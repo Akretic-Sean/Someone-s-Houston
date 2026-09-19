@@ -123,7 +123,11 @@ Quota errors ask the user to retry later. Preview and generated reports retain t
 complete estimates envelope; affected areas show source ranges and conservative-input
 badges. Original missing facts stay null.
 
-Facility counts inside a boundary are distinct from proximity scores.
+Amenities and healthcare display full inventory counts within 3 miles of the neighborhood
+reference point, including outside its boundary. Closer and more numerous facilities
+improve access through distance-weighted counts. The server and browser use
+`houston-access-v2`; deploy the nearby-access migration and report-flow function before
+the frontend. See [the scoring policy](../docs/scoring-matrix.md).
 
 
 See [the release checklist](../docs/hackathon-release.md) for backend deployment,

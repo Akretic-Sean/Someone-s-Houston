@@ -1,3 +1,4 @@
+import type { NearbyAccess, ScoredCategory } from '../../../../shared/scoring.mjs';
 import { Card } from '../components/Bits';
 import {
   WITHHELD_TEXT,
@@ -87,17 +88,19 @@ function Caveats({ category }: { category: Category }) {
 function InventoryList({
   inventories,
   keys,
+  nearbyAccess,
 }: {
   inventories: Record<string, Inventory> | null | undefined;
   keys: string[];
+  nearbyAccess?: NearbyAccess | null;
 }) {
   if (!inventories) return <Fact label="Inventory" value="Unavailable" />;
   return (
     <>
-      <p className="ev-note">Facility counts inside the neighborhood boundary. These are counts, not access scores.</p>
+      <p className="ev-note">{nearbyAccess ? 'Facilities within 3 miles of the neighborhood reference point, including across neighborhood boundaries. Closer facilities contribute more to the score.' : 'Facility counts inside the neighborhood boundary. These are counts, not access scores.'}</p>
       {keys.map((key) => {
         const inv = inventories[key];
-        const count = inv?.record_count_in_neighborhood;
+        const count = nearbyAccess ? nearbyAccess.facilities[key]?.count : inv?.record_count_in_neighborhood;
         return (
           <Fact
             key={key}
@@ -107,7 +110,7 @@ function InventoryList({
           />
         );
       })}
-      <p className="ev-note">Nearby facilities, including those outside the boundary, contribute to proximity scores. Distances below are straight-line distances from the neighborhood reference point, not travel distances from a home.</p>
+      <p className="ev-note">{nearbyAccess ? 'Nearest facilities are listed below for context. Only those within 3 miles contribute to this access score.' : 'Nearby facilities, including those outside the boundary, contribute to proximity scores.'} Distances are straight-line from the neighborhood reference point, not travel distances from a home.</p>
       {keys.flatMap((key) => {
         const nearest = inventories[key]?.nearest_to_reference_point ?? [];
         return nearest.slice(0, 3).map((p) => (
@@ -128,10 +131,12 @@ function Body({
   view,
   officeId,
   airportId,
+  nearbyAccess,
 }: {
   view: CategoryView;
   officeId: string;
   airportId: string;
+  nearbyAccess?: NearbyAccess | null;
 }) {
   const category = view.category;
   if (!category?.facts) return null;
@@ -214,6 +219,7 @@ function Body({
           <InventoryList
             inventories={f.inventories}
             keys={['libraries', 'museums', 'community_centers', 'multi_service_centers']}
+            nearbyAccess={nearbyAccess}
           />
           <p className="ev-note">
             Counts per category. These overlap, so they are not added into a single total
@@ -264,6 +270,7 @@ function Body({
           <InventoryList
             inventories={f.inventories}
             keys={['hospitals', 'health_facilities', 'multi_service_centers']}
+            nearbyAccess={nearbyAccess}
           />
           <p className="ev-note">
             Facility locations only — not insurance acceptance, appointment availability or
@@ -282,11 +289,13 @@ export default function EvidenceCards({
   officeId,
   airportId,
   weights,
+  scoredCategories,
 }: {
   views: CategoryView[];
   officeId: string;
   airportId: string;
   weights: Record<CategoryId, number>;
+  scoredCategories?: Record<CategoryId, ScoredCategory>;
 }) {
   const total = Object.values(weights).reduce((a, b) => a + b, 0);
 
@@ -307,7 +316,7 @@ export default function EvidenceCards({
             <p className="ev-withheld">{WITHHELD_TEXT[view.withheld]}</p>
           ) : (
             <>
-              <Body view={view} officeId={officeId} airportId={airportId} />
+              <Body view={view} officeId={officeId} airportId={airportId} nearbyAccess={scoredCategories?.[view.id].nearbyAccess} />
               <Caveats category={view.category!} />
               <Sources category={view.category!} />
             </>

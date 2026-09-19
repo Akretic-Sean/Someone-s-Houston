@@ -42,8 +42,9 @@ export async function extractProfile(transcript: string, answers: CandidateProfi
   return result;
 }
 export async function generateAiReport(options: ScoringOptions, preferences: CandidateProfile): Promise<GeneratedReport> {
-  const result = await invoke({ action: 'generate', scoringPolicy: 'source-bounded-v1', requestId: crypto.randomUUID(), options, preferences }) as GeneratedReport;
+  const result = await invoke({ action: 'generate', scoringPolicy: 'source-bounded-v1', facilityPolicy: 'nearby-3mi-v1', requestId: crypto.randomUUID(), options, preferences }) as GeneratedReport;
   validateBoundedScoringPayload(result?.payload);
+  if (result.payload.base.model_version !== 'houston-access-v2') throw new Error('Please refresh the report service to use nearby facility scoring.');
   if (!result.narrative || !['generated', 'degraded'].includes(result.narrative.status)
     || !Number.isFinite(Date.parse(result.narrative.expiresAt))
     || (result.narrative.text !== null && typeof result.narrative.text !== 'string')

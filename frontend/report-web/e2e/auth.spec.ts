@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
-import { CATEGORY_IDS, DEFAULT_WEIGHTS, MODEL_VERSION } from '../../../shared/scoring.mjs';
+import { CATEGORY_IDS, DEFAULT_WEIGHTS, ACCESS_MODEL_VERSION } from '../../../shared/scoring.mjs';
 
 const storageKey = 'sb-hknzivrgihnqzvsafkkr-auth-token';
 function session(email = 'recruiter@example.test', expired = false) {
@@ -13,7 +13,7 @@ function session(email = 'recruiter@example.test', expired = false) {
 
 function baseScoringFixture() {
   return {
-    schema_version: 1, model_version: MODEL_VERSION, evaluated_at: new Date().toISOString(),
+    schema_version: 1, model_version: ACCESS_MODEL_VERSION, evaluated_at: new Date().toISOString(),
     category_definitions: CATEGORY_IDS.map(id => ({ id, label: id, default_weight: DEFAULT_WEIGHTS[id] })),
     neighborhoods: Array.from({ length: 88 }, (_, index) => {
       const id = index + 1;
@@ -29,6 +29,7 @@ function baseScoringFixture() {
       return { neighborhood_id: id, name: `Neighborhood ${id}`, reference_point: { latitude: 29.75 + index / 1000, longitude: -95.65 + (index % 11) * .045 },
         categories: Object.fromEntries(CATEGORY_IDS.map(category => [category, {
           availability: 'partial', refresh_due_at: new Date(Date.now() + 86400000).toISOString(),
+          ...(['amen', 'health'].includes(category) ? { nearby_access: { radius_meters: 4828.032, facilities: Object.fromEntries(Object.keys(metrics[category]).map(key => [key, { count: 3, weighted_count: 3 / id }])) } } : {}),
           evidence_version: 'browser-test-v1', metrics: metrics[category],
         }])),
       };
@@ -66,6 +67,7 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
         }]));
         return route.fulfill({ json: { status: 'generated', data: { fields, unanswered: [] } } });
       }
+      expect(input.facilityPolicy).toBe('nearby-3mi-v1');
       return route.fulfill({ json: { payload: scoringFixture(options.expiredBounds), generatedAt: new Date().toISOString(), narrative: {
         status: options.degrade ? 'degraded' : 'generated', text: options.degrade ? null : 'Your selected priorities favor these relative matches.',
         expiresAt: new Date(Date.now() + 3600000).toISOString(), facts: [{ id: 'match_1', label: 'Computed match', value: 'Neighborhood 1', source: 'Verified scoring evidence' }],
@@ -87,7 +89,7 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
       ? route.fulfill({ status: 500, json: { msg: 'Temporary failure' } })
       : route.fulfill({ status: 204 });
     if (url.pathname.endsWith('/user')) return route.fulfill({ json: session().user });
-    if (url.pathname.endsWith('/get_neighborhood_scoring_data_with_estimates')) {
+    if (url.pathname.endsWith('/get_neighborhood_access_scoring_data')) {
       state.scoringReads++;
       return route.fulfill({ json: scoringFixture(options.expiredBounds) });
     }
@@ -333,18 +335,49 @@ test('all 88 rank with every priority; rent bounds are disclosed and disappear i
   await page.getByRole('button', { name: 'Adjust priorities', exact: true }).click();
   await page.getByRole('button', { name: 'Buy', exact: true }).click();
   await expect(page.getByText('5 neighborhoods include conservative source-derived estimates.', { exact: false })).toBeVisible();
-  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
   await page.getByLabel('Choose neighborhood').selectOption('7');
   await expect(detail.getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
-  expect(state.aiRequests.length).toBe(1);
+  expect(state.aiRequests.length).toBe(2);
 });
 
 test('expired bounds leave six areas unranked rather than pretending full coverage', async ({ page }) => {
   await mockApi(page, { expiredBounds: true });
   await page.goto('/'); await signIn(page);
   await expect(page.getByText('82 of 88 neighborhoods can be ranked.')).toBeVisible();
-  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
   await expect(page.getByText('82 / 88', { exact: true })).toBeVisible();
   await page.getByLabel('Choose neighborhood').selectOption('7');
   await expect(page.locator('#neighborhood-evidence').getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
+});
+
+test('amenities and healthcare display radius counts instead of boundary-only zeroes', async ({ page }, testInfo) => {
+  await mockApi(page);
+  await page.route('**/rest/v1/rpc/get_neighborhood_evidence', async route => {
+    const id = route.request().postDataJSON().p_neighborhood_id;
+    const base = baseScoringFixture();
+    const row = base.neighborhoods[id - 1];
+    const categories = Object.fromEntries(CATEGORY_IDS.map(key => [key, {
+      ...row.categories[key], score: null, facts: ['amen', 'health'].includes(key) ? {
+        inventories: Object.fromEntries(Object.keys(row.categories[key].metrics).map(type => [type, {
+          record_count_in_neighborhood: 0,
+          nearest_to_reference_point: [{ place_id: type, name: `Nearby ${type}`, straight_line_meters: 1609.344, inside_neighborhood: false }],
+        }])),
+      } : {}, sources: [], limitations: [], missing_inputs: [],
+    }]));
+    await route.fulfill({ json: { category_definitions: base.category_definitions, safety: { tier: null, weighted: false },
+      neighborhoods: [{ ...row, categories }] } });
+  });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  const cards = page.locator('.ev-card').filter({ hasText: 'Facilities within 3 miles' });
+  await expect(cards).toHaveCount(2);
+  await expect(cards.first().locator('.ev-fact-value')).toHaveText(['3', '3', '3', '3']);
+  await expect(cards.last().locator('.ev-fact-value')).toHaveText(['3', '3', '3']);
+  await expect(cards.first()).toContainText('1.0 mi');
+  await expect(cards.first()).toContainText('outside this neighborhood');
+  await expect(cards.first()).toContainText('Only those within 3 miles contribute');
+  await expect(page.getByRole('button', { name: 'Continue with factual report', exact: true })).toHaveCount(0);
+  await cards.first().scrollIntoViewIfNeeded();
+  await page.screenshot({ path: testInfo.outputPath('nearby-access.png') });
 });

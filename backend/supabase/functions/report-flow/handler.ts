@@ -7,6 +7,7 @@ import {
 // @deno-types="../../../../shared/scoring.d.mts"
 import {
   CATEGORY_IDS,
+  ACCESS_MODEL_VERSION,
   scoreNeighborhoods,
   validateScoringPayload,
 } from "../../../../shared/scoring.mjs";
@@ -57,6 +58,7 @@ const RequestSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("generate"),
     scoringPolicy: z.literal("source-bounded-v1").optional(),
+    facilityPolicy: z.literal("nearby-3mi-v1").optional(),
     requestId: z.string().uuid(),
     options: Options,
     preferences: FormSchema,
@@ -72,7 +74,7 @@ export type Dependencies = {
     userId: string,
     requestId: string,
   ) => Promise<"allowed" | "duplicate" | "limited">;
-  loadScoring: (token: string, bounded: boolean) => Promise<unknown>;
+  loadScoring: (token: string, bounded: boolean, nearby?: boolean) => Promise<unknown>;
   models: () => Models;
   now?: () => number;
 };
@@ -220,13 +222,16 @@ export function createHandler(deps: Dependencies) {
       const now = deps.now ?? Date.now;
       if (input.action === "generate") {
         try {
+          if (input.facilityPolicy && !input.scoringPolicy) return reply(400, { error: "invalid_input" });
           const raw = await deps.loadScoring(
             token,
             input.scoringPolicy === "source-bounded-v1",
+            input.facilityPolicy === "nearby-3mi-v1",
           );
           if (input.scoringPolicy === "source-bounded-v1") {
             envelope = validateBoundedScoringPayload(raw, now());
             payload = envelope.base;
+            if (input.facilityPolicy && payload.model_version !== ACCESS_MODEL_VERSION) throw new Error("Wrong facility model");
             result = scoreNeighborhoodsWithEstimates(
               envelope,
               input.options,

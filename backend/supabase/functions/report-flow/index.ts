@@ -43,9 +43,9 @@ Deno.serve(createHandler({
       serviceKey,
       serviceKey,
     ),
-  loadScoring: (token, bounded) =>
+  loadScoring: (token, bounded, nearby) =>
     rpc(
-      bounded
+      nearby ? "get_neighborhood_access_scoring_data" : bounded
         ? "get_neighborhood_scoring_data_with_estimates"
         : "get_neighborhood_scoring_data",
       {},

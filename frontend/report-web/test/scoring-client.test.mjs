@@ -17,12 +17,13 @@ function baseSnapshot(due = START + 86_400_000) {
     health: { hospitals: 1000, health_facilities: 2000, multi_service_centers: 4000 },
   };
   return {
-    schema_version: 1, model_version: 'houston-proximity-v1', evaluated_at: new Date(START).toISOString(),
+    schema_version: 1, model_version: 'houston-access-v2', evaluated_at: new Date(START).toISOString(),
     category_definitions: CATEGORY_IDS.map(id => ({ id, label: id, default_weight: DEFAULT_WEIGHTS[id] })),
     neighborhoods: Array.from({ length: 88 }, (_, index) => ({
       neighborhood_id: index + 1, name: `Neighborhood ${index + 1}`,
       reference_point: { latitude: 29.7, longitude: -95.3 },
       categories: Object.fromEntries(CATEGORY_IDS.map(id => [id, {
+        ...(['amen', 'health'].includes(id) ? { nearby_access: { radius_meters: 4828.032, facilities: Object.fromEntries(Object.keys(metrics[id]).map(key => [key, { count: 2, weighted_count: 1 }])) } } : {}),
         availability: 'partial', refresh_due_at: new Date(due).toISOString(), evidence_version: 'test-evidence-1', metrics: structuredClone(metrics[id]),
       }])),
     })),
@@ -35,7 +36,7 @@ test('coalesces concurrent reads, caches for one hour from fetch, and isolates c
   let calls = 0, time = START;
   const client = createScoringClient({ url: URL, key: KEY, now: () => time, fetchImpl: async (url, options) => {
     calls++;
-    assert.equal(url, `${URL}/rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`);
+    assert.equal(url, `${URL}/rest/v1/rpc/get_neighborhood_access_scoring_data`);
     assert.equal(options.method, 'POST');
     assert.equal(options.body, '{}');
     assert.equal(options.redirect, 'error');

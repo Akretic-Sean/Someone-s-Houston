@@ -446,3 +446,20 @@ contact email. No email is sent. Passwords remain in Supabase Auth. After creati
 use native `signInWithPassword` with the shared `usernameEmail` mapping to obtain
 the normal user session used by `report-flow`. No client-chosen role/user ID is
 accepted. No email-based password recovery is provided in this hackathon flow.
+
+
+### Nearby facility scoring (current report)
+
+`POST /rest/v1/rpc/get_neighborhood_access_scoring_data` with `{}` and the publishable
+key returns the same `source-bounded-v1` envelope as the estimates RPC, with
+`base.model_version: "houston-access-v2"`. Each amen/health category adds
+`nearby_access: { radius_meters: 4828.032, facilities: { <type>: { count: integer,
+weighted_count: number } | null } }`. Count includes the full imported inventory in
+that radius; weighted count sums `max(0, 1 - distance_meters / 4828.032)`.
+Category source/version/deadline checks remain authoritative. A known zero is distinct
+from missing input. Source-record categories can overlap. The response preserves all
+88 areas and the original nearest-distance metrics. See [scoring policy](scoring-matrix.md).
+
+The report-flow generate request selects this model with `facilityPolicy: "nearby-3mi-v1"`
+alongside `scoringPolicy: "source-bounded-v1"`. Missing or incorrect model inputs fail
+before a quota reservation. Legacy requests and legacy RPC responses remain unchanged.

@@ -129,3 +129,13 @@ The [Claude setup guide](claude-data-guide.md) describes seven local read-only t
 ## Source-backed inputs for all 88
 
 The six missing rent/flood measurements have a separate, explicitly labeled conservative-input path. Keep every selected category; do not use the rejected global-exclusion approach. Read [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new RPC, shared wrapper, source bounds, badges, expiry and acceptance tests. Original observations and the strict model remain unchanged.
+
+
+## Current nearby facility report
+
+The current frontend reads `get_neighborhood_access_scoring_data` (source-bounded envelope,
+base model `houston-access-v2`). The legacy RPCs above remain compatible for older
+clients. Deploy the new migration and updated report-flow Edge Function before releasing
+this frontend. Amenities/healthcare now use complete 3-mile inventories with distance
+weighting; see [scoring-matrix.md](scoring-matrix.md). Detail inventory counts inside a
+polygon are not the access counts; use `ScoredCategory.nearbyAccess` for the report cards.
