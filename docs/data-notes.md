@@ -4,6 +4,8 @@ Checked on 2026-09-19 against [the build plan](build-plan.md). These are source-
 
 The [backend data policy](backend-data-policy.md) now selects Supabase and sets bounded import/freshness defaults. A source's appearance below confirms only the stated checks, not eligibility under that policy. In particular, the HPD summary ending in 2024 and the tested 311 feed need replacement or newer verified coverage for current scoring.
 
+**Research update:** the [prioritized source shortlist](source-shortlist.md) identifies a City dashboard API with 88 neighborhood features and prepared income/home-value/rent estimates; three sampled rows match the published 2024 tables after rounding. This may avoid a custom block-group aggregation for the initial affordability metrics, pending full validation. Newer HPD 2025/2026 CSV samples include map-coordinate fields. Direct Census API calls currently require a key. See the shortlist for exact endpoints and remaining checks.
+
 ## Source findings
 
 | Source | Geography, period, access, and checked fields | Fit for the proposed score |
