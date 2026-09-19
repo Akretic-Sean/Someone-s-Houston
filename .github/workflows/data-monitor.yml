@@ -1,0 +1,36 @@
+name: Backend data health
+on:
+  schedule:
+    - cron: '8,23,38,53 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: backend-data-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    # Dispatch/schedule only from reviewed main; never give a PR issue-write access.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: backend
+      - run: npm run build
+        working-directory: backend
+      - run: node tools/monitor-data.mjs --issue
+        working-directory: backend
+        env:
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+          GITHUB_TOKEN: ${{ github.token }}

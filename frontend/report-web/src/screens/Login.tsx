@@ -13,29 +13,32 @@ export default function Login() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
-    if (!supabase) return;
+    if (!supabase || busy) return;
     setBusy(true);
     setError('');
     setNotice('');
 
-    if (mode === 'sign-in') {
-      const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-      if (signInError) setError(signInError.message);
-      // On success the auth listener in App.tsx swaps in the app.
-    } else {
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: window.location.origin },
-      });
-      if (signUpError) {
-        setError(signUpError.message);
-      } else if (!data.session) {
-        setNotice('Check your email to confirm your account, then sign in.');
-        setMode('sign-in');
+    try {
+      if (mode === 'sign-in') {
+        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+        if (signInError) setError(signInError.message);
+        // On success the auth listener in App.tsx swaps in the app.
+      } else {
+        const { data, error: signUpError } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: window.location.origin },
+        });
+        if (signUpError) {
+          setError(signUpError.message);
+        } else if (!data.session) {
+          setNotice('Check your email to confirm your account, then sign in.');
+          setMode('sign-in');
+        }
       }
-    }
-    setBusy(false);
+    } catch {
+      setError('Could not connect to sign in. Please retry.');
+    } finally { setBusy(false); }
   }
 
   return (
@@ -91,6 +94,7 @@ export default function Login() {
         <button
           type="button"
           className="login-switch"
+          disabled={busy}
           onClick={() => {
             setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
             setError('');

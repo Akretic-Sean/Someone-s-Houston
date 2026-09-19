@@ -1,0 +1,1 @@
+- [x] Install uploaded Locatro font as the main display typeface and verify the landing page

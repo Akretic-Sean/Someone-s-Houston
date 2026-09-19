@@ -1,18 +1,16 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
-
-const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
-const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined;
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from '../config';
 
 /**
  * Browser Supabase client for the shared Someone's Houston project.
  * Uses the publishable key only — RLS applies to every call.
  *
  * Null when the env vars are missing, so the prototype still runs
- * offline with mocked data. Copy .env.example to .env to enable auth.
+ * without login; live report generation remains unavailable until configured.
  */
 export const supabase: SupabaseClient | null =
-  url && publishableKey
-    ? createClient(url, publishableKey, {
+  SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY
+    ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true },
       })
     : null;

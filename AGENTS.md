@@ -1,8 +1,10 @@
 # Working agreements
 
 - Frontend work belongs in `frontend/`, owned by Oleggo1.
+- For frontend/backend integration, start with `docs/frontend-backend-handoff.md`; reuse the current frontend data/auth layers and verify with the documented preflight before declaring it connected.
 - Backend work belongs in `backend/`, owned by Akretic-Sean.
 - `docs/api.md` is the shared API contract. Keep endpoint paths, request/response examples, authentication, and errors in sync with implementation. Mark proposals clearly until both sides agree.
+- For source imports, data reads, MCP tools or report integration, follow `docs/data-instructions.md` for shared data meanings, freshness and missing-value rules. `docs/claude-data-guide.md` covers partner connection and interpretation checks.
 - Use short-lived feature branches and pull requests targeting `main`. Pull the latest `main` before starting a new feature.
 - Keep edits focused on your area. Coordinate changes to shared configuration and the other owner's files.
 - Document the chosen stack and exact setup, development, and test commands in the relevant README. Use one lockfile per package or agreed workspace, and avoid unrelated dependency changes.

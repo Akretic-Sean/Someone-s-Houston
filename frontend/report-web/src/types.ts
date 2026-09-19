@@ -16,6 +16,9 @@ export interface Office {
   id: OfficeId;
   label: string;
   sub: string;
+  /** Approximate office location, for the map. Not a precise address. */
+  lat: number;
+  lon: number;
 }
 
 /** Offer mode compares two salaries; remote mode carries the salary over. */
@@ -78,6 +81,11 @@ export interface NeighborhoodFactor {
 
 export interface Neighborhood {
   id: string;
+  /**
+   * The City's Super Neighborhood `POLYID`, 1-88. This is the join key onto the
+   * live `neighborhood_profiles` layer — never join on a matched name.
+   */
+  neighborhoodId: number;
   name: string;
   /** 0–100, relative to the other returned areas only. */
   score: number;
@@ -92,10 +100,19 @@ export interface Neighborhood {
   /** Prose the candidate reads; written against their stated preferences. */
   why: string;
   safety: SafetyTier;
-  /** Position on the abstract map, as a CSS percentage. */
-  x: string;
-  y: string;
   factors: NeighborhoodFactor[];
+}
+
+/** A neighborhood joined onto the live reference layer, ready to render. */
+export interface ResolvedNeighborhood extends Neighborhood {
+  lat: number;
+  lon: number;
+  /** Monthly gross rent, whole USD. Null renders as "Unavailable". */
+  medianGrossRent: number | null;
+  medianHouseholdIncome: number | null;
+  medianHomeValue: number | null;
+  /** True when the figures came from the live layer rather than the mock. */
+  live: boolean;
 }
 
 /** One row of the side-by-side money comparison. */

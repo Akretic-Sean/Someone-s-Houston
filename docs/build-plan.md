@@ -4,7 +4,9 @@
 
 Hackathon track: **Houston Open Data**. Status: planning.
 
-Backend decision, 2026-09-19: use **Supabase** for prepared neighborhood data and saved reports. The first [neighborhood reference layer](neighborhood-layer.md) is live: 88 validated City profiles, a read-only REST API, and a local Claude MCP connector. The [backend data policy](backend-data-policy.md) defines bounded import windows, freshness checks, and the fast report path. It supersedes the original KV storage proposal and live-first scoring approach. Report/scoring services and Cloudflare hosting remain proposed.
+Backend decision, 2026-09-19: use **Supabase** for prepared neighborhood data and future saved reports. The [neighborhood reference layer](neighborhood-layer.md), category evidence and compact scoring-data RPC are implemented. The [backend data policy](backend-data-policy.md) defines bounded imports and the fast report path. It supersedes the original KV storage proposal and live-first scoring approach. Stored-report services and Cloudflare hosting remain proposed.
+
+**P0 implementation supersedes this original scoring plan:** use the eight-category [current matrix](matrix-readiness.md) and [shared `houston-proximity-v1` model](scoring-matrix.md). The formula, filters, safety tiers, salary/tax claims and MCP report-generation tools below are historical proposals, not implemented outputs or instructions for the current frontend. P0 produces an in-session comparison using rent/value estimates, validated flood area and proximity; it does not persist/share reports or calculate personal finances.
 
 ---
 

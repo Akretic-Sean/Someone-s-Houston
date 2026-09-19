@@ -1,18 +1,25 @@
 import { useState } from 'react';
 import { Brand, Card, StatusPill, initials } from '../components/Bits';
+import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
 import { KPIS, REPORT_SUMMARIES } from '../data/report';
 
 const NAV = ['Reports', 'Candidates', 'Connectors', 'Insights', 'Settings'] as const;
-type Nav = (typeof NAV)[number];
 
 export default function Dashboard({
+  nav,
+  onNav,
+  connectors,
+  onToggleConnector,
   onOpenReport,
   onCreate,
 }: {
+  nav: string;
+  onNav: (nav: string) => void;
+  connectors: ConnectorStates;
+  onToggleConnector: (id: ConnectorId) => void;
   onOpenReport: () => void;
   onCreate: () => void;
 }) {
-  const [nav, setNav] = useState<Nav>('Reports');
   const [query, setQuery] = useState('');
 
   const rows = REPORT_SUMMARIES.filter((r) =>
@@ -30,7 +37,7 @@ export default function Dashboard({
               type="button"
               className="nav-item"
               aria-current={nav === n}
-              onClick={() => setNav(n)}
+              onClick={() => onNav(n)}
             >
               <span className="nav-dot" aria-hidden="true" />
               {n}
@@ -125,6 +132,47 @@ export default function Dashboard({
                 {rows.length === 0 ? <div className="empty">No candidates match &ldquo;{query}&rdquo;.</div> : null}
               </div>
             </Card>
+          </>
+        ) : nav === 'Connectors' ? (
+          <>
+            <span className="eyebrow">Connectors</span>
+            <h1 className="greeting" style={{ marginBottom: 8 }}>
+              Connectors
+            </h1>
+            <p className="section-lede">
+              Connect a source once here, and it becomes available when you build a report.
+              Only connected sources are offered in the builder.
+            </p>
+
+            <div className="connectors">
+              {CONNECTORS.map((c) => {
+                const connected = connectors[c.id] === 'connected';
+                return (
+                  <Card key={c.id}>
+                    <div className="connector">
+                      <span className="connector-mark" aria-hidden="true">
+                        {c.mark}
+                      </span>
+                      <span style={{ minWidth: 0 }}>
+                        <span className="connector-name">{c.name}</span>
+                        <br />
+                        <span className="connector-state" data-connected={connected}>
+                          {connected ? 'Connected' : 'Not connected'}
+                        </span>
+                      </span>
+                    </div>
+                    <p className="connector-blurb">{c.blurb}</p>
+                    <button
+                      type="button"
+                      className={connected ? 'btn' : 'btn btn-primary'}
+                      onClick={() => onToggleConnector(c.id)}
+                    >
+                      {connected ? 'Disconnect' : 'Connect'}
+                    </button>
+                  </Card>
+                );
+              })}
+            </div>
           </>
         ) : (
           <>

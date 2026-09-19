@@ -4,10 +4,11 @@ import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
 import { createNeighborhoodClient, filterNeighborhoods, filterSchema, type NeighborhoodProfile } from './neighborhoods.js';
 import { createContextClient, amenitiesInputSchema, conditionsInputSchema, type ContextClient } from './context.js';
+import { createEvidenceClient, evidenceInputSchema, type EvidenceClient } from './evidence.js';
 
 const interpretation = 'City of Houston neighborhood estimates from ACS 2020-2024, not current listings. Gross rent is monthly; income is annual household income, not an individual salary. Coordinates are polygon centers, not driving times. Missing values are unknown. These fields alone do not establish flood risk, school quality, safety, or the best neighborhood for a family.';
 
-export function createServer(client: { list(): Promise<NeighborhoodProfile[]> }, context?: Pick<ContextClient, 'getAmenities' | 'getCurrentConditions'>) {
+export function createServer(client: { list(): Promise<NeighborhoodProfile[]> }, context?: Pick<ContextClient, 'getAmenities' | 'getCurrentConditions'>, evidence?: EvidenceClient) {
   const server = new McpServer({ name: 'hou-match-neighborhoods', version: '0.1.0' });
   const annotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
   const respond = async (select: (rows: NeighborhoodProfile[]) => object) => {
@@ -49,6 +50,13 @@ export function createServer(client: { list(): Promise<NeighborhoodProfile[]> },
     if (!context) throw new Error('Context client is not configured.');
     return context.getCurrentConditions(args);
   }));
+  server.registerTool('get_neighborhood_evidence', {
+    description: 'Read evidence for all eight current report priorities: affordability, commute, flood context, local amenities, fitness, food, airport access and healthcare. Includes sources, dates, missing inputs and explicit availability. No scores or safety tiers are implemented; distances are not travel times. Use this before drafting a relocation recommendation.',
+    inputSchema: evidenceInputSchema, annotations,
+  }, args => contextResponse(async () => {
+    if (!evidence) throw new Error('Evidence client is not configured.');
+    return evidence.getEvidence(args);
+  }));
   return server;
 }
 
@@ -56,7 +64,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   try {
     const client = createNeighborhoodClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
     const context = createContextClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
-    await createServer(client, context).connect(new StdioServerTransport());
+    const evidence = createEvidenceClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
+    await createServer(client, context, evidence).connect(new StdioServerTransport());
   } catch {
     console.error('Cannot start neighborhood MCP. Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY; run npm run build.');
     process.exitCode = 1;

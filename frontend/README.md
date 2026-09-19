@@ -1,51 +1,70 @@
 # Frontend
 
-Owner: @Oleggo1.
+Owner: @Oleggo1. The report app lives in `frontend/report-web/`.
 
-| App | Folder | What it is |
-| --- | --- | --- |
-| `report-web` | `report-web/` | Recruiter dashboard, report builder, and the candidate-facing report page |
+## Stack and commands
 
-## Stack
-
-React 19, TypeScript, Vite 7. No UI framework and no CSS library: design tokens and
-component styles live in `report-web/src/styles.css`. Fonts (Instrument Serif, IBM Plex
-Mono) load from Google Fonts.
-
-One lockfile, in `report-web/`.
-
-## Commands
+React 19, TypeScript, Vite 7 and Supabase Auth. Styles live in
+`report-web/src/styles.css`; the package has one npm lockfile. Use Node 22.12+
+(or Node 24, as used by CI).
 
 Run from `frontend/report-web/`:
 
 ```sh
-npm install      # prerequisites: Node 20.19+ or 22.12+ (developed on 23.11)
-npm run dev      # http://localhost:5173
-npm run build    # typecheck, then a static bundle in dist/
-npm run preview  # serve the built bundle
+npm ci
+npm run dev        # http://localhost:5173
+npm test           # scoring-client and evidence-validity tests
 npm run typecheck
+npm run build      # TypeScript and production bundle
+npm run preview
+npx playwright install chromium
+npm run test:e2e    # login/report integration on desktop and mobile
 ```
 
-There is no test runner yet. `npm run build` runs `tsc -b` first, so a type error fails
-the build.
+GitHub Actions runs the unit tests, production build and browser tests for PRs
+and `main`. Browser tests intercept Supabase requests with synthetic fixtures;
+they do not create accounts, send email or certify a deployed Auth configuration.
 
-## How it is wired
+## Configuration and login
 
-The app is frontend-only and renders mocked data. Three screens, switchable from the bar
-at the top of the page:
+Copy `report-web/.env.example` to ignored `report-web/.env.local`. Set the shared
+Supabase URL and its `VITE_SUPABASE_PUBLISHABLE_KEY`. Never use an admin key.
+The same configuration powers login and public neighborhood reads.
 
-1. **Recruiter dashboard** — KPIs and the recent-reports table.
-2. **Create report** — import a call transcript from a meeting-notes connector, review the
-   extracted candidate profile (each field carries a confidence), set the office hub, the
-   comparison mode and the priority weights.
-3. **Candidate report** — the seven sections a candidate opens.
+When configured, signed-out visitors see email/password sign-in or account
+creation. Enable email/password auth in the shared project's Auth settings and
+allow the deployed app origin as a confirmation redirect. Confirmation-required
+signup returns to sign-in until the user confirms their email. Existing sessions
+restore on reload. Sign-out and account changes clear in-session report state;
+remote sign-out failures explicitly distinguish local logout from unconfirmed
+logout on other devices.
 
-`src/types.ts` is the contract. It is the shape the backend has to return and the only
-thing the component tree reads; `src/data/report.ts` is a mock that conforms to it. To go
-live, replace the mock with a fetch — no component should need to change.
+Without configuration, the app opens the preference screen and reports that
+live data is unavailable. It cannot generate a report from mocked data.
 
-Every figure a candidate sees renders with a `source` line underneath. `source` is a
-required field on the types that carry figures so it cannot be dropped by accident.
+## Report flow
 
-Coordinate contract changes through `../docs/api.md`. Keep server credentials out of
-browser code.
+- **Configure priorities:** rent/buy, work arrangement, office hub, airport and
+  eight priority weights. Fully remote mode removes commute from the comparison.
+- **Neighborhood report:** live inputs from `get_neighborhood_scoring_data`, ranked
+  by `shared/scoring.mjs`, with the top five, all 88 neighborhoods, source evidence
+  and explicit missing-data states. Inputs recalculate from the cached cohort.
+- **Sample dashboard:** labeled demonstration records and connector controls.
+
+The map plots actual reference points using a cosine-corrected projection.
+These are neighborhood locations, not parcels or navigational directions.
+
+Reports are kept only in the current browser session. Saved/shareable reports,
+private candidate storage, route times, safety tiers, salary standing and personal
+financial comparisons are not implemented. Authentication alone does not create
+private-data authorization. Unknown or expired evidence is withheld, never
+replaced by a favorable zero or an estimate.
+
+Listing Watch retains the real ranked neighborhood IDs. Its optional webhook is
+unconfigured by default, so submission is disabled until a service is provided.
+
+Read [the integration handoff](../docs/frontend-backend-handoff.md),
+[API contract](../docs/api.md) and [scoring method](../docs/scoring-matrix.md)
+for data meanings, cache deadlines and live acceptance checks. Configure the
+same public variables in the frontend deployment's build environment before
+building; a local build does not deploy the app.

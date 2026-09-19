@@ -1,0 +1,56 @@
+name: Backend verification
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: backend-ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  node:
+    name: Backend build and Node tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci --ignore-scripts
+        working-directory: backend
+      - run: npm test
+        working-directory: backend
+  python:
+    name: Python import safeguards
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: backend/scripts/requirements*.txt
+      - run: python -m pip install -r backend/scripts/requirements-test.txt
+      - run: python backend/tools/prepare_housing.py --self-test
+      - run: python -m unittest discover -s backend/test -p '*_test.py' -v
+  database:
+    name: Migrations and SQL access/publication tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+      - run: python backend/scripts/test_database.py

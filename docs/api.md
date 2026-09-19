@@ -1,8 +1,10 @@
 # Shared API contract
 
+For implementation setup, frontend file/field mapping and acceptance checks, start with [the frontend/backend handoff](frontend-backend-handoff.md). The endpoint definitions below remain the source of truth.
+
 Neighborhood profiles, maps, facility context and current-condition reads are **implemented and live**, 2026-09-19. The Supabase and local MCP sections below describe those available reads.
 
-The merged frontend (`frontend/report-web`) currently renders mock reports. Its proposed report endpoints and payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented or agreed backend endpoints. The frontend has not yet been connected to the live data APIs.
+The P0 comparison flow uses a compact public scoring-data RPC and the shared deterministic `houston-proximity-v1` model to generate an in-session ranked report. See [the scoring method](scoring-matrix.md). Its proposed stored-report endpoints and old mock payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented endpoints or the current scoring response.
 
 ## Neighborhood profiles
 
@@ -93,6 +95,58 @@ Invalid IDs/categories return HTTP 400 with the standard error structure. Follow
 
 See the working [Leaflet map demo and integration guide](map-integration.md), [current-feed operations](live-feeds.md), and [facility provenance](neighborhood-context.md).
 
+## Category evidence
+
+`GET /rest/v1/rpc/get_neighborhood_evidence?p_neighborhood_id=62` (or POST with `{"p_neighborhood_id":62}`) returns facts for the screenshot's eight priorities. Omit the ID for all 88 neighborhoods. Use the same publishable-key header; this is a public read with no upstream fetch or scoring invocation.
+
+Response: `{ profile_id, weight_total, evaluated_at, category_definitions, safety, neighborhoods, interpretation }`. Each neighborhood has its canonical ID/name, labeled reference point, and `categories` keyed exactly by `afford`, `commute`, `flood`, `amen`, `fit`, `food`, `air`, `health`. Each category contains `{ availability, facts, sources, missing_inputs, limitations, evidence_version, prepared_at, refresh_due_at, score, score_status }`.
+
+Only `partial` or `reference_snapshot` exposes usable facts. `unavailable` and `needs_refresh` return `facts:null`. Every score in this **raw evidence endpoint** remains null with `score_status:not_implemented`; it does not accept preferences or run the separate comparison model below. Safety is unweighted with no tier. Sources identify a URL, check time and observation period (null when unknown). IDs outside 1–88 return HTTP400. Failed reads must not substitute mock scores.
+
+Facts include `afford.median_gross_rent_monthly_usd`, `afford.median_home_value_usd`, `afford.housing_stock`; facility categories use `inventories.<facility_category>.record_count_in_neighborhood` and `nearest_to_reference_point` (up to 3 records). `food.inventories.grocery_stores` covers only the USDA SNAP subset. `commute.destinations` has five office proxies and `air.destinations` two airport proxies, with `straight_line_meters` and **null `drive_time_minutes`**. Flood facts contain coverage/edition metadata and exposure percentages only where validated. See [category evidence](category-evidence.md) for exact meanings.
+
+Cache at most one hour, recheck each `refresh_due_at` before rendering, and clear facts after that deadline. The RPC checks live source/boundary dependencies; use it instead of the raw evidence table. `createEvidenceClient` in `backend/src/evidence.ts` validates single-neighborhood reads, coalesces requests, clones cached values and rechecks expiry. Keep one client per process/app. No subscription or per-visitor ingestion is needed.
+
+## Scoring data and local ranking
+
+`POST /rest/v1/rpc/get_neighborhood_scoring_data` with `{}` returns the complete 88-neighborhood cohort for model `houston-proximity-v1`. Authentication is the same public `apikey` header; anonymous and authenticated reads are allowed. The function is read-only and uses the evidence RPC's freshness and dependency checks. It neither stores candidate inputs nor calls external providers.
+
+```ts
+// Full definitions: shared/scoring.d.mts
+{
+  schema_version: 1,
+  model_version: 'houston-proximity-v1',
+  evaluated_at: string,
+  category_definitions: Array<{ id, label, default_weight }>,
+  neighborhoods: Array<{
+    neighborhood_id: number,
+    name: string,
+    reference_point: { latitude: number, longitude: number },
+    categories: {
+      // Each of the eight IDs has the same envelope:
+      [categoryId]: { availability, refresh_due_at, evidence_version, metrics }
+    }
+  }>
+}
+```
+
+| Category | Exact `metrics` keys | Units |
+| --- | --- | --- |
+| `afford` | `rent_usd`, `home_value_usd` | USD; rent is monthly, home value is not a payment |
+| `commute` | `ion`, `downtown`, `energy`, `tmc`, `nasa` | Straight-line meters |
+| `flood` | `sfha_area_pct` | Percent of neighborhood area in the mapped 1%-annual-chance zone |
+| `amen` | `libraries`, `museums`, `community_centers`, `multi_service_centers` | Nearest inventory record's straight-line meters |
+| `fit` | `parks`, `community_centers` | Nearest inventory record's straight-line meters |
+| `food` | `grocery_stores` | Nearest covered SNAP grocery's straight-line meters |
+| `air` | `iah`, `hou` | Straight-line meters |
+| `health` | `hospitals`, `health_facilities`, `multi_service_centers` | Nearest inventory record's straight-line meters |
+
+Measurements may be null. Unusable evidence never becomes zero. Validate the complete response with `validateScoringPayload` from `shared/scoring.mjs`; do not mix snapshots or rank a subset as a new reference cohort. Cache for at most one hour, respecting deadlines. The full compact response is approximately 152 kB uncompressed. Load it once and recalculate locally on input changes; fetch detailed evidence only for selected neighborhoods.
+
+Call `scoreNeighborhoods(payload, { weights, tenure, mode, office, airport })`. All eight weights are 0–10; `tenure` is `rent|buy`, `mode` is `offer|remote`, `office` is one of the five IDs above, and `airport` is `iah|hou|nearest`. The result contains `modelVersion`, `evaluatedAt`, `effectiveWeights`, `normalizedWeights`, `ranked`, `unranked` and `results`. Each neighborhood result has `neighborhoodId`, `name`, `referencePoint`, `rank`, `totalScore`, category measurements/scores/contributions, `missingCategories` and deterministic `explanations`.
+
+The model converts lower-is-favored measurements into cohort percentiles, equally averages components within a category and applies the chosen weights. Remote mode sets commute weight to zero for everyone. All-zero effective weights are invalid. Missing a positively weighted category leaves the neighborhood unranked; weights are never redistributed separately per neighborhood. Scores are provisional relative comparisons, not route times, safety tiers or a personal financial assessment. [The model contract](scoring-matrix.md) defines tie, missing-value and freshness behavior.
+
 ## Neighborhood MCP
 
 Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API client. See [backend setup](../backend/README.md).
@@ -103,22 +157,32 @@ Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API c
 | `get_neighborhood` | Required integer `neighborhood_id`, 1–88 | `neighborhood`, `data_version`, interpretation guidance |
 | `get_neighborhood_amenities` | Required `neighborhood_id` 1–88; optional `category`, `limit` 1–100 | Facility counts, bounded records and source provenance |
 | `get_current_conditions` | Optional `neighborhood_id` 1–88, `limit` 1–20 | Bounded current observations/alerts, availability, timestamps and interpretation notes |
+| `get_neighborhood_evidence` | Required `neighborhood_id` 1–88 | Facts, provenance and missing inputs for all eight priorities; null scores and unavailable safety tier |
 
 Results provide context, not recommendation scores. Failed reads return MCP `isError: true`; none of the tools has write/SQL capabilities. Text and structured responses include source context. Live testing launches the actual stdio process and queries Supabase. Reconnect the MCP after building to discover newly added tools.
 
 ## Report integration status
 
-Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, effective floodplain and crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Current gauge/alert context is not a substitute for an effective floodplain or parcel-level assessment. The data layers are ready for frontend integration independently of those decisions.
+In-session ranking is implemented by the shared model and compact data RPC above. Stored-report endpoints, private candidate authorization, salary/tax calculations, saved-report schema/expiration, crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Effective FEMA map evidence is available through the category endpoint, subject to coverage flags; gauges/alerts remain separate operational context. Neither establishes parcel-level risk. Existing browser login, where present, does not create saved-report ownership policies.
+
+The user's latest screenshot confirms the frontend weight IDs below. [The current evidence matrix](matrix-readiness.md) uses `backend/data/reference/report-priorities.v1.json`; the earlier 100-point draft is superseded. Raw defaults total 54 and produce the screenshot percentages after normalization/display rounding. The shared comparison model applies these weights using the documented limited measurements.
+
+## Optional Listing Watch integration
+
+**Status: frontend request adapter only; no watch service is configured or deployed by P0.** The preserved dialog uses the real ranked shortlist. With `VITE_LISTING_WATCH_WEBHOOK_URL` unset, it shows an unavailable state, disables submission and sends nothing. This variable is optional for scoring and must never contain a secret token.
+
+If a separate service is later supplied, `frontend/report-web/src/watch/api.ts` sends a JSON POST to that URL with `Content-Type: application/json` and a 15-second timeout. `src/watch/types.ts` is the frontend request shape: `{ reportId, neighborhoodIds, neighborhoodNames, listingType, softCriteria, officeId, delivery: { channel: "email", email }, consent: true, cadence: "weekly", expiresAfterWeeks: 12 }`. `listingType` is `sale|rent|both`; neighborhood IDs are the City's canonical integers. The current `reportId` is a `session-…` browser correlation identifier, **not** a persisted report key or authorization credential.
+
+The UI requires a selected neighborhood, email and explicit consent before calling the adapter. A future service must independently validate the request and consent, protect contact details, and implement scheduling, expiry, listing retrieval and delivery. None of those operations is provided by the Supabase scoring RPC or current five MCP tools. The adapter treats an HTTP success as request acceptance only; it does not establish that a watch was stored or any email delivered. No live listing inventory or property scores enter the neighborhood matrix.
 
 ## Proposed report API
 
 Status: **proposed by the frontend, not yet agreed or implemented.** The following
 report endpoints are design proposals; the live neighborhood reads above remain available.
 
-The frontend (`frontend/report-web`) renders against mocked data that conforms to the
-TypeScript types in `frontend/report-web/src/types.ts`. Those types define the current
-frontend mock shape; the report API below is proposed for the backend owner to agree,
-amend, or reject. They do not replace the implemented Supabase response schemas above.
+The payloads below preserve the earlier frontend mock design for future stored-report work.
+They do not replace the implemented Supabase response schemas or shared scoring types above,
+and their sample financial/safety claims must not be rendered as live outputs.
 
 Open questions for @Akretic-Sean, listed here rather than assumed:
 
@@ -127,7 +191,9 @@ Open questions for @Akretic-Sean, listed here rather than assumed:
 - Whether report reads need any auth. The build plan says a report is reachable by
   unguessable ID with no login, which implies none on `GET /reports/:id`.
 - Whether the recruiter-side endpoints need auth. Presumably yes.
-- Whether scoring runs server-side only. The frontend does no scoring and should not.
+- How a future persistence service validates/recomputes report scores. P0 deliberately runs
+  the same tested, dependency-free scoring module in the browser and Node; server-only
+  scoring is not a requirement for these public-data comparisons.
 
 ### Proposed report conventions
 
@@ -233,8 +299,9 @@ neighborhood score/factor or hero fact; that gap must be resolved during integra
   ```
 
   `office` is one of `ion` / `downtown` / `energy` / `tmc` / `nasa`. `mode` is `offer` or
-  `remote`; in remote mode the offer equals the current salary. Weights are 0–10 each and
-  are normalised server-side.
+  `remote`. The earlier proposal's salary/offer assumptions are not implemented. The P0
+  model accepts weights from 0–10 and normalizes them in shared code, setting commute
+  to zero in remote mode. A future stored-report endpoint must preserve that contract.
 
 - Success: `201` with `{ "id": "…", "url": "…" }`.
 - Errors: `400` on a malformed profile, `422` if no neighborhood survives the filters.

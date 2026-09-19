@@ -1,0 +1,1240 @@
+{
+  "purpose": "Documentation example captured from the live API. Never load this file as application data or an error fallback.",
+  "captured_at": "2026-09-19T19:01:24.966Z",
+  "request": {
+    "method": "POST",
+    "path": "/rest/v1/rpc/get_neighborhood_evidence",
+    "body": {
+      "p_neighborhood_id": 62
+    }
+  },
+  "response": {
+    "profile_id": "report-priorities-v1",
+    "weight_total": 54,
+    "evaluated_at": "2026-09-19T19:01:24.964Z",
+    "category_definitions": [
+      {
+        "id": "afford",
+        "label": "Affordability",
+        "default_weight": 8
+      },
+      {
+        "id": "commute",
+        "label": "Commute",
+        "default_weight": 7
+      },
+      {
+        "id": "flood",
+        "label": "Flood context",
+        "default_weight": 6
+      },
+      {
+        "id": "amen",
+        "label": "Local amenities",
+        "default_weight": 5
+      },
+      {
+        "id": "fit",
+        "label": "Fitness and recreation",
+        "default_weight": 7
+      },
+      {
+        "id": "food",
+        "label": "Dining and grocery access",
+        "default_weight": 8
+      },
+      {
+        "id": "air",
+        "label": "Airport access",
+        "default_weight": 6
+      },
+      {
+        "id": "health",
+        "label": "Healthcare access",
+        "default_weight": 7
+      }
+    ],
+    "safety": {
+      "weighted": false,
+      "tier": null,
+      "availability": "unavailable",
+      "reason": "No validated safety dataset or tier methodology is implemented."
+    },
+    "neighborhoods": [
+      {
+        "neighborhood_id": 62,
+        "name": "MIDTOWN",
+        "reference_point": {
+          "latitude": 29.742253,
+          "longitude": -95.375334,
+          "method": "source_polygon_center"
+        },
+        "categories": {
+          "afford": {
+            "availability": "partial",
+            "facts": {
+              "housing_stock": {
+                "shares_pct": {
+                  "two_bedrooms": 26.93,
+                  "built_2000_or_later": 69.38,
+                  "built_2020_or_later": 1.72,
+                  "single_unit_attached": 12.17,
+                  "single_unit_detached": 6.17,
+                  "studio_or_one_bedroom": 60.7,
+                  "three_or_more_bedrooms": 12.37,
+                  "two_or_more_units_in_structure": 81.65
+                },
+                "bedroom_counts": {
+                  "no_bedroom": 1438,
+                  "one_bedroom": 4269,
+                  "two_bedrooms": 2532,
+                  "four_bedrooms": 50,
+                  "three_bedrooms": 1096,
+                  "five_or_more_bedrooms": 17
+                },
+                "structure_counts": {
+                  "two_units": 15,
+                  "mobile_home": 0,
+                  "boat_rv_van_other": 0,
+                  "ten_or_more_units": 7221,
+                  "five_to_nine_units": 258,
+                  "three_or_four_units": 183,
+                  "single_unit_attached": 1144,
+                  "single_unit_detached": 580
+                },
+                "year_built_counts": {
+                  "built_1940_to_1959": 205,
+                  "built_1960_to_1979": 765,
+                  "built_1980_to_1999": 1514,
+                  "built_2000_to_2009": 2600,
+                  "built_2010_to_2019": 3761,
+                  "built_2020_or_later": 162,
+                  "built_1939_or_earlier": 395
+                },
+                "total_housing_units": 9402
+              },
+              "quality_flags": [
+                "structure_counts_rounded_sum_differs_from_total"
+              ],
+              "housing_table_audit": {
+                "bedroom_counts": {
+                  "source_page": 3,
+                  "sum_difference_units": 0
+                },
+                "structure_counts": {
+                  "source_page": 2,
+                  "sum_difference_units": -1
+                },
+                "year_built_counts": {
+                  "source_page": 2,
+                  "sum_difference_units": 0
+                }
+              },
+              "median_home_value_usd": 388688,
+              "median_gross_rent_monthly_usd": 1811
+            },
+            "sources": [
+              {
+                "source_id": "coh_economic_profile",
+                "source_url": "https://services.arcgis.com/NummVBqZSIJKUeVR/arcgis/rest/services/Super_Neighborhoods_Demographics/FeatureServer/2",
+                "source_period": "ACS 2020-2024",
+                "source_checked_at": "2026-09-19T17:01:51.387+00:00",
+                "data_version": "coh-sn-2024-fc3656164c231d74"
+              },
+              {
+                "source_id": "coh_housing_structure_2024",
+                "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/11-Units-in-Structure-2024.pdf",
+                "source_period": "ACS 2020-2024",
+                "source_checked_at": "2026-09-19T18:21:29Z",
+                "unit": "estimated_housing_units",
+                "title": "Units in Structure",
+                "record_count": 88,
+                "source_sha256": "cd061bffb8bcf57c11b65d6d74960709261102739c426cc97a4395f98fd2189a",
+                "refresh_cadence": "annual_release",
+                "source_period_end": 2024,
+                "source_period_start": 2020,
+                "source_retrieved_at": "2026-09-19T18:21:29Z",
+                "source_release_month": "2026-01"
+              },
+              {
+                "source_id": "coh_housing_bedrooms_2024",
+                "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/12-Bedrooms-2024.pdf",
+                "source_period": "ACS 2020-2024",
+                "source_checked_at": "2026-09-19T18:21:36Z",
+                "unit": "estimated_housing_units",
+                "title": "Bedrooms",
+                "record_count": 88,
+                "source_sha256": "f5436416f0129a5d62b44f0d651589867b636f573cf940387459bcba9a198508",
+                "refresh_cadence": "annual_release",
+                "source_period_end": 2024,
+                "source_period_start": 2020,
+                "source_retrieved_at": "2026-09-19T18:21:36Z",
+                "source_release_month": "2026-01"
+              },
+              {
+                "source_id": "coh_housing_year_built_2024",
+                "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/13-Year-Structure-Built-2024.pdf",
+                "source_period": "ACS 2020-2024",
+                "source_checked_at": "2026-09-19T18:21:41Z",
+                "unit": "estimated_housing_units",
+                "title": "Year Structure Built",
+                "record_count": 88,
+                "source_sha256": "28eb878b6afe22ff57ff08c6ad7f279fe6bc69279efc5827346d2831e6effa01",
+                "refresh_cadence": "annual_release",
+                "source_period_end": 2024,
+                "source_period_start": 2020,
+                "source_retrieved_at": "2026-09-19T18:21:41Z",
+                "source_release_month": "2026-01"
+              }
+            ],
+            "missing_inputs": [
+              "Candidate budget, tenure, housing preferences, salary and offer/remote mode",
+              "Current comparable listings and all-in ownership/rental costs",
+              "Origin-city and tax inputs for a relocation financial comparison"
+            ],
+            "limitations": [
+              "Gross rent is a monthly ACS estimate and home value is an estimated median, not a current asking price or mortgage payment.",
+              "Marginal housing-stock estimates for all housing units, not current listings, available rentals, affordability, building condition, or an individual's housing eligibility.",
+              "Structure, bedroom and year-built distributions are separate marginals: do not infer counts of homes satisfying combinations of these attributes.",
+              "Built 2020 or later is relative to the 2020–2024 observation period; it does not include verified construction after 2024.",
+              "Shares use each table's published housing total. Original rounded counts are preserved; category sums can differ slightly from the total.",
+              "Missing or suppressed cells are null, never zero; dependent derived shares remain null. Margins of error are not provided in these City tables.",
+              "Housing preferences must come from the candidate; do not infer a preference from family status, age, or demographic composition."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T17:01:51.387+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "commute": {
+            "availability": "partial",
+            "facts": {
+              "destinations": [
+                {
+                  "id": "ion",
+                  "kind": "office_hub",
+                  "note": "One building represents the broad Ion/Midtown hub. The operator separately recommends 4111 Fannin Street for the parking garage; this point is not that garage entrance.",
+                  "label": "Ion / Midtown",
+                  "address": "4201 Main Street, Houston, Texas",
+                  "source_url": "https://iondistrict.com/tenants/ion/",
+                  "anchor_name": "Ion building",
+                  "coordinates": [
+                    -95.382207000002,
+                    29.734299000003
+                  ],
+                  "geocoder_query": "4201 Main Street Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 1110
+                },
+                {
+                  "id": "downtown",
+                  "kind": "office_hub",
+                  "note": "The publicly listed district-office address is a representative downtown point, not the candidate's employer or the geographic center of all downtown workplaces.",
+                  "label": "Downtown",
+                  "address": "1221 McKinney Street, Houston, Texas",
+                  "source_url": "https://downtownhouston.org/about/contact-us",
+                  "anchor_name": "Downtown Houston+ district office",
+                  "coordinates": [
+                    -95.362465500002,
+                    29.756025000003
+                  ],
+                  "geocoder_query": "1221 McKinney Street Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 1970
+                },
+                {
+                  "id": "energy",
+                  "kind": "office_hub",
+                  "note": "The publicly listed district-office address represents the broad Energy Corridor area. Actual employer locations throughout the corridor differ.",
+                  "label": "Energy Corridor",
+                  "address": "777 North Eldridge Parkway, Houston, Texas",
+                  "source_url": "https://energycorridor.org/energy-corridor-staff/",
+                  "anchor_name": "Energy Corridor District office",
+                  "coordinates": [
+                    -95.618893500002,
+                    29.777643000002
+                  ],
+                  "geocoder_query": "777 North Eldridge Parkway Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 23840
+                },
+                {
+                  "id": "tmc",
+                  "kind": "office_hub",
+                  "note": "Represents the medical campus using its listed executive-office address. It does not represent Helix Park, a particular hospital entrance or parking destination.",
+                  "label": "Texas Medical Center",
+                  "address": "6550 Bertner Avenue, Houston, Texas",
+                  "source_url": "https://www.tmc.edu/operations/tmc-campus/",
+                  "anchor_name": "Texas Medical Center medical-campus executive offices",
+                  "coordinates": [
+                    -95.397975000002,
+                    29.709045000002
+                  ],
+                  "geocoder_query": "6550 Bertner Avenue Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 4290
+                },
+                {
+                  "id": "nasa",
+                  "kind": "office_hub",
+                  "note": "Represents the Johnson Space Center address, not every Clear Lake workplace or an access-controlled gate. It must not be used to promise a drive time or public campus access.",
+                  "label": "NASA / Clear Lake",
+                  "address": "2101 NASA Parkway, Houston, Texas",
+                  "source_url": "https://www.nasa.gov/johnson/jsc-procurement/about-jsc-procurement/",
+                  "anchor_name": "NASA Johnson Space Center address",
+                  "coordinates": [
+                    -95.093689500002,
+                    29.554326000003
+                  ],
+                  "geocoder_query": "2101 NASA Parkway Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 34310
+                }
+              ],
+              "route_status": "not_configured"
+            },
+            "sources": [
+              {
+                "source_id": "destination_ion",
+                "source_url": "https://iondistrict.com/tenants/ion/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              },
+              {
+                "source_id": "destination_downtown",
+                "source_url": "https://downtownhouston.org/about/contact-us",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              },
+              {
+                "source_id": "destination_energy",
+                "source_url": "https://energycorridor.org/energy-corridor-staff/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              },
+              {
+                "source_id": "destination_tmc",
+                "source_url": "https://www.tmc.edu/operations/tmc-campus/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              },
+              {
+                "source_id": "destination_nasa",
+                "source_url": "https://www.nasa.gov/johnson/jsc-procurement/about-jsc-procurement/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              }
+            ],
+            "missing_inputs": [
+              "Verified origin/destination route and departure time",
+              "In-office frequency and commute reliability data"
+            ],
+            "limitations": [
+              "Representative destination points for straight-line distance context only. These are not routing results, district centroids, confirmed vehicle entrances or individual employer locations. Let the candidate choose a workplace address before generating any actual commute estimate.",
+              "A road-routing provider with appropriate terms and credentials is required before returning drive-time minutes."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T18:21:49+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "flood": {
+            "availability": "partial",
+            "facts": {
+              "flags": [],
+              "lomr_count": 0,
+              "definitions": {
+                "sfha_area_pct": "Percent of neighborhood area mapped as special flood hazard area (1% annual-chance floodplain); includes floodway.",
+                "floodway_area_pct": "Percent in a mapped floodway; subset of SFHA, so do not add it to SFHA.",
+                "annual_0_2_pct_area_pct": "Percent mapped specifically as 0.2% annual-chance zone X, excluding SFHA. Not a cumulative 0.2% flood envelope."
+              },
+              "availability": "reference_summary",
+              "sfha_area_pct": 0,
+              "floodway_area_pct": 0,
+              "neighborhood_area_m2": 3223522.35,
+              "source_polygon_count": 2,
+              "effective_panel_count": 4,
+              "superseded_lomr_count": 0,
+              "annual_0_2_pct_area_pct": 0,
+              "mapped_zone_coverage_pct": 100,
+              "panel_effective_date_max": "2017-01-06",
+              "panel_effective_date_min": "2007-06-18",
+              "zone_category_overlap_pct": 0,
+              "latest_lomr_effective_date": null,
+              "unclassified_zone_area_pct": 0,
+              "effective_panel_coverage_pct": 100,
+              "nfhl_availability_coverage_pct": 100,
+              "missing_or_future_panel_date_count": 0,
+              "reduced_risk_due_to_levee_area_pct": 0
+            },
+            "sources": [
+              {
+                "source_id": "fema_nfhl_neighborhood_exposure",
+                "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+                "source_period": "Current effective NFHL snapshot; per-neighborhood panel and LOMR dates retained.",
+                "source_checked_at": "2026-09-19T18:36:32.632499+00:00",
+                "source_layers": {
+                  "0": {
+                    "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+                    "source_sha256": "ebda1c7f708ef1cf360c78f04923ac4afc7e2202fb85f7099577ab0f7335f046",
+                    "expected_count": 6,
+                    "retrieved_count": 6,
+                    "downloaded_bytes": 860134,
+                    "source_data_last_edit_at": null,
+                    "complete_id_set_before_after": true
+                  },
+                  "1": {
+                    "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/1",
+                    "source_sha256": "134eeb4069c144cb4cedd256545c2da3c12e4a4d5606a8cccdbbeae05b0e6448",
+                    "expected_count": 143,
+                    "retrieved_count": 143,
+                    "downloaded_bytes": 773439,
+                    "source_data_last_edit_at": null,
+                    "complete_id_set_before_after": true
+                  },
+                  "3": {
+                    "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+                    "source_sha256": "ba196d809a085227b2d11a077c67e65cbd4f080d720284723729fa77b7c3e08f",
+                    "expected_count": 176,
+                    "retrieved_count": 176,
+                    "downloaded_bytes": 178124,
+                    "source_data_last_edit_at": null,
+                    "complete_id_set_before_after": true
+                  },
+                  "28": {
+                    "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+                    "source_sha256": "b2b73e641132170542349033a719e03016fa68bd38b34be8464fb20225ee97b4",
+                    "expected_count": 13314,
+                    "retrieved_count": 13314,
+                    "downloaded_bytes": 259967089,
+                    "source_data_last_edit_at": null,
+                    "complete_id_set_before_after": true
+                  }
+                },
+                "source_version": "b2f3507cc6f80ad36a332f9d",
+                "coordinate_area_method": "EPSG:5070 equal-area projection; full source geometry, union before intersection; total neighborhood area including water.",
+                "coverage_threshold_pct": 99.99
+              }
+            ],
+            "missing_inputs": [
+              "Property-specific flood assessment, drainage and insurance"
+            ],
+            "limitations": [
+              "Mapped area share is not a probability that a home or resident will flood and is not a safety score.",
+              "Neighborhood total-area denominator includes water and nonresidential land; not dwelling-weighted.",
+              "Panel dates describe effective map editions, not the age of all underlying studies; newer LOMRs may modify older panels.",
+              "Effective NFHL only; preliminary future maps, property-specific LOMAs, drainage/pluvial flooding and future climate are not evaluated.",
+              "Mapped minimal-hazard or outside-SFHA areas can still flood. No flood-hazard record is not interpreted as zero exposure.",
+              "Coverage below 99.99%, unknown classification or missing effective-date coverage suppresses exposure percentages."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T18:36:32.632+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "amen": {
+            "availability": "partial",
+            "facts": {
+              "inventories": {
+                "museums": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "Houston Fire Museum",
+                      "address": null,
+                      "latitude": 29.7477794655342,
+                      "place_id": "coh_museums:26",
+                      "longitude": -95.3750825284693,
+                      "source_id": "coh_museums",
+                      "location_method": "source_point",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 610
+                    },
+                    {
+                      "name": "Harris County Heritage Society Museum",
+                      "address": null,
+                      "latitude": 29.7593714673361,
+                      "place_id": "coh_museums:23",
+                      "longitude": -95.3713565301057,
+                      "source_id": "coh_museums",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1940
+                    },
+                    {
+                      "name": "The Museum of Fine Arts",
+                      "address": null,
+                      "latitude": 29.7255224599869,
+                      "place_id": "coh_museums:54",
+                      "longitude": -95.390409529011,
+                      "source_id": "coh_museums",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2360
+                    }
+                  ],
+                  "record_count_in_neighborhood": 1
+                },
+                "libraries": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "African American Library @ Gregory School",
+                      "address": "1300 Victor St",
+                      "latitude": 29.7540880748615,
+                      "place_id": "coh_libraries:35",
+                      "longitude": -95.3804152138887,
+                      "source_id": "coh_libraries",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1400
+                    },
+                    {
+                      "name": "Freed-Montrose Library",
+                      "address": "4100 Montrose Blvd",
+                      "latitude": 29.7354807363685,
+                      "place_id": "coh_libraries:15",
+                      "longitude": -95.391547832503,
+                      "source_id": "coh_libraries",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1740
+                    },
+                    {
+                      "name": "Julia Ideson Building",
+                      "address": "550 Mckinney St",
+                      "latitude": 29.7588939146294,
+                      "place_id": "coh_libraries:39",
+                      "longitude": -95.3690893788763,
+                      "source_id": "coh_libraries",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1950
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                },
+                "community_centers": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "Emancipation Community Center",
+                      "address": "3018 Dowling 77004",
+                      "latitude": 29.7357442020906,
+                      "place_id": "coh_community_centers:46",
+                      "longitude": -95.364933922473,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1240
+                    },
+                    {
+                      "name": "Cherryhurst Community Center",
+                      "address": "1700 Missouri 77006",
+                      "latitude": 29.7444046244101,
+                      "place_id": "coh_community_centers:53",
+                      "longitude": -95.398131096061,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2210
+                    },
+                    {
+                      "name": "Fonde Community Center",
+                      "address": "110 Sabine 77007",
+                      "latitude": 29.7629736552277,
+                      "place_id": "coh_community_centers:44",
+                      "longitude": -95.3750443548758,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2300
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                },
+                "multi_service_centers": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "THIRD WARD MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7283470532971,
+                      "place_id": "coh_multi_service_centers:108",
+                      "longitude": -95.3615258312707,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2040
+                    },
+                    {
+                      "name": "WEST END MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7728143212297,
+                      "place_id": "coh_multi_service_centers:106",
+                      "longitude": -95.3968873902676,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 3980
+                    },
+                    {
+                      "name": "FIFTH WARD MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7722631950437,
+                      "place_id": "coh_multi_service_centers:6",
+                      "longitude": -95.3308212074925,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 5440
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                }
+              }
+            },
+            "sources": [
+              {
+                "source_id": "coh_community_centers",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/8",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published community-center locations; source update date and current programs/hours unknown. Service/layer license metadata is empty; retain attribution.",
+                "category": "community_centers",
+                "attribution": "City of Houston GIS — Community Centers",
+                "data_version": "5b9dbad5fc80bded:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 60,
+                "published_count": 60,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_libraries",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/12",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published library locations; source update date unknown. Does not establish current operating status or hours. YEAR is not documented as a last-update field and is not imported. Service/layer license metadata is empty; retain attribution.",
+                "category": "libraries",
+                "attribution": "City of Houston GIS — Libraries",
+                "data_version": "a694eab2eb843b61:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 43,
+                "published_count": 43,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_multi_service_centers",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/7",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published multi-service-center locations; source update date and current programs/hours unknown. Some facilities also occur in the health-facility layer. Service/layer license metadata is empty; retain attribution.",
+                "category": "multi_service_centers",
+                "attribution": "City of Houston GIS — Multi-Service Centers",
+                "data_version": "3b865225413cde58:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 11,
+                "published_count": 11,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_museums",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/13",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Regional museum-location inventory, including locations outside Houston. Source update date and current operating status unknown. Service/layer license metadata is empty; retain attribution.",
+                "category": "museums",
+                "attribution": "City of Houston GIS — Museums",
+                "data_version": "f364e4aa81e7e474:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 61,
+                "published_count": 16,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              }
+            ],
+            "missing_inputs": [
+              "Operating hours and candidate-specific amenity preferences"
+            ],
+            "limitations": [
+              "Counts are source records, not necessarily distinct physical facilities; categories can overlap.",
+              "Nearest records are chosen across imported Houston neighborhoods and may lie outside this neighborhood. Facilities outside the imported geography are not searched.",
+              "Distances are straight-line from a neighborhood reference point, not a home, entrance, route, walking time or drive time. Parks use representative points.",
+              "An inventory does not establish current opening status, admission eligibility, service quality or availability. Unknown observation dates remain unknown."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T17:25:41.064+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "fit": {
+            "availability": "partial",
+            "facts": {
+              "inventories": {
+                "parks": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "GLOVER (ELIZABETH) PARK",
+                      "address": "3118  Elgin Houston 77004",
+                      "latitude": 29.739937408764,
+                      "place_id": "coh_parks:315",
+                      "longitude": -95.3737188398292,
+                      "source_id": "coh_parks",
+                      "location_method": "point_on_surface",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 300
+                    },
+                    {
+                      "name": "BALDWIN PARK",
+                      "address": "1701  Elgin Houston 77004",
+                      "latitude": 29.7385319814677,
+                      "place_id": "coh_parks:117",
+                      "longitude": -95.3706406384269,
+                      "source_id": "coh_parks",
+                      "location_method": "point_on_surface",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 610
+                    },
+                    {
+                      "name": "PEGGY'S POINT PLAZA PARK",
+                      "address": "4240  Main Houston 77002",
+                      "latitude": 29.7344144987068,
+                      "place_id": "coh_parks:132",
+                      "longitude": -95.3830860536498,
+                      "source_id": "coh_parks",
+                      "location_method": "point_on_surface",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 1150
+                    }
+                  ],
+                  "record_count_in_neighborhood": 3
+                },
+                "community_centers": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "Emancipation Community Center",
+                      "address": "3018 Dowling 77004",
+                      "latitude": 29.7357442020906,
+                      "place_id": "coh_community_centers:46",
+                      "longitude": -95.364933922473,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1240
+                    },
+                    {
+                      "name": "Cherryhurst Community Center",
+                      "address": "1700 Missouri 77006",
+                      "latitude": 29.7444046244101,
+                      "place_id": "coh_community_centers:53",
+                      "longitude": -95.398131096061,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2210
+                    },
+                    {
+                      "name": "Fonde Community Center",
+                      "address": "110 Sabine 77007",
+                      "latitude": 29.7629736552277,
+                      "place_id": "coh_community_centers:44",
+                      "longitude": -95.3750443548758,
+                      "source_id": "coh_community_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2300
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                }
+              }
+            },
+            "sources": [
+              {
+                "source_id": "coh_community_centers",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/8",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published community-center locations; source update date and current programs/hours unknown. Service/layer license metadata is empty; retain attribution.",
+                "category": "community_centers",
+                "attribution": "City of Houston GIS — Community Centers",
+                "data_version": "5b9dbad5fc80bded:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 60,
+                "published_count": 60,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_parks",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/14",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "City-maintained park inventory; source update date unknown. Includes small greenspaces and park reserves; not a count of staffed recreation facilities. Preserve full polygon geometry for spatial joins. Source Latitude/Longitude attributes are projected values and must not be interpreted as degrees. Service/layer license metadata is empty; retain attribution. 1 input polygon geometries received ST_MakeValid linework topology repair; each retained area within 0.0001% (minimum numerical tolerance 0.000001 m²). Raw source geometries are preserved in the import snapshot.",
+                "category": "parks",
+                "attribution": "City of Houston GIS — Parks (City of Houston)",
+                "data_version": "08c3a0a607887eb2:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 380,
+                "published_count": 374,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 1
+              }
+            ],
+            "missing_inputs": [
+              "Verified gyms, trails, facility entrances and usable walking/cycling routes"
+            ],
+            "limitations": [
+              "Counts are source records, not necessarily distinct physical facilities; categories can overlap.",
+              "Nearest records are chosen across imported Houston neighborhoods and may lie outside this neighborhood. Facilities outside the imported geography are not searched.",
+              "Distances are straight-line from a neighborhood reference point, not a home, entrance, route, walking time or drive time. Parks use representative points.",
+              "An inventory does not establish current opening status, admission eligibility, service quality or availability. Unknown observation dates remain unknown."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T17:25:41.064+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "food": {
+            "availability": "partial",
+            "facts": {
+              "inventories": {
+                "grocery_stores": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "RANDALLS  1773",
+                      "address": "2225 Louisiana St, Houston, TX 77002",
+                      "latitude": 29.748976000000003,
+                      "place_id": "usda_snap_grocery:620607",
+                      "longitude": -95.374557,
+                      "source_id": "usda_snap_grocery",
+                      "location_method": "source_point",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 750
+                    },
+                    {
+                      "name": "HEB Food Store 756",
+                      "address": "6055 South Freeway, Houston, TX 77004",
+                      "latitude": 29.735565,
+                      "place_id": "usda_snap_grocery:1386320",
+                      "longitude": -95.369499,
+                      "source_id": "usda_snap_grocery",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 930
+                    },
+                    {
+                      "name": "Phoenicia Specialty Foods",
+                      "address": "1001 Austin St, Houston, TX 77010",
+                      "latitude": 29.754514999999998,
+                      "place_id": "usda_snap_grocery:1003941",
+                      "longitude": -95.36142,
+                      "source_id": "usda_snap_grocery",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1910
+                    }
+                  ],
+                  "record_count_in_neighborhood": 1
+                }
+              }
+            },
+            "sources": [
+              {
+                "source_id": "usda_snap_grocery",
+                "source_url": "https://services1.arcgis.com/RLQu0rK7h4kbsBq5/arcgis/rest/services/snap_retailer_location_data/FeatureServer/0",
+                "source_period": "USDA inventory layer edited 2026-09-17",
+                "source_checked_at": "2026-09-19T18:21:28.607Z",
+                "note": "Only SNAP-authorized retailers classified by USDA as Grocery Store, Supermarket or Super Store. Regional bounding-box inventory is filtered to Houston Super Neighborhoods during publication. This subset is not a census of all grocery stores, dining options, affordability, quality, current opening hours or stock. The layer edit date is the inventory edition, not an individual store inspection or opening date. Source Record_ID identifies retailers; ObjectId is used only for retrieval batches. Official provenance: https://www.fna.usda.gov/snap/retailer-locator ; https://www.arcgis.com/home/item.html?id=8b260f9a10b0459aa441ad8588c2251c",
+                "category": "grocery_stores",
+                "attribution": "USDA Food and Nutrition Administration — SNAP Retailer Locator",
+                "source_count": 923,
+                "source_published_at": "2026-09-17T13:33:58.255Z"
+              }
+            ],
+            "missing_inputs": [
+              "Verified restaurant/dining inventory",
+              "Grocery stores outside the SNAP-authorized subset",
+              "Opening hours, prices, stock, dietary fit and road travel time"
+            ],
+            "limitations": [
+              "Only SNAP-authorized retailers classified by USDA as Grocery Store, Supermarket or Super Store. Regional bounding-box inventory is filtered to Houston Super Neighborhoods during publication. This subset is not a census of all grocery stores, dining options, affordability, quality, current opening hours or stock. The layer edit date is the inventory edition, not an individual store inspection or opening date. Source Record_ID identifies retailers; ObjectId is used only for retrieval batches. Official provenance: https://www.fna.usda.gov/snap/retailer-locator ; https://www.arcgis.com/home/item.html?id=8b260f9a10b0459aa441ad8588c2251c",
+              "Counts are source records, not necessarily distinct physical facilities; categories can overlap.",
+              "Nearest records are chosen across imported Houston neighborhoods and may lie outside this neighborhood. Facilities outside the imported geography are not searched.",
+              "Distances are straight-line from a neighborhood reference point, not a home, entrance, route, walking time or drive time. Parks use representative points.",
+              "An inventory does not establish current opening status, admission eligibility, service quality or availability. Unknown observation dates remain unknown."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T18:21:28.607+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "air": {
+            "availability": "partial",
+            "facts": {
+              "destinations": [
+                {
+                  "id": "iah",
+                  "kind": "airport",
+                  "note": "The airport operator recommends this navigation address. It is a representative terminal-area address, not an individual terminal's drop-off curb or runway center. Terminal choice changes actual travel.",
+                  "label": "George Bush Intercontinental Airport (IAH)",
+                  "address": "2800 North Terminal Road, Houston, Texas",
+                  "source_url": "https://www.fly2houston.com/iah/visitor-information/maps-and-directions/",
+                  "anchor_name": "IAH official navigation address",
+                  "coordinates": [
+                    -95.350558500002,
+                    29.987073000002
+                  ],
+                  "geocoder_query": "2800 North Terminal Road Houston Texas",
+                  "location_method": "city_verified_address_proxy",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": 100,
+                  "straight_line_meters": 27330
+                },
+                {
+                  "id": "hou",
+                  "kind": "airport",
+                  "note": "Converted the operator's degrees-and-decimal-minutes GPS to decimal degrees. This is the operator's general navigation point, not a separately verified drop-off curb. The City address geocoder returned a different point about 255 meters north; the operator-published GPS is used here explicitly.",
+                  "label": "William P. Hobby Airport (HOU)",
+                  "address": "7800 Airport Boulevard, Houston, Texas",
+                  "source_url": "https://www.fly2houston.com/hou/directions-to-hou/",
+                  "anchor_name": "HOU operator-published navigation GPS",
+                  "coordinates": [
+                    -95.27663333333334,
+                    29.65455
+                  ],
+                  "geocoder_query": null,
+                  "location_method": "operator_published_navigation_coordinate",
+                  "drive_time_minutes": null,
+                  "geocoder_match_score": null,
+                  "straight_line_meters": 13640,
+                  "source_coordinate_text": "Latitude: 29 39.273; Longitude: -95 16.598"
+                }
+              ],
+              "route_status": "not_configured"
+            },
+            "sources": [
+              {
+                "source_id": "destination_iah",
+                "source_url": "https://www.fly2houston.com/iah/visitor-information/maps-and-directions/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "city_verified_address_proxy"
+              },
+              {
+                "source_id": "destination_hou",
+                "source_url": "https://www.fly2houston.com/hou/directions-to-hou/",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T18:21:49Z",
+                "geocoder": {
+                  "name": "City of Houston COH Verified Address Locator",
+                  "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy.",
+                  "operation": "findAddressCandidates",
+                  "parameters": {
+                    "f": "json",
+                    "outSR": "4326",
+                    "maxLocations": 1
+                  },
+                  "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer"
+                },
+                "location_method": "operator_published_navigation_coordinate"
+              }
+            ],
+            "missing_inputs": [
+              "Terminal-specific route and departure time",
+              "Current airline/route schedules if used in a recommendation"
+            ],
+            "limitations": [
+              "Representative destination points for straight-line distance context only. These are not routing results, district centroids, confirmed vehicle entrances or individual employer locations. Let the candidate choose a workplace address before generating any actual commute estimate.",
+              "A road-routing provider with appropriate terms and credentials is required before returning drive-time minutes."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T18:21:49+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          },
+          "health": {
+            "availability": "partial",
+            "facts": {
+              "inventories": {
+                "hospitals": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "DEPELCHIN CHILDRENS HOSPITAL",
+                      "address": "03214 AUSTIN HOUSTON 77004",
+                      "latitude": 29.739253987371,
+                      "place_id": "coh_hospitals:63",
+                      "longitude": -95.3743078494793,
+                      "source_id": "coh_hospitals",
+                      "location_method": "source_point",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 350
+                    },
+                    {
+                      "name": "SCCI HOSPITAL",
+                      "address": "00105 DREW ST HOUSTON 77006",
+                      "latitude": 29.7487990014175,
+                      "place_id": "coh_hospitals:52",
+                      "longitude": -95.3825143500523,
+                      "source_id": "coh_hospitals",
+                      "location_method": "source_point",
+                      "inside_neighborhood": true,
+                      "straight_line_meters": 1010
+                    },
+                    {
+                      "name": "CHRISTUS ST JOSEPH HOSPITAL",
+                      "address": "01919 LA BRANCH HOUSTON 77002",
+                      "latitude": 29.746986912547,
+                      "place_id": "coh_hospitals:12",
+                      "longitude": -95.365883867312,
+                      "source_id": "coh_hospitals",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 1050
+                    }
+                  ],
+                  "record_count_in_neighborhood": 2
+                },
+                "health_facilities": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "THIRD WARD MULTI-SERVICE CENTER",
+                      "address": "3611 ENNIS HOUSTON 77004",
+                      "latitude": 29.7283470532971,
+                      "place_id": "coh_health_facilities:108",
+                      "longitude": -95.3615258312707,
+                      "source_id": "coh_health_facilities",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2040
+                    },
+                    {
+                      "name": "LA NUEVA CASA DE AMIGOS WIC CENTER",
+                      "address": "1809 N MAIN HOUSTON 77009",
+                      "latitude": 29.7754484660295,
+                      "place_id": "coh_health_facilities:77",
+                      "longitude": -95.3617128433515,
+                      "source_id": "coh_health_facilities",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 3920
+                    },
+                    {
+                      "name": "LA NUEVA CASA DE AMIGOS HEALTH CENTER",
+                      "address": "1809 N MAIN HOUSTON 77009",
+                      "latitude": 29.7755529649206,
+                      "place_id": "coh_health_facilities:103",
+                      "longitude": -95.3617537116641,
+                      "source_id": "coh_health_facilities",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 3930
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                },
+                "multi_service_centers": {
+                  "distance_method": "spherical_great_circle_from_neighborhood_reference_point_rounded_10m",
+                  "nearest_to_reference_point": [
+                    {
+                      "name": "THIRD WARD MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7283470532971,
+                      "place_id": "coh_multi_service_centers:108",
+                      "longitude": -95.3615258312707,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 2040
+                    },
+                    {
+                      "name": "WEST END MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7728143212297,
+                      "place_id": "coh_multi_service_centers:106",
+                      "longitude": -95.3968873902676,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 3980
+                    },
+                    {
+                      "name": "FIFTH WARD MULTI-SERVICE CENTER",
+                      "address": null,
+                      "latitude": 29.7722631950437,
+                      "place_id": "coh_multi_service_centers:6",
+                      "longitude": -95.3308212074925,
+                      "source_id": "coh_multi_service_centers",
+                      "location_method": "source_point",
+                      "inside_neighborhood": false,
+                      "straight_line_meters": 5440
+                    }
+                  ],
+                  "record_count_in_neighborhood": 0
+                }
+              }
+            },
+            "sources": [
+              {
+                "source_id": "coh_health_facilities",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/11",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Includes different public-health facility types, not only clinics. Source update date and current service availability unknown. Some multi-service centers appear in both datasets; do not sum category counts as unique facilities. Service/layer license metadata is empty; retain attribution.",
+                "category": "health_facilities",
+                "attribution": "City of Houston GIS — Health Department Facilities",
+                "data_version": "f07d67aefc2a190a:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 32,
+                "published_count": 30,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_hospitals",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/10",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published hospital-location inventory; source update date and current operating status unknown. Locations are context only, not evidence of current emergency services or availability. Coverage may extend outside Houston. Service/layer license metadata is empty; retain attribution.",
+                "category": "hospitals",
+                "attribution": "City of Houston GIS — Hospitals",
+                "data_version": "b1aebb331331ac31:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 108,
+                "published_count": 64,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              },
+              {
+                "source_id": "coh_multi_service_centers",
+                "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/7",
+                "source_period": null,
+                "source_checked_at": "2026-09-19T17:25:41.064+00:00",
+                "note": "Published multi-service-center locations; source update date and current programs/hours unknown. Some facilities also occur in the health-facility layer. Service/layer license metadata is empty; retain attribution.",
+                "category": "multi_service_centers",
+                "attribution": "City of Houston GIS — Multi-Service Centers",
+                "data_version": "3b865225413cde58:coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_count": 11,
+                "published_count": 11,
+                "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+                "source_published_at": null,
+                "geometry_repair_count": 0
+              }
+            ],
+            "missing_inputs": [
+              "Insurance acceptance, specialties, appointments, emergency capacity and road travel time"
+            ],
+            "limitations": [
+              "Counts are source records, not necessarily distinct physical facilities; categories can overlap.",
+              "Nearest records are chosen across imported Houston neighborhoods and may lie outside this neighborhood. Facilities outside the imported geography are not searched.",
+              "Distances are straight-line from a neighborhood reference point, not a home, entrance, route, walking time or drive time. Parks use representative points.",
+              "An inventory does not establish current opening status, admission eligibility, service quality or availability. Unknown observation dates remain unknown."
+            ],
+            "evidence_version": "report-evidence-5be12dcf447b933c",
+            "prepared_at": "2026-09-19T18:38:47.946+00:00",
+            "refresh_due_at": "2026-10-20T17:25:41.064+00:00",
+            "score": null,
+            "score_status": "not_implemented"
+          }
+        }
+      }
+    ],
+    "interpretation": "Source-backed reference evidence, not a completed score or a current property listing. Missing and stale facts are unknown. Distances, when present, are straight-line from a neighborhood reference point, never drive or walking times."
+  }
+}
