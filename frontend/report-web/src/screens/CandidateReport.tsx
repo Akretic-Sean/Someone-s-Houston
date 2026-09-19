@@ -5,8 +5,11 @@ import NeighborhoodMap from '../components/NeighborhoodMap';
 import { OFFICES, WEIGHT_DEFS } from '../data/offices';
 import { MOCK_REPORT } from '../data/report';
 import { sourceLabel } from '../data/neighborhoodApi';
-import { formatRent, parseSalary, resolveNeighborhoods } from '../data/resolve';
+import { formatRent, resolveNeighborhoods } from '../data/resolve';
 import { useNeighborhoods } from '../hooks/useNeighborhoods';
+import EvidenceCards from '../evidence/EvidenceCards';
+import { useEvidence } from '../evidence/useEvidence';
+import { buildCategoryViews, findDestination } from '../evidence/select';
 import type { Report, ResolvedNeighborhood } from '../types';
 
 /**
@@ -85,17 +88,6 @@ function NeighborhoodCard({
         <span className="tag">{hood.momentum}</span>
       </div>
 
-      {hood.standing !== null ? (
-        <p className="standing">
-          Your salary is <strong>{hood.standing.toFixed(1)}×</strong> the median household
-          income here
-          {hood.medianHouseholdIncome !== null
-            ? ` ($${hood.medianHouseholdIncome.toLocaleString('en-US')})`
-            : ''}
-          .
-        </p>
-      ) : null}
-
       <p className="hood-why">{hood.why}</p>
 
       <p className="source" style={{ marginTop: 10 }}>
@@ -136,6 +128,7 @@ export default function CandidateReport({
   const report = useReport(config);
   const { rows, loading, error, retry } = useNeighborhoods();
   const [hovered, setHovered] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -149,12 +142,22 @@ export default function CandidateReport({
     .join(', ');
 
   const office = OFFICES.find((o) => o.id === config.office) ?? OFFICES[0];
-  // Standing compares what they will earn *in Houston* against the local
-  // median: the offer in offer mode, the carried-over salary in remote mode.
-  const houstonPay = parseSalary(
-    config.mode === 'remote' ? config.profile.salary : config.profile.offer,
+  const resolved = rows ? resolveNeighborhoods(report.neighborhoods, rows) : [];
+  const activeId = selectedId ?? resolved[0]?.neighborhoodId ?? null;
+  const evidence = useEvidence(activeId);
+  const activeName = resolved.find((n) => n.neighborhoodId === activeId)?.name ?? '';
+  const categoryViews = evidence.payload ? buildCategoryViews(evidence.payload) : [];
+
+  // The office marker must sit on the point the displayed distance was measured
+  // from, which is the evidence destination, not the frontend's own constant.
+  const evidenceOffice = findDestination(
+    evidence.payload?.neighborhoods[0]?.categories?.commute ?? null,
+    config.office,
   );
-  const resolved = rows ? resolveNeighborhoods(report.neighborhoods, rows, houstonPay) : [];
+  const officeForMap =
+    evidenceOffice?.coordinates
+      ? { ...office, lon: evidenceOffice.coordinates[0], lat: evidenceOffice.coordinates[1] }
+      : office;
 
   function submitLead(e: React.FormEvent) {
     e.preventDefault();
@@ -306,7 +309,7 @@ export default function CandidateReport({
               <NeighborhoodMap
                 rows={rows ?? []}
                 picks={resolved}
-                office={office}
+                office={officeForMap}
                 hovered={hovered}
                 onHover={setHovered}
                 sourceLabel={sourceLabel(rows ?? [])}
@@ -325,6 +328,73 @@ export default function CandidateReport({
               </div>
             </>
           )}
+        </section>
+
+        <section>
+          <div className="sec-head">
+            <h2 className="section-title">The evidence</h2>
+            {resolved.length > 0 ? (
+              <div className="seg" role="group" aria-label="Neighborhood">
+                {resolved.map((n) => (
+                  <button
+                    key={n.id}
+                    type="button"
+                    aria-pressed={n.neighborhoodId === activeId}
+                    onClick={() => setSelectedId(n.neighborhoodId)}
+                  >
+                    {n.name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+          <p className="section-lede">
+            What the published data actually supports for {activeName || 'this area'}, category
+            by category, with the source under each figure. Anything not published is marked
+            unavailable rather than estimated. There are no category scores and no safety tier:
+            the backend returns neither.
+          </p>
+
+          {evidence.loading ? (
+            <Card>
+              <p className="line-text">
+                <span className="spinner" />
+                Loading evidence…
+              </p>
+            </Card>
+          ) : evidence.error ? (
+            <Card>
+              <span className="eyebrow">Evidence unavailable</span>
+              <p className="note-text" style={{ margin: '8px 0 12px' }}>
+                {evidence.error.kind === 'auth'
+                  ? 'The evidence layer is not configured for this build. Nothing has been estimated in its place.'
+                  : 'The evidence could not be read just now. Nothing has been estimated in its place.'}
+              </p>
+              {evidence.error.kind === 'unavailable' ? (
+                <button type="button" className="btn" onClick={evidence.retry}>
+                  Try again
+                </button>
+              ) : null}
+            </Card>
+          ) : categoryViews.length > 0 ? (
+            <>
+              <EvidenceCards
+                views={categoryViews}
+                officeId={config.office}
+                airportId="iah"
+                weights={config.weights}
+              />
+              {evidence.payload?.interpretation ? (
+                <p className="source" style={{ marginTop: 16 }}>
+                  {evidence.payload.interpretation}
+                </p>
+              ) : null}
+              <p className="source" style={{ marginTop: 8 }}>
+                Safety tier: unavailable
+                {evidence.payload?.safety?.reason ? ` — ${evidence.payload.safety.reason}` : ''}
+              </p>
+            </>
+          ) : null}
         </section>
 
         <section>

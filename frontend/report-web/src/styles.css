@@ -1134,29 +1134,6 @@ tbody tr:hover {
   font-family: var(--mono);
   font-size: 11px;
 }
-.map-tip-standing {
-  margin-top: 3px;
-  padding-top: 6px;
-  border-top: 1px solid var(--line);
-}
-.map-tip-standing strong {
-  color: var(--teal-bright);
-}
-
-.standing {
-  font-size: 14px;
-  line-height: 1.6;
-  color: var(--text);
-  background: rgba(20, 184, 166, 0.1);
-  border-left: 2px solid var(--teal);
-  border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-}
-.standing strong {
-  color: var(--teal-bright);
-}
-
 .hood-card {
   transition:
     border-color 0.15s ease,
@@ -1459,4 +1436,107 @@ tbody tr:hover {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- evidence cards ---------- */
+.ev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+.ev-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ev-weight {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+}
+.ev-withheld {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-3);
+  font-style: italic;
+}
+.ev-fact {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+.ev-fact-label {
+  color: var(--text-3);
+  text-transform: capitalize;
+}
+.ev-fact-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  text-align: right;
+}
+/* Unavailable must never read as a number. */
+.ev-fact-value[data-unknown='true'] {
+  color: var(--text-4);
+  font-weight: 400;
+  font-style: italic;
+}
+.ev-place {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 5px 0;
+  font-size: 12px;
+}
+.ev-place-name {
+  color: var(--text-2);
+}
+.ev-place-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.ev-note {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-3);
+  margin-top: 10px;
+}
+.ev-caveats {
+  margin-top: 12px;
+  font-size: 12px;
+}
+.ev-caveats summary {
+  cursor: pointer;
+  color: var(--accent-soft);
+  font-weight: 600;
+}
+.ev-caveats ul {
+  margin: 8px 0 0 16px;
+  color: var(--text-3);
+  line-height: 1.6;
+}
+.ev-caveat-head {
+  margin-top: 8px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+.ev-sources {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ev-sources a {
+  color: var(--teal-bright);
 }

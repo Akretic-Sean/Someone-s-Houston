@@ -160,12 +160,6 @@ export default function NeighborhoodMap({
                     <span>Median home value</span>
                     <strong>{money(n.medianHomeValue)}</strong>
                   </span>
-                  {n.standing !== null ? (
-                    <span className="map-tip-row map-tip-standing">
-                      <span>Your salary is</span>
-                      <strong>{n.standing.toFixed(1)}× the median</strong>
-                    </span>
-                  ) : null}
                 </span>
               ) : null}
             </button>

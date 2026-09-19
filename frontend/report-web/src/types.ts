@@ -111,11 +111,6 @@ export interface ResolvedNeighborhood extends Neighborhood {
   medianGrossRent: number | null;
   medianHouseholdIncome: number | null;
   medianHomeValue: number | null;
-  /**
-   * Candidate salary divided by the neighborhood's median household income.
-   * The build plan's "live like a king" number. Null when income is suppressed.
-   */
-  standing: number | null;
   /** True when the figures came from the live layer rather than the mock. */
   live: boolean;
 }
