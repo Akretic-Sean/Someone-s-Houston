@@ -80,7 +80,9 @@ export default function NeighborhoodMap({ rows, picks, office, hovered, onHover,
       marker.bindTooltip(tooltip, { direction: 'top', offset: [0, -10] });
       marker.on('click', () => handlers.current.onSelect(row.neighborhood_id));
       marker.on('mouseover', () => handlers.current.onHover(row.neighborhood_id));
-      marker.on('mouseout', () => handlers.current.onHover(null));
+      marker.on('mouseout', () => {
+        if (document.activeElement !== marker.getElement()) handlers.current.onHover(null);
+      });
       const element = marker.getElement();
       if (element) {
         element.setAttribute('aria-label', label);

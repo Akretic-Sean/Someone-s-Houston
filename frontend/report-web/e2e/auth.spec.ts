@@ -147,7 +147,7 @@ function boundaryFixture() {
 
 const tileFixture = '<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#dedede"/><path d="M0 90H256 M100 0V256" stroke="#fff" stroke-width="8"/></svg>';
 
-test('geographic map loads boundaries, keeps markers aligned on zoom, and selects evidence', async ({ page }, testInfo) => {
+test('geographic map loads boundaries, keeps markers aligned on zoom, and selects evidence', async ({ page, isMobile }, testInfo) => {
   await mockApi(page);
   let boundaryReads = 0;
   await page.route('**/rest/v1/rpc/get_neighborhood_map', route => {
@@ -164,9 +164,13 @@ test('geographic map loads boundaries, keeps markers aligned on zoom, and select
   await expect(map.getByRole('link', { name: 'OpenStreetMap' })).toBeVisible();
   const firstPick = map.locator('[data-pin]').first();
   const selectedId = await firstPick.getAttribute('data-pin');
-  await firstPick.focus();
-  await expect(firstPick).toHaveAttribute('data-active', 'true');
-  await firstPick.press('Enter');
+  if (isMobile) {
+    await firstPick.tap();
+  } else {
+    await firstPick.focus();
+    await expect(firstPick).toHaveAttribute('data-active', 'true');
+    await firstPick.press('Enter');
+  }
   await expect(page.getByLabel('Choose neighborhood')).toHaveValue(selectedId!);
   await page.getByRole('button', { name: 'Zoom to matches', exact: true }).click();
   await expect(map.locator('[data-neighborhood-id]')).toHaveCount(88);
