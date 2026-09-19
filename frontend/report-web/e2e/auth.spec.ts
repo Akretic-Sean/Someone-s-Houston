@@ -348,3 +348,28 @@ test('expired bounds leave six areas unranked rather than pretending full covera
   await page.getByLabel('Choose neighborhood').selectOption('7');
   await expect(page.locator('#neighborhood-evidence').getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
 });
+
+
+test('private dashboard saves and reopens after reload', async ({ page }) => {
+  await mockApi(page);
+  const rows: any[] = [];
+  await page.route('**/rest/v1/saved_reports*', async route => {
+    if (route.request().method() === 'POST') {
+      rows.push({ ...route.request().postDataJSON(), created_at: new Date().toISOString() });
+      return route.fulfill({ status: 201, json: null });
+    }
+    return route.fulfill({ json: rows, headers: { 'content-range': `0-${Math.max(0, rows.length - 1)}/${rows.length}` } });
+  });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByText('Saved to your dashboard.', { exact: true })).toBeVisible();
+  expect(rows).toHaveLength(1);
+  expect(rows[0].snapshot.payload.base.neighborhoods).toHaveLength(88);
+  await page.reload();
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await expect(page.locator('.sidebar-user')).not.toContainText('Priya');
+  await expect(page.locator('.sidebar-user')).toContainText('recruiter');
+  await page.getByRole('button', { name: 'Relocation report', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Saved priorities restored with current evidence.', { exact: false })).toBeVisible();
+});

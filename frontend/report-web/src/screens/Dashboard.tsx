@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { Brand, Card, StatusPill, initials } from '../components/Bits';
+import { Brand, Card, initials } from '../components/Bits';
 import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
-import { KPIS, REPORT_SUMMARIES } from '../data/report';
+import type { SavedReport } from '../data/savedReports';
 
 const NAV = ['Reports', 'Candidates', 'Connectors', 'Insights', 'Settings'] as const;
 
 export default function Dashboard({
+  displayName, email, reports, count, loading, error, onRetry,
   nav,
   onNav,
   connectors,
@@ -13,17 +14,18 @@ export default function Dashboard({
   onOpenReport,
   onCreate,
 }: {
+  displayName: string; email: string; reports: SavedReport[]; count: number; loading: boolean; error: string; onRetry: () => void;
   nav: string;
   onNav: (nav: string) => void;
   connectors: ConnectorStates;
   onToggleConnector: (id: ConnectorId) => void;
-  onOpenReport: () => void;
+  onOpenReport: (row: SavedReport) => void;
   onCreate: () => void;
 }) {
   const [query, setQuery] = useState('');
 
-  const rows = REPORT_SUMMARIES.filter((r) =>
-    `${r.name} ${r.origin} ${r.role}`.toLowerCase().includes(query.toLowerCase()),
+  const rows = reports.filter((r) =>
+    `${r.title} ${r.config.profile.city} ${r.config.profile.role}`.toLowerCase().includes(query.toLowerCase()),
   );
 
   return (
@@ -45,8 +47,8 @@ export default function Dashboard({
           ))}
         </nav>
         <div className="sidebar-user">
-          <div style={{ fontWeight: 700, color: 'var(--text)' }}>Priya Natarajan</div>
-          Talent partner &mdash; Aurelia Robotics
+          <div style={{ fontWeight: 700, color: 'var(--text)' }}>{displayName}</div>
+          {email}
         </div>
       </aside>
 
@@ -57,7 +59,7 @@ export default function Dashboard({
               <div>
                 <span className="eyebrow">Reports</span>
                 <h1 className="greeting">
-                  Good morning, <em>Priya</em>
+                  Welcome, <em>{displayName}</em>
                 </h1>
               </div>
               <button type="button" className="btn btn-primary" onClick={onCreate}>
@@ -65,25 +67,15 @@ export default function Dashboard({
               </button>
             </div>
 
-            <div className="kpis">
-              {KPIS.map((k) => (
-                <Card key={k.label}>
-                  <div className="kpi-label">{k.label}</div>
-                  <div className="kpi-value">
-                    {k.value}
-                    <span className="kpi-delta">{k.delta}</span>
-                  </div>
-                  <div className="kpi-sub">{k.sub}</div>
-                </Card>
-              ))}
-            </div>
-
+            <div className="kpis"><Card><div className="kpi-label">Saved reports</div><div className="kpi-value">{loading || error ? '—' : count}</div><div className="kpi-sub">Your private Supabase records</div></Card></div>
+            {loading && <p role="status">Loading reports—</p>}
+            {error && <p role="alert">{error} <button onClick={onRetry}>Retry</button></p>}
             <Card>
               <div className="sec-head">
                 <h2 style={{ fontSize: 16 }}>Recent reports</h2>
                 <input
-                  aria-label="Search candidates"
-                  placeholder="Search candidates"
+                  aria-label="Search reports"
+                  placeholder="Search reports"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   style={{
@@ -101,35 +93,35 @@ export default function Dashboard({
                 <table>
                   <thead>
                     <tr>
-                      <th>Candidate</th>
+                      <th>Report</th>
                       <th>Origin</th>
                       <th>Role</th>
                       <th>Status</th>
-                      <th>Updated</th>
+                      <th>Created</th>
                     </tr>
                   </thead>
                   <tbody>
                     {rows.map((r) => (
-                      <tr key={r.id} onClick={onOpenReport}>
+                      <tr key={r.id} >
                         <td>
                           <span className="who">
                             <span className="avatar" aria-hidden="true">
-                              {initials(r.name)}
+                              {initials(r.title)}
                             </span>
-                            {r.name}
+                            <button type="button" disabled={loading} onClick={() => onOpenReport(r)}>{r.title}</button>
                           </span>
                         </td>
-                        <td>{r.origin}</td>
-                        <td>{r.role}</td>
+                        <td>{r.config.profile.city || '—'}</td>
+                        <td>{r.config.profile.role || '—'}</td>
                         <td>
-                          <StatusPill status={r.status} />
+                          Saved
                         </td>
-                        <td style={{ color: 'var(--text-3)' }}>{r.date}</td>
+                        <td style={{ color: 'var(--text-3)' }}>{new Date(r.created_at).toLocaleDateString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-                {rows.length === 0 ? <div className="empty">No candidates match &ldquo;{query}&rdquo;.</div> : null}
+                {!loading && !error && rows.length === 0 ? <div className="empty">{query ? `No reports match —${query}—.` : 'No saved reports yet. Create a relocation report to get started.'}</div> : null}
               </div>
             </Card>
           </>
@@ -140,8 +132,7 @@ export default function Dashboard({
               Connectors
             </h1>
             <p className="section-lede">
-              Connect a source once here, and it becomes available when you build a report.
-              Only connected sources are offered in the builder.
+              Demo controls only. These toggles do not connect external accounts. Neighborhood reports use the configured Supabase evidence pipeline.
             </p>
 
             <div className="connectors">
