@@ -6,10 +6,11 @@ import { createNeighborhoodClient, filterNeighborhoods, filterSchema, type Neigh
 import { createContextClient, amenitiesInputSchema, conditionsInputSchema, type ContextClient } from './context.js';
 import { createEvidenceClient, evidenceInputSchema, type EvidenceClient } from './evidence.js';
 import { createRelocationClient, relocationInputSchema, type RelocationClient } from './relocation.js';
+import { createComparisonClient, comparisonInputSchema, type ComparisonClient } from './comparison.js';
 
 const interpretation = 'City of Houston neighborhood estimates from ACS 2020-2024, not current listings. Gross rent is monthly; income is annual household income, not an individual salary. Coordinates are polygon centers, not driving times. Missing values are unknown. These fields alone do not establish flood risk, school quality, safety, or the best neighborhood for a family.';
 
-export function createServer(client: { list(): Promise<NeighborhoodProfile[]> }, context?: Pick<ContextClient, 'getAmenities' | 'getCurrentConditions'>, evidence?: EvidenceClient, relocation?: RelocationClient) {
+export function createServer(client: { list(): Promise<NeighborhoodProfile[]> }, context?: Pick<ContextClient, 'getAmenities' | 'getCurrentConditions'>, evidence?: EvidenceClient, relocation?: RelocationClient, comparison?: ComparisonClient) {
   const server = new McpServer({ name: 'hou-match-neighborhoods', version: '0.1.0' });
   const annotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
   const respond = async (select: (rows: NeighborhoodProfile[]) => object) => {
@@ -65,6 +66,13 @@ export function createServer(client: { list(): Promise<NeighborhoodProfile[]> },
     if (!relocation) throw new Error('Relocation client is not configured.');
     return relocation.getRelocationContext(args);
   }));
+  server.registerTool('compare_neighborhood_scenarios', {
+    description: 'Compare two explicit preference sets using the same deterministic scoring model as the frontend and one complete live Supabase cohort. Returns shortlists, signed winner-versus-runner-up category contributions, missing-data exclusions, rank changes and a snapshot fingerprint. No agent-invented weights, causal claims, route times or safety tiers. Read neighborhood evidence for cited source dates and links.',
+    inputSchema: comparisonInputSchema, annotations,
+  }, args => contextResponse(async () => {
+    if (!comparison) throw new Error('Comparison client is not configured.');
+    return comparison.compare(args);
+  }));
   return server;
 }
 
@@ -74,7 +82,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     const context = createContextClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
     const evidence = createEvidenceClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
     const relocation = createRelocationClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
-    await createServer(client, context, evidence, relocation).connect(new StdioServerTransport());
+    const comparison = createComparisonClient({ url: process.env.SUPABASE_URL ?? '', publishableKey: process.env.SUPABASE_PUBLISHABLE_KEY ?? '' });
+    await createServer(client, context, evidence, relocation, comparison).connect(new StdioServerTransport());
   } catch {
     console.error('Cannot start neighborhood MCP. Set SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY; run npm run build.');
     process.exitCode = 1;

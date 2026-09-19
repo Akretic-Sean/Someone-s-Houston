@@ -113,4 +113,4 @@ P0 validation recorded on 2026-09-19: 80 backend tests and seven frontend client
 
 ## Optional agent MCP
 
-The [Claude setup guide](claude-data-guide.md) describes six local read-only fact tools. MCP is optional for frontend work, and no scoring MCP tool is added by this change. The browser uses REST/RPC and the shared model; Claude should explain their returned facts/results rather than invent formulas.
+The [Claude setup guide](claude-data-guide.md) describes seven local read-only tools, including the shared-model scenario comparison in [the demo guide](backend-demo-proof.md). MCP remains optional for frontend work. The browser uses REST/RPC and the shared model; Claude should explain their returned facts/results rather than invent formulas.

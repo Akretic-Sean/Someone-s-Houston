@@ -34,7 +34,7 @@ Copy `.env.example` to `.env`. Fill `SUPABASE_PUBLISHABLE_KEY` with this project
 npm run test:live
 ```
 
-This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual six-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization, scoring and MCP discovery/calls. To run only the shared model tests from repository root: `node --test backend/test/scoring.test.mjs`.
+This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual seven-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization, scoring and MCP discovery/calls. To run only the shared model tests from repository root: `node --test backend/test/scoring.test.mjs`.
 
 GitHub Actions runs the complete Node, Python and database verification set on every PR. `supabase/tests/` contains plain SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. From the repository root, run `python backend/scripts/test_database.py` with Docker running to apply all migrations and execute every SQL suite in a disposable local database. No hosted database credentials are used. See [data operations](../docs/data-operations.md) for the full local commands, refresh ownership and GitHub issue monitoring.
 
@@ -72,7 +72,7 @@ Current conditions use a separate deployed Edge Function and active database Cro
 
 ## Claude Code / Desktop
 
-The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all six tools and correct interpretation in the partner's actual session. The [category-evidence guide](../docs/category-evidence.md) covers the screenshot's priorities, housing/FEMA/grocery preparation and atomic publication of 704 evidence rows.
+The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all seven tools and correct interpretation in the partner's actual session. The [category-evidence guide](../docs/category-evidence.md) covers the screenshot's priorities, housing/FEMA/grocery preparation and atomic publication of 704 evidence rows.
 
 Run `npm run build` before connecting. From the repository root, copy `.mcp.json.example` to the ignored `.mcp.json` and replace the local `SUPABASE_PUBLISHABLE_KEY` placeholder, or export that environment variable before launching Claude Code. The example already has this project's URL and reference. Claude Code runs the relative server path from the repository root. Use `/mcp` to inspect/connect it.
 
@@ -86,7 +86,7 @@ Example prompts:
 - "Use get_current_conditions for regional weather alerts and gauges; explain any unavailable or expired data."
 - "Use get_neighborhood_evidence for Midtown (62). Explain the eight priorities, source dates and missing inputs; preserve null route minutes and safety tier."
 
-The six MCP tools return facts and source context. The separate shared model ranks neighborhoods using explicit preferences; no scoring MCP tool is added. Neither supplies driving times, safety tiers, tax calculations or saved reports. MCP has no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all six tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
+Six MCP tools return facts and source context. The seventh, `compare_neighborhood_scenarios`, runs the same shared model for two explicit preference sets; see [scenario comparisons](../docs/backend-demo-proof.md). Neither supplies driving times, safety tiers, tax calculations or saved reports. MCP has no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all seven tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
 
 The optional `supabase` entry is the separate **developer** MCP: project-scoped, read-only and OAuth-authenticated with each developer's own Supabase account. It is not needed to consume neighborhood data.
 

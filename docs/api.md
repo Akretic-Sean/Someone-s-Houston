@@ -364,3 +364,12 @@ Handler errors are 403 unauthorized, 405 method,
 not include transcripts, provider credentials, or raw model errors.
 See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
 Production extraction/narration endpoints and stored reports remain unimplemented.
+
+
+## Agent scenario comparison (implemented, local MCP)
+
+`compare_neighborhood_scenarios` accepts `baseline` and `alternative` preference objects plus optional `limit` (1-5, default 3). Each preference requires all eight 0-10 `weights`, `tenure` rent/buy, `mode` offer/remote, `office` ion/downtown/energy/tmc/nasa, and `airport` iah/hou/nearest. All-zero effective weights are rejected before reading.
+
+Uses the existing public `get_neighborhood_scoring_data` RPC and shared model; **no new HTTP endpoint or database migration**. Returns version 1 with `model_version`, `evaluated_at`, `snapshot_sha256`, `evidence_versions`, echoed `preferences`, `baseline`/`alternative` summaries, and 88 `rank_changes`. Summaries include full scored `shortlist` rows, common normalized weights, excluded IDs/reasons and signed `winner_margin.categories` contributions. Contributions sum to the winner-minus-runner-up margin; negative values favor the runner-up. Missing ranks and margins remain null. Rank changes can reflect a change in eligibility as well as weights. `snapshot_sha256` fingerprints validated measurements excluding the changing evaluation time; it is not a signed source attestation.
+
+The client coalesces reads, caches at most one hour or the earliest usable source deadline, rejects oversized responses/admin keys, and never substitutes mock or expired fallback data. Tool failure uses MCP `isError: true`. Source URLs remain in `get_neighborhood_evidence`; match evidence versions before combining claims. See [examples and live proof](backend-demo-proof.md). Frontend continues using its existing direct RPC and shared model.
