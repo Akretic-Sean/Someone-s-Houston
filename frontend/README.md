@@ -42,6 +42,38 @@ logout on other devices.
 Without configuration, the app opens the preference screen and reports that
 live data is unavailable. It cannot generate a report from mocked data.
 
+## Deploying to Vercel
+
+`vercel.json` lives in `report-web/`, so the Vercel project's **Root Directory must be
+set to `frontend/report-web`** — the Vite preset, `npm run build` and `dist` all come
+from that file.
+
+One-time dashboard setup:
+
+1. New project, import this repository.
+2. Root Directory: `frontend/report-web`.
+3. Environment Variables, for **every** environment you build:
+
+   | Name | Value |
+   | --- | --- |
+   | `VITE_SUPABASE_URL` | `https://hknzivrgihnqzvsafkkr.supabase.co` |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | the project's `sb_publishable_` key |
+
+4. Deploy.
+
+Vite reads these **at build time**, so changing one needs a redeploy.
+
+**Do not skip step 3.** `src/lib/supabase.ts` returns `null` when either variable is
+missing, and `App.tsx` gates on `supabase && !session` — a build without them has no
+authentication at all and opens straight into the workspace. It fails open, quietly.
+
+After the first deploy, add the resulting URL to **Supabase → Authentication → URL
+Configuration** as both Site URL and a Redirect URL, or sign-up confirmation emails
+point at localhost.
+
+The SPA rewrite sends unknown paths to `index.html`; static assets resolve ahead of it.
+That is what will make `/r/:id` report links work once routing exists.
+
 ## Report flow
 
 - **Configure priorities:** rent/buy, work arrangement, office hub, airport and
