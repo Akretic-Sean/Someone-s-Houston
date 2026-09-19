@@ -1,0 +1,110 @@
+{
+  "sources": [
+    {
+      "source_id": "coh_parks",
+      "category": "parks",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/14",
+      "object_id_field": "OBJECTID",
+      "name_field": "Name",
+      "address_fields": ["Address", "CityMuni", "Zip"],
+      "geometry_type": "Polygon",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Parks (City of Houston)",
+      "note": "City-maintained park inventory; source update date unknown. Includes small greenspaces and park reserves; not a count of staffed recreation facilities. Preserve full polygon geometry for spatial joins. Source Latitude/Longitude attributes are projected values and must not be interpreted as degrees. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_libraries",
+      "category": "libraries",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/12",
+      "object_id_field": "OBJECTID",
+      "name_field": "LIBRARY",
+      "address_fields": ["ADDRESS"],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Libraries",
+      "note": "Published library locations; source update date unknown. Does not establish current operating status or hours. YEAR is not documented as a last-update field and is not imported. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_community_centers",
+      "category": "community_centers",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/8",
+      "object_id_field": "OBJECTID",
+      "name_field": "NAME",
+      "address_fields": ["ADDRESS", "ZIPCODE"],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Community Centers",
+      "note": "Published community-center locations; source update date and current programs/hours unknown. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_hospitals",
+      "category": "hospitals",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/10",
+      "object_id_field": "OBJECTID",
+      "name_field": "NAME",
+      "address_fields": ["ADDRNO", "PREFIX", "STNAME", "STTYPE", "SUFFIX", "CITY", "ZIP"],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Hospitals",
+      "note": "Published hospital-location inventory; source update date and current operating status unknown. Locations are context only, not evidence of current emergency services or availability. Coverage may extend outside Houston. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_health_facilities",
+      "category": "health_facilities",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/11",
+      "object_id_field": "OBJECTID",
+      "name_field": "NAME",
+      "address_fields": ["ADDRESS", "CITY", "ZIP"],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Health Department Facilities",
+      "note": "Includes different public-health facility types, not only clinics. Source update date and current service availability unknown. Some multi-service centers appear in both datasets; do not sum category counts as unique facilities. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_multi_service_centers",
+      "category": "multi_service_centers",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/7",
+      "object_id_field": "OBJECTID",
+      "name_field": "NAME",
+      "address_fields": [],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Multi-Service Centers",
+      "note": "Published multi-service-center locations; source update date and current programs/hours unknown. Some facilities also occur in the health-facility layer. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "coh_museums",
+      "category": "museums",
+      "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/HoustonMap/Neighborhood/MapServer/13",
+      "object_id_field": "OBJECTID_1",
+      "name_field": "NAME",
+      "address_fields": [],
+      "geometry_type": "Point",
+      "source_published_at": null,
+      "source_period": null,
+      "attribution": "City of Houston GIS — Museums",
+      "note": "Regional museum-location inventory, including locations outside Houston. Source update date and current operating status unknown. Service/layer license metadata is empty; retain attribution."
+    },
+    {
+      "source_id": "tea_schools",
+      "category": "schools",
+      "source_url": "https://services2.arcgis.com/5MVN2jsqIrNZD4tP/arcgis/rest/services/Schools_2024_to_2025/FeatureServer/0",
+      "object_id_field": "ObjectID",
+      "name_field": "USER_School_Name",
+      "address_fields": ["USER_School_Site_Street_Address", "USER_School_Site_City", "USER_School_Site_Zip"],
+      "geometry_type": "Point",
+      "bbox": [-95.9, 29.4, -95.0, 30.2],
+      "expected_data_last_edit": 1742332855718,
+      "source_published_at": null,
+      "source_period": "2024–2025 school year",
+      "attribution": "Texas Education Agency — School District Locator",
+      "note": "2024–2025 school-location snapshot used by the official TEA locator, verified via tea.texas.gov and locator webmap 15ce858b4ad5408480950db704fd455a. Source dataLastEditDate is 2025-03-18T21:20:55.718Z; that is an edit timestamp, not a publication date. Houston-area bounding-box subset; points outside Super Neighborhoods are not neighborhood membership. Approximate locations do not determine school attendance eligibility, current enrollment, operating status, or school quality. No student/staff/contact records imported. TEA item license metadata is empty; retain attribution."
+    }
+  ]
+}

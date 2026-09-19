@@ -9,6 +9,8 @@
     "test": "npm run build && node --test test/*.test.mjs",
     "data:prepare": "npm run build && node --env-file-if-exists=.env dist/import-neighborhoods.js",
     "data:publish": "npm run build && node --env-file-if-exists=.env dist/import-neighborhoods.js --publish",
+    "geo:prepare": "npm run build && node dist/prepare-boundaries.js && node dist/prepare-amenities.js",
+    "geo:publish": "npm run build && node --env-file-if-exists=.env dist/publish-geodata.js",
     "mcp": "node --env-file-if-exists=.env dist/mcp.js",
     "test:live": "npm run build && node --env-file-if-exists=.env test/live.mjs"
   },

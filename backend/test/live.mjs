@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { createNeighborhoodClient } from '../dist/neighborhoods.js';
+import { createContextClient } from '../dist/context.js';
 
 const url = process.env.SUPABASE_URL;
 const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -16,6 +17,13 @@ const firstMs = Math.round(performance.now() - start);
 const cachedStart = performance.now();
 await client.list();
 const cachedMs = Math.round(performance.now() - cachedStart);
+const context = createContextClient({ url, publishableKey });
+const amenities = await context.getAmenities({ neighborhood_id: 62, limit: 5 });
+assert.equal(amenities.neighborhood_id, 62);
+assert.ok(amenities.returned_records <= 5);
+const current = await context.getCurrentConditions({ limit: 2 });
+assert.equal(current.feeds.length, 2);
+assert.ok(current.returned_records <= 2);
 
 // Read-only security check: an unknown body must fail permissions, never upsert an existing record.
 const denied = await fetch(`${url}/rest/v1/neighborhood_profiles`, {
@@ -32,9 +40,15 @@ const transport = new StdioClientTransport({
 });
 try {
   await mcp.connect(transport);
-  assert.equal((await mcp.listTools()).tools.length, 2);
+  assert.equal((await mcp.listTools()).tools.length, 4);
   const result = await mcp.callTool({ name: 'get_neighborhood', arguments: { neighborhood_id: 62 } });
   assert.equal(result.isError, undefined);
   assert.equal(JSON.parse(result.content[0].text).neighborhood.name, 'MIDTOWN');
+  const amenityResult = await mcp.callTool({ name: 'get_neighborhood_amenities', arguments: { neighborhood_id: 62, limit: 5 } });
+  assert.equal(amenityResult.isError, undefined);
+  assert.ok(JSON.parse(amenityResult.content[0].text).returned_records <= 5);
+  const conditionsResult = await mcp.callTool({ name: 'get_current_conditions', arguments: { limit: 2 } });
+  assert.equal(conditionsResult.isError, undefined);
+  assert.equal(JSON.parse(conditionsResult.content[0].text).feeds.length, 2);
 } finally { await mcp.close(); }
-console.log(JSON.stringify({ rows: rows.length, json_bytes: Buffer.byteLength(JSON.stringify(rows)), first_read_ms: firstMs, cached_read_ms: cachedMs, anonymous_write_status: denied.status, mcp: 'passed' }));
+console.log(JSON.stringify({ rows: rows.length, json_bytes: Buffer.byteLength(JSON.stringify(rows)), first_read_ms: firstMs, cached_read_ms: cachedMs, anonymous_write_status: denied.status, amenity_status: amenities.availability, amenity_records: amenities.total_matches, current_feeds: current.feeds.map(f => ({ source_id: f.source_id, availability: f.availability })), mcp: 'passed' }));

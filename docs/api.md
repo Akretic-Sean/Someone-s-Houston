@@ -1,6 +1,6 @@
 # Shared API contract
 
-Neighborhood reference reads are **implemented and live**, 2026-09-19. This is the backend's integration contract for frontend review; the complete report/scoring contract still needs agreement.
+Neighborhood profiles, maps, facility context and current-condition reads are **implemented and live**, 2026-09-19. This is the backend's integration contract for frontend review; the complete report/scoring contract still needs agreement.
 
 ## Neighborhood profiles
 
@@ -58,6 +58,39 @@ Errors use Supabase's JSON `{ "code", "message", "details", "hint" }` format whe
 
 Anonymous and authenticated users can SELECT; INSERT/UPDATE/DELETE are denied. Candidate inputs and saved reports must use separately protected tables, without this public-read policy.
 
+## Map, facilities and current conditions
+
+All three RPCs use `POST /rest/v1/rpc/<name>` on the same base URL, headers `apikey: <SUPABASE_PUBLISHABLE_KEY>` and `Content-Type: application/json`. They are read-only even though PostgREST uses POST for arguments. No custom API server is required.
+
+| RPC | JSON body | Response and suggested cache |
+| --- | --- | --- |
+| `get_neighborhood_map` | `{}` | WGS84 GeoJSON FeatureCollection, 88 boundaries, approximately 209 kB uncompressed. Cache 24 hours; render/filter locally. |
+| `get_neighborhood_places` | `{ "p_neighborhood_id": 62, "p_category": null }` | GeoJSON points plus `sources` provenance. Required ID 1–88; optional category. Cache per ID/category for one hour. |
+| `get_current_context` | `{}` or `{ "p_neighborhood_id": 62 }` | `{ checked_at, neighborhood_id, feeds }`. Regional or intersecting-neighborhood weather/gauge context. Poll no more often than five minutes, only while needed/visible; recheck expiry before display. |
+
+```js
+const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/get_neighborhood_places`, {
+  method: 'POST',
+  headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+  body: JSON.stringify({ p_neighborhood_id: 62, p_category: 'parks' }),
+  signal: AbortSignal.timeout(15000)
+});
+if (!response.ok) throw new Error('Facility context unavailable');
+const places = await response.json();
+```
+
+Categories: `parks`, `libraries`, `community_centers`, `hospitals`, `health_facilities`, `multi_service_centers`, `museums`, `schools`. Join feature `properties.source_id` to the matching `sources` entry. Read `source_period`, `source_checked_at`, `note`, `geometry_repair_count` and `availability`. Only `reference_snapshot` is usable; `needs_rejoin` means the boundary changed and this source needs republishing. Missing sources are unavailable, not zero facilities. Schools use the 2024–25 inventory; other inventories have unknown observation dates. A recently checked source is not proof that a facility is open today. Category overlap means counts are source records, not unique physical sites.
+
+Geometry uses `[longitude, latitude]`. Facility points include `location_method`; park polygon representatives are not entrances. A park intersecting several neighborhoods belongs to each. The display map is simplified; backend membership uses full-precision PostGIS geometry. IDs consistently join back to `neighborhood_profiles`.
+
+The two current feeds are `nws_alerts` and `usgs_gauges`. Each includes `availability`, `source_checked_at`, `source_published_at`, `valid_until`, `record_count`, `payload`, `source_url`, `attribution` and `note` when available. An unavailable feed may have only its ID/status and null payload. Check both snapshot and feature `valid_until` every time data is displayed, including cached data. `stale` or `unavailable` is not zero alerts; `no_current_observations` is not evidence of low water or no flood risk. A fresh empty NWS feed means no active alerts were returned in the queried scope. Alerts without geometry remain regional context even when a neighborhood ID is supplied.
+
+USGS values use each station's datum; they are not comparable flood depths or parcel risk scores. The backend refreshes both providers every 15 minutes. Snapshot expiry is at most 30 minutes; gauge observations expire six hours after observation, alerts at their own expiry. Use the RPC, not raw `live_context` table reads, to enforce server-side expiry. These source cadences do not need Supabase Realtime subscriptions.
+
+Invalid IDs/categories return HTTP 400 with the standard error structure. Follow the same unavailable/retry behavior as profile reads. The refresh endpoint, staging and publishing functions are private ingestion operations; the frontend must not call them.
+
+See the working [Leaflet map demo and integration guide](map-integration.md), [current-feed operations](live-feeds.md), and [facility provenance](neighborhood-context.md).
+
 ## Neighborhood MCP
 
 Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API client. See [backend setup](../backend/README.md).
@@ -66,9 +99,11 @@ Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API c
 | --- | --- | --- |
 | `list_neighborhoods` | Optional `name` substring, positive `max_median_rent`, positive `max_median_home_value`, `limit` 1–88 (default 10) | `total_matches`, up to `limit` `neighborhoods`, `data_version`, interpretation guidance |
 | `get_neighborhood` | Required integer `neighborhood_id`, 1–88 | `neighborhood`, `data_version`, interpretation guidance |
+| `get_neighborhood_amenities` | Required `neighborhood_id` 1–88; optional `category`, `limit` 1–100 | Facility counts, bounded records and source provenance |
+| `get_current_conditions` | Optional `neighborhood_id` 1–88, `limit` 1–20 | Bounded current observations/alerts, availability, timestamps and interpretation notes |
 
-Results are ID-ordered, not scored. Failed reads return MCP `isError: true`; neither tool has write/SQL capabilities. Text and structured responses include source periods in returned records. Live testing launched the actual stdio process and queried Supabase.
+Results provide context, not recommendation scores. Failed reads return MCP `isError: true`; none of the tools has write/SQL capabilities. Text and structured responses include source context. Live testing launches the actual stdio process and queries Supabase. Reconnect the MCP after building to discover newly added tools.
 
 ## Still proposed
 
-Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, flood/crime/services layers and hosted HTTP MCP deployment are not implemented by this change. The reference layer is ready for frontend integration independently of those decisions.
+Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, effective floodplain and crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Current gauge/alert context is not a substitute for an effective floodplain or parcel-level assessment. The data layers are ready for frontend integration independently of those decisions.

@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>Houston neighborhoods · Map integration demo</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #102e37; background: #edf3f4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { display: grid; grid-template-columns: 350px 1fr; height: 100dvh; }
+    aside { background: #fff; padding: 30px 24px; border-right: 1px solid #d5e0e2; overflow: auto; }
+    h1 { font-size: 28px; line-height: 1.12; letter-spacing: -.7px; margin: 10px 0 12px; }
+    h2 { font-size: 19px; margin: 0 0 12px; }
+    p { font-size: 14px; line-height: 1.5; }
+    .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: #137e7a; }
+    label { display: block; font-size: 12px; font-weight: 650; margin: 16px 0 6px; }
+    input[type=url], input[type=password], select { width: 100%; padding: 11px; border: 1px solid #c1d0d3; border-radius: 6px; background: #fff; color: #102e37; }
+    button { width: 100%; padding: 12px; margin-top: 20px; border: 0; border-radius: 6px; background: #096c69; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+    button:disabled { opacity: .55; cursor: wait; }
+    .check { display: flex; align-items: center; gap: 8px; font-weight: 400; }
+    #status { min-height: 42px; font-size: 12px; color: #46636d; margin-top: 12px; }
+    #detail { margin-top: 24px; border-top: 1px solid #d5e0e2; padding-top: 24px; }
+    dl { display: grid; gap: 6px; margin: 0; }
+    dt { color: #627b83; font-size: 12px; } dd { margin: 0 0 12px; font-size: 22px; font-weight: 650; }
+    .small { font-size: 11px; color: #627b83; }
+    fieldset { border: 1px solid #d5e0e2; border-radius: 6px; margin: 18px 0 0; padding: 8px 12px; }
+    legend { font-size: 11px; font-weight: 700; color: #46636d; }
+    fieldset .check { margin-top: 6px; }
+    fieldset .small { margin: 6px 0 12px; }
+    .stage { position: relative; min-height: 0; }
+    #map { position: absolute; inset: 0; background: #e4edf0; }
+    .legend { position: absolute; z-index: 500; bottom: 38px; left: 16px; background: white; border: 1px solid #d5e0e2; border-radius: 6px; padding: 12px 16px; box-shadow: 0 3px 15px #133a4015; font-size: 11px; line-height: 1.9; pointer-events: none; }
+    .swatch { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin: 0 5px 0 12px; }
+    .swatch:first-of-type { margin-left: 0; }
+    a { color: #096c69; }
+    @media (max-width: 720px) { main { display: block; height: auto; } aside { padding: 20px; } .stage { height: 65vh; min-height: 420px; } }
+  </style>
+</head>
+<body>
+<main>
+  <aside>
+    <div class="eyebrow">Someone's Houston · Integration demo</div>
+    <h1>Find your place<br>in Houston.</h1>
+    <p>Explore all 88 Super Neighborhoods. Select an area to see the City's published housing estimates.</p>
+    <form id="connect">
+      <label for="url">Supabase project URL</label>
+      <input id="url" type="url" required value="https://hknzivrgihnqzvsafkkr.supabase.co" autocomplete="off" spellcheck="false">
+      <label for="key">Supabase publishable key</label>
+      <input id="key" type="password" required placeholder="sb_publishable_…" autocomplete="off" spellcheck="false">
+      <label class="check"><input id="basemap" type="checkbox" checked> Show OpenStreetMap street tiles</label>
+      <button id="load" type="submit">Load neighborhood map</button>
+    </form>
+    <p id="status" role="status" aria-live="polite">Enter the public project key. Credentials stay in this page's memory.</p>
+    <label for="neighborhood">Explore a neighborhood</label>
+    <select id="neighborhood" disabled><option value="">Choose an area on the map</option></select>
+    <fieldset>
+      <legend>Optional context layers</legend>
+      <label class="check"><input id="facilities" type="checkbox" disabled> Facilities in selected neighborhood</label>
+      <p class="small" id="facilities-status" role="status">Reference locations; counts do not describe quality or current opening hours.</p>
+      <label class="check"><input id="gauges" type="checkbox" disabled> Current regional water gauges</label>
+      <p class="small" id="gauges-status" role="status">USGS station heights, not flood depth or neighborhood risk.</p>
+    </fieldset>
+    <section id="detail" aria-live="polite"><h2>88 places. One city.</h2><p>Select a neighborhood to explore.</p></section>
+    <p class="small"><span id="period">Economic estimates: ACS 2020–2024.</span> They describe an area and are not current rental listings. Boundaries are for neighborhood context, not parcel-level decisions.</p>
+    <p class="small"><a href="https://www.houstontx.gov/planning/Demographics/" target="_blank" rel="noopener">City data</a> · <a href="https://www.openstreetmap.org/fixthemap" target="_blank" rel="noopener">Report a map issue</a></p>
+  </aside>
+  <section class="stage" aria-label="Interactive Houston neighborhood map">
+    <div id="map"></div>
+    <div class="legend"><strong>Estimated monthly gross rent</strong><br><span class="swatch" style="background:#168b88"></span>≤ $1,200 <span class="swatch" style="background:#377cca"></span>≤ $1,700 <span class="swatch" style="background:#8c62bb"></span>&gt; $1,700 <span class="swatch" style="background:#819095"></span>Unavailable<br><span class="swatch" style="background:#e79931"></span>Facilities <span class="swatch" style="background:#174c91"></span>USGS gauges (optional)</div>
+  </section>
+</main>
+<script>
+  const elements = Object.fromEntries(['url', 'key', 'basemap', 'connect', 'load', 'status', 'detail', 'neighborhood', 'period', 'facilities', 'facilities-status', 'gauges', 'gauges-status'].map(id => [id, document.getElementById(id)]));
+  const currency = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
+  const money = value => Number.isFinite(value) && value > 0 ? currency.format(value) : 'Unavailable';
+  const cache = new Map();
+  let map, polygons, tileLayer;
+  let profilesById = new Map(), layersById = new Map();
+  let connection, selectedNeighborhoodId, facilityLayer, gaugeLayer, facilitySequence = 0;
+  let gaugePollTimer, gaugeExpiryTimer, gaugeSequence = 0;
+  const facilityCache = new Map(), facilityInflight = new Map(), gaugeCache = new Map();
+  const HOUR = 3600000, GAUGE_INTERVAL = 300000;
+  // A provider can be replaced here without changing the database/API. Tiles never pass through Supabase.
+  const BASEMAP = { url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' };
+
+  function node(tag, text) { const result = document.createElement(tag); result.textContent = text; return result; }
+  function selectNeighborhood(id, move = false) {
+    const profile = profilesById.get(id), layer = layersById.get(id);
+    if (!profile || !layer) return;
+    elements.neighborhood.value = String(id);
+    selectedNeighborhoodId = id;
+    const details = document.createElement('dl');
+    for (const [label, value] of [['Monthly gross rent', profile.median_gross_rent], ['Median home value', profile.median_home_value]]) {
+      details.append(node('dt', label), node('dd', money(value)));
+    }
+    elements.detail.replaceChildren(node('h2', profile.name), details, node('p', `City of Houston estimates · ACS ${profile.source_period_start}–${profile.source_period_end}`));
+    if (move) { map.fitBounds(layer.getBounds(), { maxZoom: 13, padding: [30, 30] }); layer.openPopup(); }
+    void showFacilities();
+  }
+  function synchronizeTiles() {
+    if (!map) return;
+    if (elements.basemap.checked && !tileLayer) {
+      tileLayer = L.tileLayer(BASEMAP.url, { maxZoom: 19, attribution: BASEMAP.attribution }).addTo(map);
+    } else if (!elements.basemap.checked && tileLayer) { map.removeLayer(tileLayer); tileLayer = undefined; }
+  }
+  function render(collection, profiles) {
+    if (!globalThis.L) throw new Error('The map library could not load. Check the network and try again.');
+    profilesById = new Map(profiles.map(row => [row.neighborhood_id, row]));
+    const periods = [...new Set(profiles.map(row => `${row.source_period_start}–${row.source_period_end}`))];
+    elements.period.textContent = `Economic estimates: ACS ${periods.join(', ')}.`;
+    if (!map) { map = L.map('map', { preferCanvas: true }).setView([29.77, -95.38], 10); map.attributionControl.addAttribution('Boundaries: <a href="https://www.houstontx.gov/planning/Demographics/">City of Houston</a>'); }
+    if (polygons) map.removeLayer(polygons);
+    layersById = new Map();
+    polygons = L.geoJSON(collection, {
+      style: feature => {
+        const rent = profilesById.get(feature.properties.neighborhood_id).median_gross_rent;
+        return { color: '#294e62', weight: 1, fillOpacity: .35, fillColor: rent === null ? '#819095' : rent <= 1200 ? '#168b88' : rent <= 1700 ? '#377cca' : '#8c62bb' };
+      },
+      onEachFeature: (feature, layer) => {
+        const id = feature.properties.neighborhood_id, profile = profilesById.get(id);
+        const popup = document.createElement('div');
+        popup.append(node('strong', feature.properties.name), node('p', `${money(profile.median_gross_rent)} estimated monthly gross rent`), node('small', `City of Houston · ACS ${profile.source_period_start}–${profile.source_period_end}`));
+        layer.bindPopup(popup);
+        layer.on('click', () => selectNeighborhood(id));
+        layersById.set(id, layer);
+      },
+    }).addTo(map);
+    map.fitBounds(polygons.getBounds(), { padding: [20, 20] });
+    synchronizeTiles();
+    elements.neighborhood.replaceChildren(node('option', 'Choose an area on the map'));
+    elements.neighborhood.firstElementChild.value = '';
+    for (const profile of [...profiles].sort((a, b) => a.name.localeCompare(b.name))) { const option = node('option', profile.name); option.value = profile.neighborhood_id; elements.neighborhood.append(option); }
+    elements.neighborhood.disabled = false;
+    elements.facilities.disabled = false;
+    elements.gauges.disabled = false;
+    selectedNeighborhoodId = undefined;
+    clearFacilities();
+    elements['facilities-status'].textContent = 'Select a neighborhood to show reference facility locations.';
+    elements.detail.replaceChildren(node('h2', '88 places. One city.'), node('p', 'Select a neighborhood to explore.'));
+  }
+  async function jsonRequest(url, options) {
+    const response = await fetch(url, { ...options, signal: AbortSignal.timeout(20000) });
+    if (!response.ok) throw new Error(`Neighborhood data unavailable (HTTP ${response.status}). Check the URL/key and retry.`);
+    return response.json();
+  }
+  function rpc(name, body, requestConnection = connection) {
+    return jsonRequest(`${requestConnection.url}/rest/v1/rpc/${name}`, {
+      method: 'POST', headers: { apikey: requestConnection.key, 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+    });
+  }
+  function clearFacilities() {
+    facilitySequence++;
+    if (facilityLayer) { map.removeLayer(facilityLayer); facilityLayer = undefined; }
+  }
+  function validPoint(feature) {
+    const coordinates = feature.geometry?.coordinates;
+    return feature.geometry?.type === 'Point' && Array.isArray(coordinates) && coordinates.length === 2 &&
+      coordinates.every(Number.isFinite) && Math.abs(coordinates[0]) <= 180 && Math.abs(coordinates[1]) <= 90;
+  }
+  async function showFacilities() {
+    clearFacilities();
+    if (!elements.facilities.checked || !connection) { elements['facilities-status'].textContent = 'Reference locations; counts do not describe quality or current opening hours.'; return; }
+    if (!selectedNeighborhoodId) { elements['facilities-status'].textContent = 'Select a neighborhood first.'; return; }
+    const id = selectedNeighborhoodId, requestConnection = connection, sequence = facilitySequence;
+    const key = `${connection.cacheKey}|${id}`;
+    elements['facilities-status'].textContent = 'Loading reference facility locations…';
+    try {
+      let cached = facilityCache.get(key);
+      if (!cached || Date.now() - cached.loadedAt >= HOUR) {
+        if (!facilityInflight.has(key)) facilityInflight.set(key, rpc('get_neighborhood_places', { p_neighborhood_id: id, p_category: null }, requestConnection)
+          .then(data => {
+            if (data.type !== 'FeatureCollection' || !Array.isArray(data.features) || !Array.isArray(data.sources) || !data.sources.length) throw new Error('Facility inventory is not yet available; coverage is unknown.');
+            const result = { data, loadedAt: Date.now() };
+            if (data.sources.some(source => source.availability === 'reference_snapshot')) facilityCache.set(key, result);
+            return result;
+          })
+          .finally(() => facilityInflight.delete(key)));
+        cached = await facilityInflight.get(key);
+      }
+      if (sequence !== facilitySequence || !elements.facilities.checked || connection !== requestConnection) return;
+      const data = cached.data;
+      if (data.type !== 'FeatureCollection' || !Array.isArray(data.features) || !Array.isArray(data.sources)) throw new Error('Facility layer unavailable.');
+      const sources = new Map(data.sources.map(source => [source.source_id, source]));
+      const features = data.features.filter(feature => validPoint(feature) && sources.get(feature.properties?.source_id)?.availability === 'reference_snapshot');
+      const excludedSources = data.sources.filter(source => source.availability !== 'reference_snapshot').length;
+      if (excludedSources === data.sources.length) { elements['facilities-status'].textContent = 'Facility sources are unavailable or awaiting boundary matching. No old markers are shown.'; return; }
+      facilityLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
+        pointToLayer: (_feature, latlng) => L.circleMarker(latlng, { radius: 5, color: '#6f3b08', weight: 1, fillColor: '#e79931', fillOpacity: .9 }),
+        onEachFeature: (feature, layer) => {
+          const properties = feature.properties, source = sources.get(properties.source_id), popup = document.createElement('div');
+          popup.append(node('strong', properties.name), node('p', String(properties.category).replaceAll('_', ' ')));
+          if (properties.address) popup.append(node('p', properties.address));
+          popup.append(node('p', source.source_period ? `Source period: ${source.source_period}` : 'Source observation period unknown.'), node('small', source.note ?? 'Reference location; current opening hours and service availability are unknown.'));
+          if (source.attribution) popup.append(node('p', source.attribution));
+          if (properties.location_method) popup.append(node('small', ` Location: ${properties.location_method}.`));
+          layer.bindPopup(popup);
+        },
+      }).addTo(map);
+      const schoolPeriods = [...new Set(data.sources.filter(source => source.category === 'schools' && source.source_period).map(source => source.source_period))];
+      elements['facilities-status'].textContent = `${features.length} reference location markers. ${schoolPeriods.length ? `Schools: ${schoolPeriods.join(', ')}; ` : ''}Other source years may be unknown. Counts are not quality scores.${excludedSources ? ` ${excludedSources} source(s) unavailable or awaiting boundary matching are hidden.` : ''}`;
+    } catch (error) {
+      if (sequence === facilitySequence) elements['facilities-status'].textContent = error instanceof Error ? error.message : 'Facility layer unavailable.';
+    }
+  }
+  function clearGauges() {
+    if (gaugeLayer) { map.removeLayer(gaugeLayer); gaugeLayer = undefined; }
+    clearTimeout(gaugeExpiryTimer); gaugeExpiryTimer = undefined;
+  }
+  function stopGaugeUpdates() {
+    gaugeSequence++;
+    clearTimeout(gaugePollTimer); gaugePollTimer = undefined;
+    clearGauges();
+  }
+  function gaugeEnabled() { return Boolean(connection && elements.gauges.checked && document.visibilityState !== 'hidden'); }
+  function renderGauges(data) {
+    clearGauges();
+    if (!gaugeEnabled()) return;
+    const feed = Array.isArray(data?.feeds) ? data.feeds.find(item => item.source_id === 'usgs_gauges') : undefined;
+    const now = Date.now(), snapshotExpiry = Date.parse(feed?.valid_until ?? '');
+    if (feed?.availability !== 'current' || !Number.isFinite(snapshotExpiry) || snapshotExpiry <= now || feed.payload?.type !== 'FeatureCollection' || !Array.isArray(feed.payload.features)) {
+      elements['gauges-status'].textContent = `Current gauge observations unavailable${feed?.availability === 'stale' || snapshotExpiry <= now ? ' (snapshot expired)' : ''}. No old markers are shown.`;
+      return;
+    }
+    const features = feed.payload.features.filter(feature => {
+      const properties = feature.properties, observed = Date.parse(properties?.observed_at ?? ''), valid = Date.parse(properties?.valid_until ?? '');
+      return validPoint(feature) && Number.isFinite(properties?.value) && properties.unit_of_measure === 'ft' &&
+        Number.isFinite(observed) && observed <= now + 300000 && now - observed <= 21600000 && Number.isFinite(valid) && valid > now;
+    });
+    if (!features.length) { elements['gauges-status'].textContent = 'No current gauge observations are available. No old markers are shown.'; return; }
+    gaugeLayer = L.geoJSON({ type: 'FeatureCollection', features }, {
+      pointToLayer: (_feature, latlng) => L.circleMarker(latlng, { radius: 6, color: '#ffffff', weight: 2, fillColor: '#174c91', fillOpacity: .95 }),
+      onEachFeature: (feature, layer) => {
+        const properties = feature.properties, popup = document.createElement('div');
+        popup.append(node('strong', properties.monitoring_location_id), node('p', `${properties.value} ${properties.unit_of_measure} · gage height`), node('p', `Observed ${new Date(properties.observed_at).toLocaleString()} (${properties.approval_status})`), node('small', 'USGS. Height above this station’s local reference; not flood depth and not comparable across stations.'));
+        layer.bindPopup(popup);
+      },
+    }).addTo(map);
+    const checked = Date.parse(feed.source_checked_at);
+    elements['gauges-status'].textContent = `${features.length} regional USGS observations. ${Number.isFinite(checked) ? `Feed checked ${new Date(checked).toLocaleTimeString()}. ` : ''}Values are station heights, not neighborhood flood risk. Refreshes every five minutes while visible.`;
+    const nextExpiry = Math.min(snapshotExpiry, ...features.map(feature => Date.parse(feature.properties.valid_until)));
+    gaugeExpiryTimer = setTimeout(() => renderGauges(data), Math.max(1, nextExpiry - Date.now() + 5));
+  }
+  async function updateGauges() {
+    clearTimeout(gaugePollTimer); gaugePollTimer = undefined;
+    if (!gaugeEnabled()) return;
+    const sequence = ++gaugeSequence, requestConnection = connection;
+    let cached = gaugeCache.get(connection.cacheKey);
+    try {
+      if (!cached || Date.now() - cached.requestedAt >= GAUGE_INTERVAL) {
+        const requestedAt = Date.now();
+        // Cache attempts too: a failure or rapid toggle must not hammer the backend.
+        cached = { requestedAt, data: undefined }; gaugeCache.set(connection.cacheKey, cached);
+        const pending = cached;
+        pending.promise = rpc('get_current_context', {}, requestConnection)
+          .then(data => { pending.data = data; })
+          .finally(() => { pending.promise = undefined; });
+      }
+      if (cached.promise) await cached.promise;
+      if (sequence !== gaugeSequence || connection !== requestConnection || !gaugeEnabled()) return;
+      renderGauges(cached.data);
+    } catch (error) {
+      if (sequence !== gaugeSequence || connection !== requestConnection || !gaugeEnabled()) return;
+      clearGauges();
+      elements['gauges-status'].textContent = 'Current gauges could not refresh. No previous markers are shown; retrying in five minutes.';
+    } finally {
+      if (sequence === gaugeSequence && connection === requestConnection && gaugeEnabled()) {
+        gaugePollTimer = setTimeout(() => void updateGauges(), Math.max(1, GAUGE_INTERVAL - (Date.now() - (cached?.requestedAt ?? Date.now()))));
+      }
+    }
+  }
+  elements.connect.addEventListener('submit', async event => {
+    event.preventDefault(); elements.load.disabled = true; elements.status.textContent = 'Loading neighborhood boundaries and profiles…';
+    try {
+      const url = new URL(elements.url.value.trim()), key = elements.key.value.trim();
+      if (url.protocol !== 'https:' || url.pathname !== '/' || url.search || url.hash || url.username || url.password) throw new Error('Use the HTTPS Supabase project URL without a path.');
+      if (!key.startsWith('sb_publishable_')) throw new Error('Use a publishable key beginning sb_publishable_. Do not enter a secret/admin key.');
+      const cacheKey = url.origin + '|' + key;
+      let result = cache.get(cacheKey);
+      if (!result || Date.now() - result.loadedAt >= 86400000) {
+        const headers = { apikey: key, 'Content-Type': 'application/json' };
+        const [collection, profiles] = await Promise.all([
+          jsonRequest(`${url.origin}/rest/v1/rpc/get_neighborhood_map`, { method: 'POST', headers, body: '{}' }),
+          jsonRequest(`${url.origin}/rest/v1/neighborhood_profiles?select=neighborhood_id,name,median_gross_rent,median_home_value,source_period_start,source_period_end&order=neighborhood_id.asc&limit=89`, { headers }),
+        ]);
+        if (collection.type !== 'FeatureCollection' || !Array.isArray(collection.features) || collection.features.length !== 88 || !Array.isArray(profiles) || profiles.length !== 88) throw new Error('Incomplete neighborhood data; please retry after the import finishes.');
+        const profileLookup = new Map(profiles.map(row => [row.neighborhood_id, row]));
+        if (profileLookup.size !== 88 || new Set(collection.features.map(f => f.id)).size !== 88 || collection.features.some(f => f.id !== f.properties?.neighborhood_id || profileLookup.get(f.id)?.name !== f.properties?.name)) throw new Error('Map and profile versions do not agree; reload after the import finishes.');
+        result = { collection, profiles, loadedAt: Date.now() }; cache.set(cacheKey, result);
+      }
+      stopGaugeUpdates();
+      connection = { url: url.origin, key, cacheKey };
+      render(result.collection, result.profiles);
+      if (elements.gauges.checked) void updateGauges();
+      elements.status.textContent = '88 neighborhoods loaded. Map geometry and profiles cached for 24 hours; optional layers load on demand.';
+    } catch (error) { elements.status.textContent = error instanceof Error ? error.message : 'The map could not load.'; }
+    finally { elements.load.disabled = false; }
+  });
+  elements.basemap.addEventListener('change', synchronizeTiles);
+  elements.neighborhood.addEventListener('change', () => selectNeighborhood(Number(elements.neighborhood.value), true));
+  elements.facilities.addEventListener('change', () => void showFacilities());
+  elements.gauges.addEventListener('change', () => {
+    stopGaugeUpdates();
+    if (elements.gauges.checked) void updateGauges();
+    else elements['gauges-status'].textContent = 'USGS station heights, not flood depth or neighborhood risk.';
+  });
+  document.addEventListener('visibilitychange', () => {
+    stopGaugeUpdates();
+    if (gaugeEnabled()) void updateGauges();
+    else if (elements.gauges.checked) elements['gauges-status'].textContent = 'Gauge refresh paused while this page is hidden.';
+  });
+</script>
+</body>
+</html>

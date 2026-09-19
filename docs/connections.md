@@ -13,7 +13,8 @@ Start with [Phase 0 data notes](data-notes.md) for source checks. The earlier [n
 | Cloudflare Workers | Proposed MCP/API hosting | Deployment not configured by this setup |
 | Supabase project | Prepared reference data; future report storage | Existing `Someone-s-Houston`, `hknzivrgihnqzvsafkkr`, Free plan, `us-east-1` |
 | Supabase agent connection | Let each developer's agent inspect the project | Backend owner's connection verified; partner authenticates separately |
-| Supabase application connection | Public neighborhood reference reads | 88 profiles imported; REST and local MCP live tests passed |
+| Supabase application connection | Public neighborhood profiles, maps, facilities and current conditions | [Read-only RPC contract](api.md); four local MCP tools |
+| Supabase refresh job | NWS weather alerts and USGS gauges | Private Edge Function, Vault authentication, one central refresh every 15 minutes |
 
 ## Houston: ready to use
 
