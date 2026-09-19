@@ -2,6 +2,8 @@
 
 This setup prepares data discovery and agent access while the application build plan is being written. It does not select the app framework, create database tables, or define the product's endpoints.
 
+See [neighborhood data research](neighborhood-data-research.md) for the product-specific source shortlist, live API checks, and Supabase/MCP architecture proposal.
+
 ## Connection inventory
 
 | Connection | Purpose | Current state |
