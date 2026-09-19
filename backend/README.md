@@ -28,7 +28,7 @@ Copy `.env.example` to `.env`. Fill `SUPABASE_PUBLISHABLE_KEY` with this project
 npm run test:live
 ```
 
-This tests all 88 profiles and the context APIs through the real public API, checks that an anonymous insert is denied, and starts the actual four-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
+This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual five-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
 
 `supabase/tests/` contains SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. Run them in the project's SQL Editor after seeding; every mutation is rolled back. These are plain SQL, not pgTAP suites. Local Docker/database reset testing has not been run.
 
@@ -66,7 +66,7 @@ Current conditions use a separate deployed Edge Function and active database Cro
 
 ## Claude Code / Desktop
 
-The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all four tools and correct interpretation in the partner's actual session.
+The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all five tools and correct interpretation in the partner's actual session. The [category-evidence guide](../docs/category-evidence.md) covers the screenshot's priorities, housing/FEMA/grocery preparation and atomic publication of 704 evidence rows.
 
 Run `npm run build` before connecting. From the repository root, copy `.mcp.json.example` to the ignored `.mcp.json` and replace the local `SUPABASE_PUBLISHABLE_KEY` placeholder, or export that environment variable before launching Claude Code. The example already has this project's URL and reference. Claude Code runs the relative server path from the repository root. Use `/mcp` to inspect/connect it.
 
@@ -78,8 +78,9 @@ Example prompts:
 - "Find neighborhoods with estimated median gross rent under $1,600. Explain what these figures do and do not mean."
 - "Use get_neighborhood_amenities for Midtown (62), including the source dates."
 - "Use get_current_conditions for regional weather alerts and gauges; explain any unavailable or expired data."
+- "Use get_neighborhood_evidence for Midtown (62). Explain the eight priorities, source dates and missing inputs; preserve null route minutes and safety tier."
 
-The tools filter estimates and return source context; they do not rank families, calculate driving times, or produce relocation reports. They have no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities, and 60 seconds for current conditions; current-condition expiry is checked on every read. Restart/reconnect after building to discover all four tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
+The tools return estimates and source context; they do not rank families, calculate driving times, or produce relocation reports. They have no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all five tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
 
 The optional `supabase` entry is the separate **developer** MCP: project-scoped, read-only and OAuth-authenticated with each developer's own Supabase account. It is not needed to consume neighborhood data.
 

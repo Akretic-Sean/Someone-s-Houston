@@ -93,6 +93,18 @@ Invalid IDs/categories return HTTP 400 with the standard error structure. Follow
 
 See the working [Leaflet map demo and integration guide](map-integration.md), [current-feed operations](live-feeds.md), and [facility provenance](neighborhood-context.md).
 
+## Category evidence
+
+`GET /rest/v1/rpc/get_neighborhood_evidence?p_neighborhood_id=62` (or POST with `{"p_neighborhood_id":62}`) returns facts for the screenshot's eight priorities. Omit the ID for all 88 neighborhoods. Use the same publishable-key header; this is a public read with no upstream fetch or scoring invocation.
+
+Response: `{ profile_id, weight_total, evaluated_at, category_definitions, safety, neighborhoods, interpretation }`. Each neighborhood has its canonical ID/name, labeled reference point, and `categories` keyed exactly by `afford`, `commute`, `flood`, `amen`, `fit`, `food`, `air`, `health`. Each category contains `{ availability, facts, sources, missing_inputs, limitations, evidence_version, prepared_at, refresh_due_at, score, score_status }`.
+
+Only `partial` or `reference_snapshot` exposes usable facts. `unavailable` and `needs_refresh` return `facts:null`. Every score is null and `score_status:not_implemented`; safety is unweighted with no tier. Sources identify a URL, check time and observation period (null when unknown). IDs outside 1–88 return HTTP400. Failed reads must not substitute mock scores.
+
+Facts include `afford.median_gross_rent_monthly_usd`, `afford.median_home_value_usd`, `afford.housing_stock`; facility categories use `inventories.<facility_category>.record_count_in_neighborhood` and `nearest_to_reference_point` (up to 3 records). `food.inventories.grocery_stores` covers only the USDA SNAP subset. `commute.destinations` has five office proxies and `air.destinations` two airport proxies, with `straight_line_meters` and **null `drive_time_minutes`**. Flood facts contain coverage/edition metadata and exposure percentages only where validated. See [category evidence](category-evidence.md) for exact meanings.
+
+Cache at most one hour, recheck each `refresh_due_at` before rendering, and clear facts after that deadline. The RPC checks live source/boundary dependencies; use it instead of the raw evidence table. `createEvidenceClient` in `backend/src/evidence.ts` validates single-neighborhood reads, coalesces requests, clones cached values and rechecks expiry. Keep one client per process/app. No subscription or per-visitor ingestion is needed.
+
 ## Neighborhood MCP
 
 Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API client. See [backend setup](../backend/README.md).
@@ -103,14 +115,15 @@ Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API c
 | `get_neighborhood` | Required integer `neighborhood_id`, 1–88 | `neighborhood`, `data_version`, interpretation guidance |
 | `get_neighborhood_amenities` | Required `neighborhood_id` 1–88; optional `category`, `limit` 1–100 | Facility counts, bounded records and source provenance |
 | `get_current_conditions` | Optional `neighborhood_id` 1–88, `limit` 1–20 | Bounded current observations/alerts, availability, timestamps and interpretation notes |
+| `get_neighborhood_evidence` | Required `neighborhood_id` 1–88 | Facts, provenance and missing inputs for all eight priorities; null scores and unavailable safety tier |
 
 Results provide context, not recommendation scores. Failed reads return MCP `isError: true`; none of the tools has write/SQL capabilities. Text and structured responses include source context. Live testing launches the actual stdio process and queries Supabase. Reconnect the MCP after building to discover newly added tools.
 
 ## Report integration status
 
-Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, effective floodplain and crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Current gauge/alert context is not a substitute for an effective floodplain or parcel-level assessment. The data layers are ready for frontend integration independently of those decisions.
+Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Effective FEMA map evidence is available through the category endpoint, subject to coverage flags; gauges/alerts remain separate operational context. Neither establishes parcel-level risk. These data reads are ready for frontend integration independently of the scoring/report service.
 
-The user has supplied a new configurable [100-point starting matrix](matrix-readiness.md), recorded in `backend/data/reference/relocation-matrix.v1.json`. It uses different category IDs from the frontend mock's current `weights` shape below. It is configuration only; the report types, controls and scoring API still need a coordinated migration. Do not silently reinterpret the old keys or present the proposed matrix as an implemented score.
+The user's latest screenshot confirms the existing frontend weight IDs below. [The current evidence matrix](matrix-readiness.md) uses `backend/data/reference/report-priorities.v1.json`; the earlier 100-point draft is superseded. Raw defaults total 54 and produce the screenshot percentages after normalization/display rounding. The evidence API supports these categories, but weights are not an implemented scoring formula.
 
 ## Proposed report API
 

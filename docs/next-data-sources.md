@@ -1,8 +1,8 @@
 # Next data sources for Hou Match
 
-Checked 2026-09-19 after the map/context PR merged. These are recommendations, not imported data or implemented tools. Reuse the current Supabase project and add small tables; no new database instance is needed. Keep the existing annual profiles and amenities separate from current operational feeds.
+Checked 2026-09-19 after the map/context PR merged. Implemented additions are identified below; the remaining sources are research recommendations. Reuse the current Supabase project and bounded tables. Keep annual reference facts separate from current operational feeds.
 
-The user's newer [100-point matrix and readiness audit](matrix-readiness.md) refines these priorities: housing fit, commute and resilience carry 60 points and need the earliest scoring work. The sources below remain useful, but the new matrix is the starting profile for future scoring.
+The user's latest screenshot supersedes the earlier 100-point draft; see [current priorities](matrix-readiness.md). Housing detail, USDA grocery summaries, destination proxies and FEMA context have now been added through [category evidence](category-evidence.md). Actual cached routing, current dining coverage and candidate-specific affordability calculations are the immediate remaining gaps. The research below supplies additional options.
 
 ## Recommended next wave
 
@@ -10,11 +10,11 @@ The user's newer [100-point matrix and readiness audit](matrix-readiness.md) ref
 | --- | --- | --- | --- |
 | 1 | Census ACS city baselines: make Houston vs San Francisco/NYC affordability comparisons defensible | Three city rows; matching 2020–2024 five-year income/home-value/rent estimates and margins of error. Annual updates. | Official API requires a free key; unauthenticated sample returned HTML, not data. |
 | 2 | METRO static GTFS: nearby transit routes and scheduled service context | Houston-area stops/routes and precomputed service summaries. Process trips/stop-times outside Supabase; retain the summaries. Check weekly and on feed expiry. | Official no-key ZIP and current calendar metadata verified. Complete stop/route inventory and neighborhood joins still need validation. |
-| 3 | FEMA effective flood mapping: a real mapped-floodplain overlay | Houston coverage only; retain necessary polygons/provenance and precompute 88 neighborhood summaries. Check monthly and on revisions. | Current public API and Houston samples work. Panel dates, revisions and coverage must be reconciled before publishing percentages. |
+| 3 | FEMA effective flood mapping | Compact 88-neighborhood evidence summaries; raw polygons remain outside Supabase. | Implemented: 83 usable exposure summaries, five withheld for coverage/conflict. No full flood-polygon map overlay is hosted. |
 | 4 | HUD Small Area Fair Market Rents: bedroom-specific family rental benchmarks | Applicable Houston-area ZIPs, studio–four-bedroom amounts, fiscal year and effective dates. Annual updates plus revisions. | Public workbook route available without an API key; downloaded workbook contents/Houston coverage not yet validated. |
 | 5 | Official tax/payroll reference tables: support the report's take-home comparison | Small reviewed, versioned reference files; optionally mirror the selected edition in Supabase. Store only the report year's rules and explicit assumptions. | Federal 2026 publication verified; a complete consistent federal/state/local/payroll set and calculation engine remain unimplemented. |
 
-For fast implementation, start the three-row Census adapter while obtaining its free key, and prepare METRO next. Investigate FEMA provenance in parallel. HUD is valuable once the workbook is acquired/validated. None requires a decade-wide import. These priorities do not imply that the current frontend's scores or monetary examples are already backed by these sources.
+For the current screenshot, prioritize routing and dining gaps, then the comparison inputs. Census/METRO/HUD remain useful bounded additions. None requires a decade-wide import. The frontend's example scores and financial calculations are not made real merely by importing these sources.
 
 ## Exact sources and interpretation
 
