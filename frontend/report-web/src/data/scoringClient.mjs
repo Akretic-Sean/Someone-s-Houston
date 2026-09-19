@@ -55,7 +55,7 @@ export function createScoringClient({ url, key, fetchImpl = fetch, now = Date.no
     if (cache && now() < cache.expiresAt) return structuredClone(cache.payload);
     if (inFlight) return structuredClone(await inFlight);
     inFlight = (async () => {
-      const response = await fetchImpl(`${url.replace(/\/$/, '')}/rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`, {
+      const response = await fetchImpl(`${url.replace(/\/$/, '')}/rest/v1/rpc/get_neighborhood_access_scoring_data`, {
         method: 'POST',
         headers: { apikey: key, 'Content-Type': 'application/json' },
         body: '{}',
@@ -70,6 +70,7 @@ export function createScoringClient({ url, key, fetchImpl = fetch, now = Date.no
       const payload = await readBoundedJson(response);
       const at = now();
       validateBoundedScoringPayload(payload, at);
+      if (payload.base.model_version !== 'houston-access-v2') throw new Error('Nearby facility scoring is not available. Please retry.');
       cache = { payload, expiresAt: Math.min(at + CACHE_MS, nextScoringDeadline(payload, at) ?? Infinity) };
       return payload;
     })().catch(error => {

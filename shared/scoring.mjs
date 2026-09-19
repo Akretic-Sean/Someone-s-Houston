@@ -3,6 +3,8 @@
  * routing assumptions or candidate data are used here. See docs/scoring-matrix.md.
  */
 export const MODEL_VERSION = 'houston-proximity-v1';
+export const ACCESS_MODEL_VERSION = 'houston-access-v2';
+export const ACCESS_RADIUS_METERS = 3 * 1609.344;
 export const CATEGORY_IDS = Object.freeze(['afford', 'commute', 'flood', 'amen', 'fit', 'food', 'air', 'health']);
 export const DEFAULT_WEIGHTS = Object.freeze({ afford: 8, commute: 7, flood: 6, amen: 5, fit: 7, food: 8, air: 6, health: 7 });
 
@@ -48,7 +50,7 @@ function timestamp(value) {
 /** Validate the complete, versioned cohort. Does not mutate or trim the payload. */
 export function validateScoringPayload(payload) {
   const bad = message => requireValue(false, 'INVALID_PAYLOAD', message);
-  if (!object(payload) || payload.schema_version !== 1 || payload.model_version !== MODEL_VERSION) bad('Unsupported neighborhood scoring schema or model version.');
+  if (!object(payload) || payload.schema_version !== 1 || ![MODEL_VERSION, ACCESS_MODEL_VERSION].includes(payload.model_version)) bad('Unsupported neighborhood scoring schema or model version.');
   if (!Number.isFinite(timestamp(payload.evaluated_at))) bad('The scoring snapshot has an invalid evaluation timestamp.');
   if (!Array.isArray(payload.category_definitions) || payload.category_definitions.length !== CATEGORY_IDS.length) bad('The scoring snapshot must define all eight categories.');
   const categoryIds = new Set();
@@ -73,6 +75,14 @@ export function validateScoringPayload(payload) {
       if (!(absent && category.evidence_version === null) && !validText(category.evidence_version, 128)) bad(`Neighborhood ${row.neighborhood_id} has an invalid ${id} evidence version.`);
       if (category.evidence_version !== null) versions.add(category.evidence_version);
       if (!object(category.metrics) || Object.keys(category.metrics).length !== METRICS[id].length) bad(`Neighborhood ${row.neighborhood_id} has invalid ${id} metrics.`);
+      if (payload.model_version === ACCESS_MODEL_VERSION && ['amen', 'health'].includes(id)) {
+        const access = category.nearby_access;
+        if (!object(access) || access.radius_meters !== ACCESS_RADIUS_METERS || !object(access.facilities) || Object.keys(access.facilities).length !== METRICS[id].length) bad(`Neighborhood ${row.neighborhood_id} has invalid nearby access metadata.`);
+        for (const key of METRICS[id]) {
+          const item = access.facilities[key];
+          if (!own(access.facilities, key) || !(item === null || (object(item) && Number.isInteger(item.count) && item.count >= 0 && item.count <= 5000 && Number.isFinite(item.weighted_count) && item.weighted_count >= 0 && item.weighted_count <= item.count))) bad(`Neighborhood ${row.neighborhood_id} has invalid nearby ${key} counts.`);
+        }
+      }
       for (const key of METRICS[id]) {
         const value = category.metrics[key];
         if (!own(category.metrics, key) || !(value === null || (Number.isFinite(value) && value >= 0 && (id !== 'flood' || value <= 100)))) bad(`Neighborhood ${row.neighborhood_id} has an invalid ${id}.${key} measurement.`);
@@ -101,7 +111,16 @@ function selectedMetrics(id, metrics, options) {
   return { ...metrics };
 }
 
-function measurement(id, options) {
+function rankingMetrics(id, category, options, version) {
+  if (version === ACCESS_MODEL_VERSION && ['amen', 'health'].includes(id)) {
+    // Negate so the existing lower-is-better percentile favors more nearby access.
+    return Object.fromEntries(METRICS[id].map(key => [key, category.nearby_access.facilities[key] === null ? null : -category.nearby_access.facilities[key].weighted_count]));
+  }
+  return selectedMetrics(id, category.metrics, options);
+}
+
+function measurement(id, options, version) {
+  if (version === ACCESS_MODEL_VERSION && ['amen', 'health'].includes(id)) return `Distance-weighted facility counts within 3 miles of the neighborhood reference point, including across boundaries; closer and more numerous options are favored, with equal weight per facility type${id === 'health' ? '; not insurance, clinical quality or appointment availability' : ''}`;
   return {
     afford: options.tenure === 'rent' ? 'ACS 2020–2024 estimated median monthly gross rent; lower is favored, without a personal budget calculation' : 'ACS 2020–2024 estimated median home value; lower is favored, without a mortgage or ownership-cost calculation',
     commute: `Straight-line proximity to the selected ${options.office} office-hub proxy; not travel time`,
@@ -157,7 +176,7 @@ export function scoreNeighborhoods(input, options, now = Date.now()) {
       currentCategories++;
       // A missing sibling component does not remove this valid component from
       // its reference cohort. Cohorts do not depend on other weights or totals.
-      for (const [key, value] of Object.entries(selectedMetrics(id, category.metrics, options))) {
+      for (const [key, value] of Object.entries(rankingMetrics(id, category, options, payload.model_version))) {
         cohort[id][key] ??= [];
         if (value !== null) cohort[id][key].push(value);
       }
@@ -169,15 +188,17 @@ export function scoreNeighborhoods(input, options, now = Date.now()) {
     for (const id of CATEGORY_IDS) {
       const source = row.categories[id];
       const selected = selectedMetrics(id, source.metrics, options);
-      const reason = unavailableReason(source, selected, now);
-      const scores = reason === null ? Object.entries(selected).map(([key, value]) => percentile(value, cohort[id][key])) : [];
+      const ranking = rankingMetrics(id, source, options, payload.model_version);
+      const reason = unavailableReason(source, ranking, now);
+      const scores = reason === null ? Object.entries(ranking).map(([key, value]) => percentile(value, cohort[id][key])) : [];
       const score = scores.length ? scores.reduce((sum, value) => sum + value, 0) / scores.length : null;
       categories[id] = {
         score, weight: effectiveWeights[id], normalizedWeight: normalizedWeights[id],
         contribution: score === null ? null : score * normalizedWeights[id],
         // Do not return stale facts even when the caller retains the snapshot.
         metrics: USABLE.has(source.availability) && timestamp(source.refresh_due_at) > now ? selected : Object.fromEntries(Object.keys(selected).map(key => [key, null])),
-        reason, label: labels[id], measurement: measurement(id, options),
+        nearbyAccess: payload.model_version === ACCESS_MODEL_VERSION && ['amen', 'health'].includes(id) && USABLE.has(source.availability) && timestamp(source.refresh_due_at) > now ? structuredClone(source.nearby_access) : null,
+        reason, label: labels[id], measurement: measurement(id, options, payload.model_version),
       };
     }
     const missingCategories = CATEGORY_IDS.filter(id => effectiveWeights[id] > 0 && categories[id].score === null);
@@ -195,7 +216,7 @@ export function scoreNeighborhoods(input, options, now = Date.now()) {
   const ranked = results.filter(row => row.totalScore !== null).sort((a, b) => b.totalScore - a.totalScore || a.neighborhoodId - b.neighborhoodId);
   ranked.forEach((row, index) => { row.rank = index + 1; });
   return {
-    modelVersion: MODEL_VERSION, evaluatedAt: new Date(now).toISOString(),
+    modelVersion: payload.model_version, evaluatedAt: new Date(now).toISOString(),
     effectiveWeights, normalizedWeights, ranked,
     unranked: results.filter(row => row.totalScore === null), results,
   };

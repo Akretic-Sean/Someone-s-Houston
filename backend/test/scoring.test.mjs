@@ -238,3 +238,61 @@ test('the weighted total is the unrounded category sum, not rounded slider perce
   }
   assert.ok(result.ranked.some(row => row.totalScore !== Math.round(row.totalScore)));
 });
+
+function accessFixture() {
+  const payload = fixture();
+  payload.model_version = 'houston-access-v2';
+  for (const row of payload.neighborhoods) for (const id of ['amen', 'health']) {
+    row.categories[id].nearby_access = { radius_meters: 4828.032,
+      facilities: Object.fromEntries(Object.keys(row.categories[id].metrics).map(key => [key, { count: 1, weighted_count: 0.5 }])) };
+  }
+  return payload;
+}
+
+test('nearby access favors both more options and closer options, independently of boundary counts and nearest distance', () => {
+  for (const id of ['amen', 'health']) {
+    const payload = accessFixture();
+    const a = payload.neighborhoods[0].categories[id];
+    const b = payload.neighborhoods[1].categories[id];
+    // Same nearest distances, but two facilities one mile away vs one.
+    b.metrics = { ...a.metrics };
+    for (const key of Object.keys(a.metrics)) {
+      a.nearby_access.facilities[key] = { count: 1, weighted_count: 2 / 3 };
+      b.nearby_access.facilities[key] = { count: 2, weighted_count: 4 / 3 };
+    }
+    const result = scoreNeighborhoods(payload, options({ weights: only(id) }), NOW);
+    assert.ok(result.results[1].totalScore > result.results[0].totalScore);
+    // Equal counts: moving the second area's facility from one to two miles loses credit.
+    for (const key of Object.keys(b.metrics)) b.nearby_access.facilities[key] = { count: 1, weighted_count: 1 / 3 };
+    const moved = scoreNeighborhoods(payload, options({ weights: only(id) }), NOW);
+    assert.ok(moved.results[0].totalScore > moved.results[1].totalScore);
+    assert.equal(moved.modelVersion, 'houston-access-v2');
+  }
+});
+
+test('nearby zero is observed; missing or expired access is withheld and never replaced by nearest-only scoring', () => {
+  const payload = accessFixture();
+  const a = payload.neighborhoods[0].categories.amen;
+  for (const key of Object.keys(a.metrics)) { a.nearby_access.facilities[key] = { count: 0, weighted_count: 0 }; a.metrics[key] = null; }
+  assert.equal(scoreNeighborhoods(payload, options({ weights: only('amen') }), NOW).results[0].totalScore, 0);
+  a.nearby_access.facilities.libraries = null;
+  assert.equal(scoreNeighborhoods(payload, options({ weights: only('amen') }), NOW).results[0].totalScore, null);
+  a.refresh_due_at = '2026-09-18T20:00:00Z';
+  assert.equal(scoreNeighborhoods(payload, options(), NOW).results[0].categories.amen.nearbyAccess, null);
+});
+
+test('rejects malformed nearby access and preserves input immutability', () => {
+  const payload = accessFixture(), before = structuredClone(payload);
+  scoreNeighborhoods(payload, options(), NOW);
+  assert.deepEqual(payload, before);
+  for (const mutate of [
+    a => { a.radius_meters = 1609.344; },
+    a => { delete a.facilities.libraries; },
+    a => { a.facilities.libraries = { count: 0, weighted_count: 1 }; },
+    a => { a.facilities.libraries = { count: 1.5, weighted_count: 1 }; },
+    a => { a.facilities.libraries = { count: 2, weighted_count: NaN }; },
+  ]) {
+    const copy = structuredClone(payload); mutate(copy.neighborhoods[0].categories.amen.nearby_access);
+    assert.throws(() => scoreNeighborhoods(copy, options(), NOW), ScoringValidationError);
+  }
+});

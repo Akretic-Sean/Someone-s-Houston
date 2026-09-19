@@ -115,11 +115,20 @@ then reviewed and edited. The controls below the notes determine the ranking.
 
 **Generate report** loads evidence and computes the ranking on the server before
 
-requesting an AI explanation. **Continue with factual report** uses the same
+requesting an AI explanation. This is the only report-generation action. If the
 
-source-bounded scoring model without a paid model call. Preview and both report
-paths retain the complete estimates envelope; affected areas show source ranges
-and conservative-input badges. Original missing facts stay null. Both paths preserve missing-data rules.
+server returns a degraded narrative, the ranked report and evidence still render.
+
+Quota errors ask the user to retry later. Preview and generated reports retain the
+complete estimates envelope; affected areas show source ranges and conservative-input
+badges. Original missing facts stay null.
+
+Amenities and healthcare display full inventory counts within 3 miles of the neighborhood
+reference point, including outside its boundary. Closer and more numerous facilities
+improve access through distance-weighted counts. The server and browser use
+`houston-access-v2`; deploy the nearby-access migration and report-flow function before
+the frontend. See [the scoring policy](../docs/scoring-matrix.md).
+
 
 See [the release checklist](../docs/hackathon-release.md) for backend deployment,
 

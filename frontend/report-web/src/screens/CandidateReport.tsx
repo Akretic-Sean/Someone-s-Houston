@@ -39,6 +39,8 @@ function ScoreBreakdown({ neighborhood }: { neighborhood: BoundedNeighborhood })
         <div className="source">{category.measurement}</div>
         <div className="score-measurements">{Object.entries(category.metrics).map(([key, value]) =>
           <span key={key}>{neighborhood.estimateInputsUsed.some(input => input.metric === key) ? 'Conservative ranking input' : METRIC_LABELS[key] ?? key}: {measurementValue(id, key, value)}</span>)}</div>
+        {category.nearbyAccess && <div className="score-measurements">{Object.entries(category.nearbyAccess.facilities).map(([key, access]) =>
+          <span key={key}>{METRIC_LABELS[key] ?? key}: {access ? `${access.count} within 3 miles � ${access.weighted_count.toFixed(2)} distance-weighted count` : 'Nearby inventory unavailable'}</span>)}</div>}
         {category.reason && <div className="source">{category.reason}</div>}
       </th>
         <td>{Math.round(category.normalizedWeight * 100)}%</td>
@@ -178,12 +180,12 @@ export default function CandidateReport({ config, result, payload, narrative, no
             {evidence.loading ? <Card><p role="status"><span className="spinner" /> Loading source evidence…</p></Card>
               : evidence.error ? <Card><p role="alert">Source details could not be read: {evidence.error.message}</p><button className="btn" onClick={evidence.retry}>Retry evidence</button></Card>
               : evidenceVersionMismatch ? <Card><p role="alert">The detailed evidence and ranking use different data versions. Details are withheld until both are refreshed.</p><button type="button" className="btn" onClick={refreshReportEvidence}>Refresh ranking and evidence</button></Card>
-              : views.length > 0 ? <EvidenceCards views={views} officeId={config.office} airportId={config.airport} weights={result.effectiveWeights} /> : null}
+              : views.length > 0 ? <EvidenceCards views={views} officeId={config.office} airportId={config.airport} weights={result.effectiveWeights} scoredCategories={active?.categories} /> : null}
           </section>
           <section>
             <h2 className="section-title">How to read this report</h2>
             <Card><ul className="scoring-method">
-              <li>Each measurement becomes a lower-is-better percentile across the neighborhoods with that measurement available. Ties share a score. Multi-facility categories average the same fixed facility measurements for every neighborhood.</li>
+              <li>Amenities and healthcare count facilities within 3 miles of each neighborhood reference point. Each contributes 1 minus its distance divided by 3 miles: closer facilities and more nearby options increase access. Distance-weighted counts become higher-is-better percentiles, averaged equally across facility types. Other measurements favor lower values. Ties share a score.</li>
               <li>The total is the sum of category scores multiplied by your normalized weights. Only display values are rounded. Equal totals use the City neighborhood ID as a stable tie-break.</li>
               <li>When an exact observation is unavailable, a labeled upper bound from an approved official source may supply a conservative ranking input. Bounds and original missing facts remain separate.</li>
               <li>Affordability uses ACS 2020–2024 estimates. It does not account for your income, mortgage, taxes, insurance or current listings.</li>

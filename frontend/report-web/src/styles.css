@@ -1742,9 +1742,7 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
 .profile-review { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 16px; margin-top: 16px; }
 .profile-review input { width: 100%; }
 .profile-review .source { font-weight: normal; overflow-wrap: anywhere; }
-.factual-report { margin: 12px 0 0 12px; }
 .ai-narrative { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
-@media (max-width: 600px) { .factual-report { margin-left: 0; display: block; } }
 
 /* Account mode is explicit without changing the existing colors or typography. */
 .login-brand { font-family: var(--serif); font-size: 22px; margin: 6px 0 20px; }

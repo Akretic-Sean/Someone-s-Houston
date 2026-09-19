@@ -4,7 +4,7 @@ import { Card, Segmented } from '../components/Bits';
 import { DEFAULT_WEIGHTS, OFFICES, WEIGHT_DEFS } from '../data/offices';
 import PreferenceNotes from '../components/PreferenceNotes';
 
-export default function CreateReport({ config, onChange, result, loading, generating, extracting, onExtracting, error, onRetry, onGenerate, onFactual }: {
+export default function CreateReport({ config, onChange, result, loading, generating, extracting, onExtracting, error, onRetry, onGenerate }: {
   config: ReportConfig;
   onChange: (next: ReportConfig) => void;
   result: BoundedScoringResult | null;
@@ -15,7 +15,6 @@ export default function CreateReport({ config, onChange, result, loading, genera
   error: string | null;
   onRetry: () => void;
   onGenerate: () => Promise<void>;
-  onFactual: () => Promise<void>;
 }) {
   const weights = { ...config.weights, commute: config.mode === 'remote' ? 0 : config.weights.commute };
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -85,7 +84,6 @@ export default function CreateReport({ config, onChange, result, loading, genera
       <button type="button" className="btn btn-primary" disabled={generating || extracting || loading || totalWeight === 0 || !result?.ranked.length || Boolean(error)} onClick={() => { void onGenerate(); }}>
         {generating ? 'Generating your report…' : 'Generate report'}
       </button>
-      <button type="button" className="btn factual-report" disabled={generating || extracting || loading || totalWeight === 0 || !result?.ranked.length} onClick={() => { void onFactual(); }}>Continue with factual report</button>
       <p className="source" style={{ marginTop: 14 }}>Priorities, housing mode, workplace hub and airport choice determine this ranking. Reports stay in this browser session; no candidate record is saved.</p>
     </div></main>
   );

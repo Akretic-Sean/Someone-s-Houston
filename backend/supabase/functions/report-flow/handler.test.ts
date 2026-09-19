@@ -1,3 +1,4 @@
+import type { ScoringPayload } from "../../../../shared/scoring.d.mts";
 import { createHandler, type Dependencies } from "./handler.ts";
 import { formOnly, NarrationInput } from "../_shared/report-models/mod.ts";
 // @deno-types="../../../../shared/scoring.d.mts"
@@ -339,4 +340,28 @@ Deno.test("invalid bounded data fails before quota/model; expiry during narratio
     (await expired.send({ ...generate, scoringPolicy: "source-bounded-v1" }))
       .status === 409,
   );
+});
+Deno.test("nearby policy keeps browser/server parity and rejects a legacy response before quota", async () => {
+  const envelope = boundedFixture();
+  const base = envelope.base as unknown as ScoringPayload;
+  base.model_version = "houston-access-v2";
+  for (const row of base.neighborhoods) for (const id of ["amen", "health"] as const) {
+    row.categories[id].nearby_access = { radius_meters: 4828.032, facilities: Object.fromEntries(
+      Object.keys(row.categories[id].metrics).map(key => [key, { count: 3, weighted_count: 3 / row.neighborhood_id }]),
+    ) };
+  }
+  let nearbyRead = false;
+  const { send } = setup({ loadScoring: async (_token, bounded, nearby) => {
+    assert(bounded); nearbyRead = nearby === true; return envelope;
+  } });
+  const response = await send({ ...generate, scoringPolicy: "source-bounded-v1", facilityPolicy: "nearby-3mi-v1" });
+  assert(response.status === 200 && nearbyRead);
+  const body = await response.json();
+  const browser = scoreNeighborhoodsWithEstimates(body.payload, generate.options as ScoringOptions, time);
+  assert(browser.modelVersion === "houston-access-v2" && browser.ranked.length === 88);
+  assert(body.narrative.text.includes(browser.ranked[0].name));
+  assert(browser.results[0].categories.amen.nearbyAccess?.facilities.libraries?.count === 3);
+  const old = setup({ loadScoring: async () => boundedFixture() });
+  assert((await old.send({ ...generate, scoringPolicy: "source-bounded-v1", facilityPolicy: "nearby-3mi-v1" })).status === 503);
+  assert(old.calls.model === 0 && old.calls.reserved === 0);
 });

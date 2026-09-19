@@ -13,7 +13,13 @@ export interface MetricFields {
   air: { iah: number | null; hou: number | null };
   health: { hospitals: number | null; health_facilities: number | null; multi_service_centers: number | null };
 }
+export interface NearbyAccess {
+  radius_meters: number;
+  facilities: Record<string, { count: number; weighted_count: number } | null>;
+}
+export type ModelVersion = 'houston-proximity-v1' | 'houston-access-v2';
 export interface ScoringCategory<T> {
+  nearby_access?: NearbyAccess;
   availability: Availability;
   refresh_due_at: string | null;
   evidence_version: string | null;
@@ -28,7 +34,7 @@ export interface ScoringNeighborhood {
 }
 export interface ScoringPayload {
   schema_version: 1;
-  model_version: 'houston-proximity-v1';
+  model_version: ModelVersion;
   evaluated_at: string;
   category_definitions: Array<{ id: CategoryId; label: string; default_weight: number }>;
   neighborhoods: ScoringNeighborhood[];
@@ -41,6 +47,7 @@ export interface ScoringOptions {
   airport: AirportSelection;
 }
 export interface ScoredCategory {
+  nearbyAccess: NearbyAccess | null;
   score: number | null;
   weight: number;
   normalizedWeight: number;
@@ -61,7 +68,7 @@ export interface ScoredNeighborhood {
   explanations: string[];
 }
 export interface ScoringResult {
-  modelVersion: 'houston-proximity-v1';
+  modelVersion: ModelVersion;
   evaluatedAt: string;
   effectiveWeights: Weights;
   normalizedWeights: Weights;
@@ -69,6 +76,8 @@ export interface ScoringResult {
   unranked: ScoredNeighborhood[];
   results: ScoredNeighborhood[];
 }
+export const ACCESS_MODEL_VERSION: 'houston-access-v2';
+export const ACCESS_RADIUS_METERS: number;
 export const MODEL_VERSION: 'houston-proximity-v1';
 export const CATEGORY_IDS: readonly CategoryId[];
 export const DEFAULT_WEIGHTS: Readonly<Weights>;

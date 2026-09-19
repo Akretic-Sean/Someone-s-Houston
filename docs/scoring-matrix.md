@@ -1,5 +1,50 @@
 # Neighborhood comparison model
 
+## Current report: nearby access model
+
+`houston-access-v2` extends the legacy model below for **amenities and healthcare only**.
+The report loads `get_neighborhood_access_scoring_data()` and uses the same shared
+`scoreNeighborhoodsWithEstimates`/`scoreNeighborhoods` implementation in the browser
+and authenticated report Edge Function. The response keeps the source-bounded envelope,
+original nearest-distance metrics, and approved rent/flood bounds.
+
+For each facility type, use **all imported records within 3 miles (4828.032 m)** of
+that neighborhood's reference point, including across boundaries. The database returns
+`nearby_access: { radius_meters, facilities: { libraries: { count, weighted_count }, ... } }`
+on `amen` and `health`. A facility at distance `d` contributes `max(0, 1 - d / 4828.032)`.
+Sum these contributions per type. A facility 1 mile away contributes 2/3; one 2 miles
+away contributes 1/3. A record exactly 3 miles away is counted but contributes zero.
+More nearby options and shorter distances improve this measurement. Convert each
+weighted count to a **higher-is-better cohort percentile**, then average the fixed
+facility types equally. All other categories and priority weights remain unchanged.
+This is an explicit product comparison policy, not a clinically validated access index.
+
+Counts are source records, not unique physical sites across categories. Imported Houston
+coverage is limited; missing facilities outside the inventory are not inferred. The
+radius is from a representative neighborhood point, not the neighborhood boundary or a
+user's address. These are spherical straight-line distances, not walking or driving times,
+insurance acceptance, opening hours, appointment availability, or quality.
+
+A verified complete inventory with no nearby records returns zero. Missing, incomplete,
+expired or mismatched source inventories return null and withhold the category. The
+reader inherits evidence/source/boundary gates and checks source publication counts.
+The report displays 3-mile counts in amenities/healthcare evidence cards and keeps
+nearest records as context. The top-three detail list is never used as a count proxy.
+
+Rollout is additive: the two legacy scoring RPCs keep `houston-proximity-v1`. Deploy the
+new migration and updated `report-flow` before the frontend. New requests send
+`scoringPolicy: "source-bounded-v1", facilityPolicy: "nearby-3mi-v1"`; the Edge Function
+checks the requested model before consuming quota. Old requests still use the old model.
+No stale cache or legacy payload is silently relabeled as the new model.
+
+Run the public live check with `node backend/tools/check-nearby-access.mjs /path/to/ignored/frontend.env` (or omit the path to use frontend env configuration).
+
+Validation: backend scoring tests cover closer/more facilities and unknown/zero/expired
+inputs; `backend/test/nearby-access.sql` checks real inventory, anonymous read access,
+legacy compatibility, incomplete inventories and expiry in a rolled-back transaction.
+
+## Legacy proximity model (unchanged for existing clients)
+
 `houston-proximity-v1` is a deterministic, provisional comparison of Houston's 88 Super Neighborhoods. The browser and Node use the same dependency-free implementation in [`shared/scoring.mjs`](../shared/scoring.mjs); [`shared/scoring.d.mts`](../shared/scoring.d.mts) defines its input and output types. It ranks public reference measurements using the user's explicit preferences. It does not assess a person, predict outcomes or generate facts with an LLM.
 
 ## Data and calculation
