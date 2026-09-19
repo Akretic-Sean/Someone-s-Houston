@@ -1,0 +1,21 @@
+{
+  "profile_id": "report-priorities-v1",
+  "recorded_on": "2026-09-19",
+  "source": "User-confirmed frontend screenshot and frontend/report-web/src/data/offices.ts",
+  "supersedes": "relocation-balanced-v1",
+  "status": "evidence_contract_scoring_not_implemented",
+  "weight_total": 54,
+  "normalization": "raw_weight / sum(all eight raw weights); round only for display",
+  "user_adjustable": true,
+  "safety": { "weighted": false, "tier": null, "status": "unavailable", "reason": "No validated safety dataset or tier methodology is implemented." },
+  "categories": [
+    { "id": "afford", "label": "Affordability", "default_weight": 8 },
+    { "id": "commute", "label": "Commute", "default_weight": 7 },
+    { "id": "flood", "label": "Flood context", "default_weight": 6 },
+    { "id": "amen", "label": "Local amenities", "default_weight": 5 },
+    { "id": "fit", "label": "Fitness and recreation", "default_weight": 7 },
+    { "id": "food", "label": "Dining and grocery access", "default_weight": 8 },
+    { "id": "air", "label": "Airport access", "default_weight": 6 },
+    { "id": "health", "label": "Healthcare access", "default_weight": 7 }
+  ]
+}

@@ -1,5 +1,11 @@
 # Claude project instructions
 
-Read and follow [AGENTS.md](AGENTS.md) for the shared project agreements.
+@AGENTS.md
 
-Oleggo1 owns the frontend in `frontend/`. Read `docs/api.md` when building API calls, and coordinate contract changes with the backend owner. Keep this file as a pointer so the two agents share one set of working agreements.
+@docs/data-instructions.md
+
+These imports keep Claude and the backend agent on shared project agreements and data rules.
+
+When asked to connect any frontend feature to the backend, start with `docs/frontend-backend-handoff.md`. It contains the setup, API-to-UI mapping, current frontend integration points, copy-paste task and acceptance checks. Reuse existing frontend/auth work and follow its explicit missing-data rules.
+
+For optional agent MCP setup and interpretation checks, read `docs/claude-data-guide.md`.

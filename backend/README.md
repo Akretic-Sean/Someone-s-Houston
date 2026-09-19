@@ -1,5 +1,7 @@
 # Hou Match backend
 
+Frontend teammates: use [the frontend/backend handoff](../docs/frontend-backend-handoff.md) for a ready-to-use agent prompt, environment setup, field mappings and connection checks. From the repository root, `npm --prefix backend run test:frontend` verifies the existing frontend configuration against the public data endpoints; it does not modify the database.
+
 Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase provides the hosted database and REST API; the neighborhood MCP runs locally over stdio. Cloudflare hosting, report generation and scoring are still proposed.
 
 ## Ready now
@@ -9,7 +11,8 @@ Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase 
 - `public.neighborhood_profiles`: 88 validated City records, public read-only, with source periods and missing-value flags.
 - 88 PostGIS boundaries plus eight facility sources, joined once during import. Three read-only RPCs serve the map, neighborhood facilities and current conditions.
 - NWS alerts and USGS water gauges refresh centrally every 15 minutes; expired data is withheld from current-condition reads.
-- Shared cached clients: `src/neighborhoods.ts` and `src/context.ts`. Four read-only Claude tools in `src/mcp.ts`.
+- Eight report-priority categories and 704 precomputed evidence records, exposed through `get_neighborhood_evidence`.
+- Shared cached clients: `src/neighborhoods.ts`, `src/context.ts` and `src/evidence.ts`. Five read-only Claude tools in `src/mcp.ts`.
 - [Frontend/API contract](../docs/api.md), [facility provenance](../docs/neighborhood-context.md), [map integration/demo](../docs/map-integration.md), [live-feed operations](../docs/live-feeds.md).
 
 ## Install and test
@@ -28,7 +31,7 @@ Copy `.env.example` to `.env`. Fill `SUPABASE_PUBLISHABLE_KEY` with this project
 npm run test:live
 ```
 
-This tests all 88 profiles and the context APIs through the real public API, checks that an anonymous insert is denied, and starts the actual four-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
+This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual five-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
 
 `supabase/tests/` contains SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. Run them in the project's SQL Editor after seeding; every mutation is rolled back. These are plain SQL, not pgTAP suites. Local Docker/database reset testing has not been run.
 
@@ -66,6 +69,8 @@ Current conditions use a separate deployed Edge Function and active database Cro
 
 ## Claude Code / Desktop
 
+The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all five tools and correct interpretation in the partner's actual session. The [category-evidence guide](../docs/category-evidence.md) covers the screenshot's priorities, housing/FEMA/grocery preparation and atomic publication of 704 evidence rows.
+
 Run `npm run build` before connecting. From the repository root, copy `.mcp.json.example` to the ignored `.mcp.json` and replace the local `SUPABASE_PUBLISHABLE_KEY` placeholder, or export that environment variable before launching Claude Code. The example already has this project's URL and reference. Claude Code runs the relative server path from the repository root. Use `/mcp` to inspect/connect it.
 
 For Claude Desktop, add only the `hou-match-neighborhoods` entry to its MCP configuration, with an **absolute path** to `backend/dist/mcp.js` and literal URL/publishable-key environment values. Run Node directly; npm's stdout banner must not be used as the MCP transport.
@@ -76,8 +81,9 @@ Example prompts:
 - "Find neighborhoods with estimated median gross rent under $1,600. Explain what these figures do and do not mean."
 - "Use get_neighborhood_amenities for Midtown (62), including the source dates."
 - "Use get_current_conditions for regional weather alerts and gauges; explain any unavailable or expired data."
+- "Use get_neighborhood_evidence for Midtown (62). Explain the eight priorities, source dates and missing inputs; preserve null route minutes and safety tier."
 
-The tools filter estimates and return source context; they do not rank families, calculate driving times, or produce relocation reports. They have no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities, and 60 seconds for current conditions; current-condition expiry is checked on every read. Restart/reconnect after building to discover all four tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
+The tools return estimates and source context; they do not rank families, calculate driving times, or produce relocation reports. They have no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all five tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
 
 The optional `supabase` entry is the separate **developer** MCP: project-scoped, read-only and OAuth-authenticated with each developer's own Supabase account. It is not needed to consume neighborhood data.
 

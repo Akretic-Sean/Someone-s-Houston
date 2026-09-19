@@ -4,6 +4,7 @@ import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { createNeighborhoodClient } from '../dist/neighborhoods.js';
 import { createContextClient } from '../dist/context.js';
+import { createEvidenceClient } from '../dist/evidence.js';
 
 const url = process.env.SUPABASE_URL;
 const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
@@ -24,6 +25,12 @@ assert.ok(amenities.returned_records <= 5);
 const current = await context.getCurrentConditions({ limit: 2 });
 assert.equal(current.feeds.length, 2);
 assert.ok(current.returned_records <= 2);
+const evidence = await createEvidenceClient({ url, publishableKey }).getEvidence({ neighborhood_id: 62 });
+assert.equal(Object.keys(evidence.neighborhoods[0].categories).length, 8);
+assert.equal(evidence.neighborhoods[0].categories.afford.facts.median_gross_rent_monthly_usd, 1811);
+assert.equal(evidence.safety.tier, null);
+assert.equal(evidence.neighborhoods[0].categories.commute.facts.destinations.length, 5);
+assert.ok(evidence.neighborhoods[0].categories.commute.facts.destinations.every(d => d.drive_time_minutes === null));
 
 // Read-only security check: an unknown body must fail permissions, never upsert an existing record.
 const denied = await fetch(`${url}/rest/v1/neighborhood_profiles`, {
@@ -40,7 +47,7 @@ const transport = new StdioClientTransport({
 });
 try {
   await mcp.connect(transport);
-  assert.equal((await mcp.listTools()).tools.length, 4);
+  assert.equal((await mcp.listTools()).tools.length, 5);
   const result = await mcp.callTool({ name: 'get_neighborhood', arguments: { neighborhood_id: 62 } });
   assert.equal(result.isError, undefined);
   assert.equal(JSON.parse(result.content[0].text).neighborhood.name, 'MIDTOWN');
@@ -50,5 +57,8 @@ try {
   const conditionsResult = await mcp.callTool({ name: 'get_current_conditions', arguments: { limit: 2 } });
   assert.equal(conditionsResult.isError, undefined);
   assert.equal(JSON.parse(conditionsResult.content[0].text).feeds.length, 2);
+  const evidenceResult = await mcp.callTool({ name: 'get_neighborhood_evidence', arguments: { neighborhood_id: 62 } });
+  assert.equal(evidenceResult.isError, undefined);
+  assert.equal(JSON.parse(evidenceResult.content[0].text).profile_id, 'report-priorities-v1');
 } finally { await mcp.close(); }
 console.log(JSON.stringify({ rows: rows.length, json_bytes: Buffer.byteLength(JSON.stringify(rows)), first_read_ms: firstMs, cached_read_ms: cachedMs, anonymous_write_status: denied.status, amenity_status: amenities.availability, amenity_records: amenities.total_matches, current_feeds: current.feeds.map(f => ({ source_id: f.source_id, availability: f.availability })), mcp: 'passed' }));

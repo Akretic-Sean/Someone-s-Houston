@@ -1,0 +1,108 @@
+{
+  "schema_version": 1,
+  "checked_at": "2026-09-19T18:21:49Z",
+  "coordinate_system": "EPSG:4326",
+  "coordinate_order": "longitude,latitude",
+  "use": "Representative destination points for straight-line distance context only. These are not routing results, district centroids, confirmed vehicle entrances or individual employer locations. Let the candidate choose a workplace address before generating any actual commute estimate.",
+  "geocoder": {
+    "name": "City of Houston COH Verified Address Locator",
+    "source_url": "https://mycity2.houstontx.gov/gisweb01/rest/services/LOCATORS/COH_VERIFIED_ADDRESS_LOCATOR/GeocodeServer",
+    "operation": "findAddressCandidates",
+    "parameters": { "f": "json", "outSR": "4326", "maxLocations": 1 },
+    "note": "Each city-geocoded address returned score 100. This is the service's address-match score, not independently verified positional accuracy. Use each anchor's geocoder_query as SingleLine. Numeric precision must not be represented as measured accuracy."
+  },
+  "destinations": [
+    {
+      "id": "ion",
+      "kind": "office_hub",
+      "label": "Ion / Midtown",
+      "anchor_name": "Ion building",
+      "address": "4201 Main Street, Houston, Texas",
+      "coordinates": [-95.382207000002, 29.734299000003],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "4201 Main Street Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://iondistrict.com/tenants/ion/",
+      "note": "One building represents the broad Ion/Midtown hub. The operator separately recommends 4111 Fannin Street for the parking garage; this point is not that garage entrance."
+    },
+    {
+      "id": "downtown",
+      "kind": "office_hub",
+      "label": "Downtown",
+      "anchor_name": "Downtown Houston+ district office",
+      "address": "1221 McKinney Street, Houston, Texas",
+      "coordinates": [-95.362465500002, 29.756025000003],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "1221 McKinney Street Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://downtownhouston.org/about/contact-us",
+      "note": "The publicly listed district-office address is a representative downtown point, not the candidate's employer or the geographic center of all downtown workplaces."
+    },
+    {
+      "id": "energy",
+      "kind": "office_hub",
+      "label": "Energy Corridor",
+      "anchor_name": "Energy Corridor District office",
+      "address": "777 North Eldridge Parkway, Houston, Texas",
+      "coordinates": [-95.618893500002, 29.777643000002],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "777 North Eldridge Parkway Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://energycorridor.org/energy-corridor-staff/",
+      "note": "The publicly listed district-office address represents the broad Energy Corridor area. Actual employer locations throughout the corridor differ."
+    },
+    {
+      "id": "tmc",
+      "kind": "office_hub",
+      "label": "Texas Medical Center",
+      "anchor_name": "Texas Medical Center medical-campus executive offices",
+      "address": "6550 Bertner Avenue, Houston, Texas",
+      "coordinates": [-95.397975000002, 29.709045000002],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "6550 Bertner Avenue Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://www.tmc.edu/operations/tmc-campus/",
+      "note": "Represents the medical campus using its listed executive-office address. It does not represent Helix Park, a particular hospital entrance or parking destination."
+    },
+    {
+      "id": "nasa",
+      "kind": "office_hub",
+      "label": "NASA / Clear Lake",
+      "anchor_name": "NASA Johnson Space Center address",
+      "address": "2101 NASA Parkway, Houston, Texas",
+      "coordinates": [-95.093689500002, 29.554326000003],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "2101 NASA Parkway Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://www.nasa.gov/johnson/jsc-procurement/about-jsc-procurement/",
+      "note": "Represents the Johnson Space Center address, not every Clear Lake workplace or an access-controlled gate. It must not be used to promise a drive time or public campus access."
+    },
+    {
+      "id": "iah",
+      "kind": "airport",
+      "label": "George Bush Intercontinental Airport (IAH)",
+      "anchor_name": "IAH official navigation address",
+      "address": "2800 North Terminal Road, Houston, Texas",
+      "coordinates": [-95.350558500002, 29.987073000002],
+      "location_method": "city_verified_address_proxy",
+      "geocoder_query": "2800 North Terminal Road Houston Texas",
+      "geocoder_match_score": 100,
+      "source_url": "https://www.fly2houston.com/iah/visitor-information/maps-and-directions/",
+      "note": "The airport operator recommends this navigation address. It is a representative terminal-area address, not an individual terminal's drop-off curb or runway center. Terminal choice changes actual travel."
+    },
+    {
+      "id": "hou",
+      "kind": "airport",
+      "label": "William P. Hobby Airport (HOU)",
+      "anchor_name": "HOU operator-published navigation GPS",
+      "address": "7800 Airport Boulevard, Houston, Texas",
+      "coordinates": [-95.27663333333334, 29.65455],
+      "location_method": "operator_published_navigation_coordinate",
+      "geocoder_query": null,
+      "geocoder_match_score": null,
+      "source_url": "https://www.fly2houston.com/hou/directions-to-hou/",
+      "source_coordinate_text": "Latitude: 29 39.273; Longitude: -95 16.598",
+      "note": "Converted the operator's degrees-and-decimal-minutes GPS to decimal degrees. This is the operator's general navigation point, not a separately verified drop-off curb. The City address geocoder returned a different point about 255 meters north; the operator-published GPS is used here explicitly."
+    }
+  ]
+}
