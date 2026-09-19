@@ -2,6 +2,8 @@
 
 Researched and probed on 2026-09-19. Product goal: help tech recruits compare Houston neighborhoods according to their own priorities and household needs.
 
+**Scope update:** [Oleggo's build plan](build-plan.md) now defines the proposed MVP: a recruiter uses Claude to generate a shareable relocation report. Its TypeScript/Workers/KV architecture and tool names supersede the exploratory recommendations below. See [Phase 0 data notes](data-notes.md) for checks against the actual scoring requirements. Supabase remains an alternative; parks, schools, weather, and live routing are possible later features. V1 commute is straight-line miles.
+
 ## What is connected
 
 - Houston's CKAN catalog and DataStore endpoints respond without an API key. The discovery utility and metadata inventory are in this branch.
@@ -10,7 +12,7 @@ Researched and probed on 2026-09-19. Product goal: help tech recruits compare Ho
 - The backend owner's Supabase developer connector is authenticated. A `hou-match` project has not been created; there is no running application database or scheduled import yet.
 - METRO, TranStar, and a traffic-aware routing provider have not been connected.
 
-## Recommended sources
+## Exploratory sources
 
 | Matching input | Source and access | Freshness and verification | Use in the product |
 | --- | --- | --- | --- |
@@ -33,7 +35,7 @@ The current-working GIS prefix is `https://mycity2.houstontx.gov/gisweb01/rest/s
 
 [TranStar](https://traffic.houstontranstar.org/api/api_doc.aspx) documents JSON incident and lane-closure feeds updated once per minute. Live access requires contacting TranStar. This is a later integration unless credentials are already available; a sample feed is not live access.
 
-## How Supabase fits
+## Alternative: how Supabase could fit
 
 Proposed flow:
 
@@ -48,7 +50,7 @@ flowchart LR
     C --> M
 ```
 
-Use Supabase as the application's data store and backend services:
+If selected, Supabase could provide the application's data store and backend services:
 
 - Store neighborhood polygons, source observations, metric dates, provenance, and successful import times.
 - Use [PostGIS](https://supabase.com/docs/guides/database/extensions/postgis) to relate points and polygons and compute proximity. Convert source coordinate systems before spatial joins.
@@ -67,7 +69,7 @@ Suggested first entities are `neighborhoods`, `source_metrics`, `candidate_prefe
 
 The public-facing assistant should receive those purpose-specific, authenticated tools. The official developer MCP has administrative capabilities and is not the application's end-user interface. A conventional matching website can use its backend API directly; custom MCP becomes useful when an AI assistant needs those same functions.
 
-## Recommended hackathon scope
+## Earlier scope proposal (superseded by the build plan)
 
 Start with candidate-weighted comparison of the 88 city super neighborhoods using affordability, park access, school information, floodplain context, and commute estimates when a routing key is available. Add current NWS alerts and USGS observations as a separate conditions panel if time allows. Show coverage and dates, and label estimates clearly.
 
