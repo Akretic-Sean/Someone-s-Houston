@@ -129,6 +129,10 @@ The user's latest screenshot confirms the existing frontend weight IDs below. [T
 
 ## Proposed report API
 
+How these endpoints would actually generate a report — the stage pipeline, the two
+model calls, the verifier that keeps invented numbers out, and the OpenRouter and
+AI SDK setup — is in [report-generation.md](report-generation.md). Also proposed.
+
 Status: **proposed by the frontend, not yet agreed or implemented.** The following
 report endpoints are design proposals; the live neighborhood reads above remain available.
 
