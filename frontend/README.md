@@ -47,5 +47,20 @@ live, replace the mock with a fetch — no component should need to change.
 Every figure a candidate sees renders with a `source` line underneath. `source` is a
 required field on the types that carry figures so it cannot be dropped by accident.
 
+## Live data that is already available
+
+`docs/api.md` documents a **live, implemented** neighborhood layer: 88 City of Houston
+Super Neighborhood profiles (median household income, median home value, median gross
+rent, centroids) from ACS 2020–2024, readable straight from the browser.
+
+This app does not use it yet — every neighborhood figure on screen is mocked, and the
+top bar says so. Wiring it up is the obvious next piece of work. The first three fields
+to swap, and the two build-plan figures that layer unlocks (standing ratio, house
+multiple), are listed in `../docs/api.md`.
+
+When that happens: values render with **City of Houston estimates • ACS 2020–2024**
+beneath them, `null` renders as "Unavailable" with dependent calculations omitted, and
+nothing is backfilled with zero.
+
 Coordinate contract changes through `../docs/api.md`. Keep server credentials out of
-browser code.
+browser code — the neighborhood layer uses a publishable key, never an admin key.
