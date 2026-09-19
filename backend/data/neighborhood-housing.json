@@ -1,0 +1,5471 @@
+{
+  "schema_version": 1,
+  "data_version": "coh-housing-2024-9cbb6e76d8bd101e",
+  "source_period_start": 2020,
+  "source_period_end": 2024,
+  "prepared_at": "2026-09-19T18:21:42Z",
+  "record_count": 88,
+  "sources": [
+    {
+      "source_id": "coh_housing_structure_2024",
+      "title": "Units in Structure",
+      "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/11-Units-in-Structure-2024.pdf",
+      "source_sha256": "cd061bffb8bcf57c11b65d6d74960709261102739c426cc97a4395f98fd2189a",
+      "source_period_start": 2020,
+      "source_period_end": 2024,
+      "source_release_month": "2026-01",
+      "source_retrieved_at": "2026-09-19T18:21:29Z",
+      "record_count": 88,
+      "unit": "estimated_housing_units",
+      "refresh_cadence": "annual_release"
+    },
+    {
+      "source_id": "coh_housing_bedrooms_2024",
+      "title": "Bedrooms",
+      "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/12-Bedrooms-2024.pdf",
+      "source_sha256": "f5436416f0129a5d62b44f0d651589867b636f573cf940387459bcba9a198508",
+      "source_period_start": 2020,
+      "source_period_end": 2024,
+      "source_release_month": "2026-01",
+      "source_retrieved_at": "2026-09-19T18:21:36Z",
+      "record_count": 88,
+      "unit": "estimated_housing_units",
+      "refresh_cadence": "annual_release"
+    },
+    {
+      "source_id": "coh_housing_year_built_2024",
+      "title": "Year Structure Built",
+      "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/13-Year-Structure-Built-2024.pdf",
+      "source_sha256": "28eb878b6afe22ff57ff08c6ad7f279fe6bc69279efc5827346d2831e6effa01",
+      "source_period_start": 2020,
+      "source_period_end": 2024,
+      "source_release_month": "2026-01",
+      "source_retrieved_at": "2026-09-19T18:21:41Z",
+      "record_count": 88,
+      "unit": "estimated_housing_units",
+      "refresh_cadence": "annual_release"
+    }
+  ],
+  "attribution": "City of Houston Planning and Development; U.S. Census Bureau ACS 2020–2024 five-year estimates",
+  "interpretation": [
+    "Marginal housing-stock estimates for all housing units, not current listings, available rentals, affordability, building condition, or an individual's housing eligibility.",
+    "Structure, bedroom and year-built distributions are separate marginals: do not infer counts of homes satisfying combinations of these attributes.",
+    "Built 2020 or later is relative to the 2020–2024 observation period; it does not include verified construction after 2024.",
+    "Shares use each table's published housing total. Original rounded counts are preserved; category sums can differ slightly from the total.",
+    "Missing or suppressed cells are null, never zero; dependent derived shares remain null. Margins of error are not provided in these City tables.",
+    "Housing preferences must come from the candidate; do not infer a preference from family status, age, or demographic composition."
+  ],
+  "rows": [
+    {
+      "neighborhood_id": 1,
+      "name": "WILLOWBROOK",
+      "facts": {
+        "total_housing_units": 4096,
+        "structure_counts": {
+          "single_unit_detached": 667,
+          "single_unit_attached": 57,
+          "two_units": 0,
+          "three_or_four_units": 178,
+          "five_to_nine_units": 651,
+          "ten_or_more_units": 2495,
+          "mobile_home": 47,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 288,
+          "one_bedroom": 1273,
+          "two_bedrooms": 1605,
+          "three_bedrooms": 679,
+          "four_bedrooms": 213,
+          "five_or_more_bedrooms": 38
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 68,
+          "built_1940_to_1959": 41,
+          "built_1960_to_1979": 558,
+          "built_1980_to_1999": 1161,
+          "built_2000_to_2009": 1447,
+          "built_2010_to_2019": 651,
+          "built_2020_or_later": 170
+        },
+        "shares_pct": {
+          "single_unit_detached": 16.28,
+          "single_unit_attached": 1.39,
+          "two_or_more_units_in_structure": 81.15,
+          "studio_or_one_bedroom": 38.11,
+          "two_bedrooms": 39.18,
+          "three_or_more_bedrooms": 22.71,
+          "built_2000_or_later": 55.37,
+          "built_2020_or_later": 4.15
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 2,
+      "name": "GREATER GREENSPOINT",
+      "facts": {
+        "total_housing_units": 16690,
+        "structure_counts": {
+          "single_unit_detached": 2717,
+          "single_unit_attached": 412,
+          "two_units": 612,
+          "three_or_four_units": 1373,
+          "five_to_nine_units": 1691,
+          "ten_or_more_units": 9701,
+          "mobile_home": 184,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1254,
+          "one_bedroom": 6866,
+          "two_bedrooms": 5274,
+          "three_bedrooms": 2697,
+          "four_bedrooms": 574,
+          "five_or_more_bedrooms": 24
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 280,
+          "built_1940_to_1959": 743,
+          "built_1960_to_1979": 6189,
+          "built_1980_to_1999": 6969,
+          "built_2000_to_2009": 1725,
+          "built_2010_to_2019": 682,
+          "built_2020_or_later": 102
+        },
+        "shares_pct": {
+          "single_unit_detached": 16.28,
+          "single_unit_attached": 2.47,
+          "two_or_more_units_in_structure": 80.15,
+          "studio_or_one_bedroom": 48.65,
+          "two_bedrooms": 31.6,
+          "three_or_more_bedrooms": 19.74,
+          "built_2000_or_later": 15.03,
+          "built_2020_or_later": 0.61
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 3,
+      "name": "CARVERDALE",
+      "facts": {
+        "total_housing_units": 1502,
+        "structure_counts": {
+          "single_unit_detached": 1135,
+          "single_unit_attached": 47,
+          "two_units": 34,
+          "three_or_four_units": 4,
+          "five_to_nine_units": 0,
+          "ten_or_more_units": 200,
+          "mobile_home": 82,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 48,
+          "one_bedroom": 102,
+          "two_bedrooms": 300,
+          "three_bedrooms": 678,
+          "four_bedrooms": 298,
+          "five_or_more_bedrooms": 76
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 33,
+          "built_1940_to_1959": 237,
+          "built_1960_to_1979": 168,
+          "built_1980_to_1999": 453,
+          "built_2000_to_2009": 296,
+          "built_2010_to_2019": 269,
+          "built_2020_or_later": 45
+        },
+        "shares_pct": {
+          "single_unit_detached": 75.57,
+          "single_unit_attached": 3.13,
+          "two_or_more_units_in_structure": 15.85,
+          "studio_or_one_bedroom": 9.99,
+          "two_bedrooms": 19.97,
+          "three_or_more_bedrooms": 70.04,
+          "built_2000_or_later": 40.61,
+          "built_2020_or_later": 3.0
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 4,
+      "name": "FAIRBANKS / NORTHWEST CROSSING",
+      "facts": {
+        "total_housing_units": 8671,
+        "structure_counts": {
+          "single_unit_detached": 1636,
+          "single_unit_attached": 392,
+          "two_units": 148,
+          "three_or_four_units": 1061,
+          "five_to_nine_units": 1478,
+          "ten_or_more_units": 3882,
+          "mobile_home": 38,
+          "boat_rv_van_other": 36
+        },
+        "bedroom_counts": {
+          "no_bedroom": 664,
+          "one_bedroom": 2831,
+          "two_bedrooms": 3071,
+          "three_bedrooms": 1716,
+          "four_bedrooms": 338,
+          "five_or_more_bedrooms": 51
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 72,
+          "built_1940_to_1959": 817,
+          "built_1960_to_1979": 2985,
+          "built_1980_to_1999": 2592,
+          "built_2000_to_2009": 1425,
+          "built_2010_to_2019": 658,
+          "built_2020_or_later": 123
+        },
+        "shares_pct": {
+          "single_unit_detached": 18.87,
+          "single_unit_attached": 4.52,
+          "two_or_more_units_in_structure": 75.76,
+          "studio_or_one_bedroom": 40.31,
+          "two_bedrooms": 35.42,
+          "three_or_more_bedrooms": 24.28,
+          "built_2000_or_later": 25.44,
+          "built_2020_or_later": 1.42
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 5,
+      "name": "GREATER INWOOD",
+      "facts": {
+        "total_housing_units": 15032,
+        "structure_counts": {
+          "single_unit_detached": 6802,
+          "single_unit_attached": 952,
+          "two_units": 156,
+          "three_or_four_units": 2095,
+          "five_to_nine_units": 1508,
+          "ten_or_more_units": 3490,
+          "mobile_home": 29,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 298,
+          "one_bedroom": 3298,
+          "two_bedrooms": 3944,
+          "three_bedrooms": 4883,
+          "four_bedrooms": 2447,
+          "five_or_more_bedrooms": 162
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 116,
+          "built_1940_to_1959": 306,
+          "built_1960_to_1979": 7056,
+          "built_1980_to_1999": 5165,
+          "built_2000_to_2009": 1845,
+          "built_2010_to_2019": 506,
+          "built_2020_or_later": 38
+        },
+        "shares_pct": {
+          "single_unit_detached": 45.25,
+          "single_unit_attached": 6.33,
+          "two_or_more_units_in_structure": 48.22,
+          "studio_or_one_bedroom": 23.92,
+          "two_bedrooms": 26.24,
+          "three_or_more_bedrooms": 49.84,
+          "built_2000_or_later": 15.89,
+          "built_2020_or_later": 0.25
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 6,
+      "name": "ACRES HOME",
+      "facts": {
+        "total_housing_units": 11863,
+        "structure_counts": {
+          "single_unit_detached": 9004,
+          "single_unit_attached": 118,
+          "two_units": 383,
+          "three_or_four_units": 469,
+          "five_to_nine_units": 274,
+          "ten_or_more_units": 1530,
+          "mobile_home": 50,
+          "boat_rv_van_other": 34
+        },
+        "bedroom_counts": {
+          "no_bedroom": 176,
+          "one_bedroom": 1074,
+          "two_bedrooms": 2829,
+          "three_bedrooms": 6290,
+          "four_bedrooms": 1423,
+          "five_or_more_bedrooms": 72
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 258,
+          "built_1940_to_1959": 1882,
+          "built_1960_to_1979": 3987,
+          "built_1980_to_1999": 1814,
+          "built_2000_to_2009": 1739,
+          "built_2010_to_2019": 1392,
+          "built_2020_or_later": 791
+        },
+        "shares_pct": {
+          "single_unit_detached": 75.9,
+          "single_unit_attached": 0.99,
+          "two_or_more_units_in_structure": 22.39,
+          "studio_or_one_bedroom": 10.54,
+          "two_bedrooms": 23.85,
+          "three_or_more_bedrooms": 65.62,
+          "built_2000_or_later": 33.06,
+          "built_2020_or_later": 6.67
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 7,
+      "name": "HIDDEN VALLEY",
+      "facts": {
+        "total_housing_units": 1051,
+        "structure_counts": {
+          "single_unit_detached": 1036,
+          "single_unit_attached": 15,
+          "two_units": 0,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 0,
+          "ten_or_more_units": 0,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 0,
+          "one_bedroom": 0,
+          "two_bedrooms": 89,
+          "three_bedrooms": 743,
+          "four_bedrooms": 213,
+          "five_or_more_bedrooms": 6
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 0,
+          "built_1940_to_1959": 101,
+          "built_1960_to_1979": 861,
+          "built_1980_to_1999": 83,
+          "built_2000_to_2009": 6,
+          "built_2010_to_2019": 0,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 98.57,
+          "single_unit_attached": 1.43,
+          "two_or_more_units_in_structure": 0.0,
+          "studio_or_one_bedroom": 0.0,
+          "two_bedrooms": 8.47,
+          "three_or_more_bedrooms": 91.53,
+          "built_2000_or_later": 0.57,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 8,
+      "name": "WESTBRANCH",
+      "facts": {
+        "total_housing_units": 1136,
+        "structure_counts": {
+          "single_unit_detached": 1056,
+          "single_unit_attached": 0,
+          "two_units": 9,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 0,
+          "ten_or_more_units": 71,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 15,
+          "one_bedroom": 18,
+          "two_bedrooms": 216,
+          "three_bedrooms": 692,
+          "four_bedrooms": 189,
+          "five_or_more_bedrooms": 5
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 11,
+          "built_1940_to_1959": 32,
+          "built_1960_to_1979": 302,
+          "built_1980_to_1999": 686,
+          "built_2000_to_2009": 53,
+          "built_2010_to_2019": 34,
+          "built_2020_or_later": 19
+        },
+        "shares_pct": {
+          "single_unit_detached": 92.96,
+          "single_unit_attached": 0.0,
+          "two_or_more_units_in_structure": 7.04,
+          "studio_or_one_bedroom": 2.9,
+          "two_bedrooms": 19.01,
+          "three_or_more_bedrooms": 77.99,
+          "built_2000_or_later": 9.33,
+          "built_2020_or_later": 1.67
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 9,
+      "name": "ADDICKS PARK TEN",
+      "facts": {
+        "total_housing_units": 7790,
+        "structure_counts": {
+          "single_unit_detached": 2754,
+          "single_unit_attached": 15,
+          "two_units": 173,
+          "three_or_four_units": 201,
+          "five_to_nine_units": 717,
+          "ten_or_more_units": 3905,
+          "mobile_home": 24,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 835,
+          "one_bedroom": 2106,
+          "two_bedrooms": 1993,
+          "three_bedrooms": 1145,
+          "four_bedrooms": 1438,
+          "five_or_more_bedrooms": 272
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 24,
+          "built_1940_to_1959": 345,
+          "built_1960_to_1979": 702,
+          "built_1980_to_1999": 2674,
+          "built_2000_to_2009": 2129,
+          "built_2010_to_2019": 1636,
+          "built_2020_or_later": 280
+        },
+        "shares_pct": {
+          "single_unit_detached": 35.35,
+          "single_unit_attached": 0.19,
+          "two_or_more_units_in_structure": 64.13,
+          "studio_or_one_bedroom": 37.75,
+          "two_bedrooms": 25.58,
+          "three_or_more_bedrooms": 36.65,
+          "built_2000_or_later": 51.93,
+          "built_2020_or_later": 3.59
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 10,
+      "name": "SPRING BRANCH WEST",
+      "facts": {
+        "total_housing_units": 13721,
+        "structure_counts": {
+          "single_unit_detached": 6116,
+          "single_unit_attached": 739,
+          "two_units": 68,
+          "three_or_four_units": 498,
+          "five_to_nine_units": 895,
+          "ten_or_more_units": 5315,
+          "mobile_home": 91,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 669,
+          "one_bedroom": 2187,
+          "two_bedrooms": 3897,
+          "three_bedrooms": 4872,
+          "four_bedrooms": 1803,
+          "five_or_more_bedrooms": 293
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 64,
+          "built_1940_to_1959": 2168,
+          "built_1960_to_1979": 6191,
+          "built_1980_to_1999": 1628,
+          "built_2000_to_2009": 1480,
+          "built_2010_to_2019": 1735,
+          "built_2020_or_later": 455
+        },
+        "shares_pct": {
+          "single_unit_detached": 44.57,
+          "single_unit_attached": 5.39,
+          "two_or_more_units_in_structure": 49.38,
+          "studio_or_one_bedroom": 20.81,
+          "two_bedrooms": 28.4,
+          "three_or_more_bedrooms": 50.78,
+          "built_2000_or_later": 26.75,
+          "built_2020_or_later": 3.32
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 11,
+      "name": "LANGWOOD",
+      "facts": {
+        "total_housing_units": 2932,
+        "structure_counts": {
+          "single_unit_detached": 1492,
+          "single_unit_attached": 39,
+          "two_units": 11,
+          "three_or_four_units": 160,
+          "five_to_nine_units": 71,
+          "ten_or_more_units": 1102,
+          "mobile_home": 56,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 89,
+          "one_bedroom": 480,
+          "two_bedrooms": 982,
+          "three_bedrooms": 1042,
+          "four_bedrooms": 339,
+          "five_or_more_bedrooms": 0
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 0,
+          "built_1940_to_1959": 777,
+          "built_1960_to_1979": 943,
+          "built_1980_to_1999": 591,
+          "built_2000_to_2009": 198,
+          "built_2010_to_2019": 404,
+          "built_2020_or_later": 19
+        },
+        "shares_pct": {
+          "single_unit_detached": 50.89,
+          "single_unit_attached": 1.33,
+          "two_or_more_units_in_structure": 45.84,
+          "studio_or_one_bedroom": 19.41,
+          "two_bedrooms": 33.49,
+          "three_or_more_bedrooms": 47.1,
+          "built_2000_or_later": 21.18,
+          "built_2020_or_later": 0.65
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 12,
+      "name": "CENTRAL NORTHWEST",
+      "facts": {
+        "total_housing_units": 20552,
+        "structure_counts": {
+          "single_unit_detached": 13387,
+          "single_unit_attached": 637,
+          "two_units": 197,
+          "three_or_four_units": 1044,
+          "five_to_nine_units": 868,
+          "ten_or_more_units": 4213,
+          "mobile_home": 205,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 471,
+          "one_bedroom": 2579,
+          "two_bedrooms": 5091,
+          "three_bedrooms": 8593,
+          "four_bedrooms": 3359,
+          "five_or_more_bedrooms": 459
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 252,
+          "built_1940_to_1959": 5920,
+          "built_1960_to_1979": 7482,
+          "built_1980_to_1999": 1949,
+          "built_2000_to_2009": 1471,
+          "built_2010_to_2019": 2800,
+          "built_2020_or_later": 678
+        },
+        "shares_pct": {
+          "single_unit_detached": 65.14,
+          "single_unit_attached": 3.1,
+          "two_or_more_units_in_structure": 30.76,
+          "studio_or_one_bedroom": 14.84,
+          "two_bedrooms": 24.77,
+          "three_or_more_bedrooms": 60.39,
+          "built_2000_or_later": 24.08,
+          "built_2020_or_later": 3.3
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 13,
+      "name": "INDEPENDENCE HEIGHTS",
+      "facts": {
+        "total_housing_units": 6161,
+        "structure_counts": {
+          "single_unit_detached": 3877,
+          "single_unit_attached": 249,
+          "two_units": 56,
+          "three_or_four_units": 122,
+          "five_to_nine_units": 171,
+          "ten_or_more_units": 1571,
+          "mobile_home": 115,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 642,
+          "one_bedroom": 738,
+          "two_bedrooms": 1839,
+          "three_bedrooms": 2514,
+          "four_bedrooms": 411,
+          "five_or_more_bedrooms": 17
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 288,
+          "built_1940_to_1959": 1718,
+          "built_1960_to_1979": 1454,
+          "built_1980_to_1999": 740,
+          "built_2000_to_2009": 262,
+          "built_2010_to_2019": 1267,
+          "built_2020_or_later": 434
+        },
+        "shares_pct": {
+          "single_unit_detached": 62.93,
+          "single_unit_attached": 4.04,
+          "two_or_more_units_in_structure": 31.16,
+          "studio_or_one_bedroom": 22.4,
+          "two_bedrooms": 29.85,
+          "three_or_more_bedrooms": 47.75,
+          "built_2000_or_later": 31.86,
+          "built_2020_or_later": 7.04
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 14,
+      "name": "LAZYBROOK / TIMBERGROVE",
+      "facts": {
+        "total_housing_units": 7742,
+        "structure_counts": {
+          "single_unit_detached": 3162,
+          "single_unit_attached": 227,
+          "two_units": 62,
+          "three_or_four_units": 321,
+          "five_to_nine_units": 411,
+          "ten_or_more_units": 3414,
+          "mobile_home": 144,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 802,
+          "one_bedroom": 2084,
+          "two_bedrooms": 1583,
+          "three_bedrooms": 2663,
+          "four_bedrooms": 580,
+          "five_or_more_bedrooms": 31
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 114,
+          "built_1940_to_1959": 1294,
+          "built_1960_to_1979": 2779,
+          "built_1980_to_1999": 938,
+          "built_2000_to_2009": 934,
+          "built_2010_to_2019": 1015,
+          "built_2020_or_later": 669
+        },
+        "shares_pct": {
+          "single_unit_detached": 40.84,
+          "single_unit_attached": 2.93,
+          "two_or_more_units_in_structure": 54.35,
+          "studio_or_one_bedroom": 37.28,
+          "two_bedrooms": 20.45,
+          "three_or_more_bedrooms": 42.29,
+          "built_2000_or_later": 33.82,
+          "built_2020_or_later": 8.64
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 15,
+      "name": "GREATER HEIGHTS",
+      "facts": {
+        "total_housing_units": 26874,
+        "structure_counts": {
+          "single_unit_detached": 18136,
+          "single_unit_attached": 1208,
+          "two_units": 502,
+          "three_or_four_units": 626,
+          "five_to_nine_units": 475,
+          "ten_or_more_units": 5863,
+          "mobile_home": 64,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1478,
+          "one_bedroom": 4975,
+          "two_bedrooms": 7343,
+          "three_bedrooms": 9675,
+          "four_bedrooms": 2848,
+          "five_or_more_bedrooms": 555
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 6700,
+          "built_1940_to_1959": 1778,
+          "built_1960_to_1979": 2277,
+          "built_1980_to_1999": 2340,
+          "built_2000_to_2009": 4169,
+          "built_2010_to_2019": 8001,
+          "built_2020_or_later": 1609
+        },
+        "shares_pct": {
+          "single_unit_detached": 67.49,
+          "single_unit_attached": 4.5,
+          "two_or_more_units_in_structure": 27.78,
+          "studio_or_one_bedroom": 24.01,
+          "two_bedrooms": 27.32,
+          "three_or_more_bedrooms": 48.66,
+          "built_2000_or_later": 51.27,
+          "built_2020_or_later": 5.99
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 16,
+      "name": "MEMORIAL",
+      "facts": {
+        "total_housing_units": 24123,
+        "structure_counts": {
+          "single_unit_detached": 9188,
+          "single_unit_attached": 2550,
+          "two_units": 119,
+          "three_or_four_units": 1160,
+          "five_to_nine_units": 1640,
+          "ten_or_more_units": 9454,
+          "mobile_home": 13,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 572,
+          "one_bedroom": 6572,
+          "two_bedrooms": 4769,
+          "three_bedrooms": 4523,
+          "four_bedrooms": 5722,
+          "five_or_more_bedrooms": 1965
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 0,
+          "built_1940_to_1959": 1161,
+          "built_1960_to_1979": 11376,
+          "built_1980_to_1999": 4095,
+          "built_2000_to_2009": 2129,
+          "built_2010_to_2019": 5107,
+          "built_2020_or_later": 254
+        },
+        "shares_pct": {
+          "single_unit_detached": 38.09,
+          "single_unit_attached": 10.57,
+          "two_or_more_units_in_structure": 51.29,
+          "studio_or_one_bedroom": 29.61,
+          "two_bedrooms": 19.77,
+          "three_or_more_bedrooms": 50.62,
+          "built_2000_or_later": 31.05,
+          "built_2020_or_later": 1.05
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 17,
+      "name": "ELDRIDGE / WEST OAKS",
+      "facts": {
+        "total_housing_units": 37536,
+        "structure_counts": {
+          "single_unit_detached": 11872,
+          "single_unit_attached": 1837,
+          "two_units": 861,
+          "three_or_four_units": 1377,
+          "five_to_nine_units": 3628,
+          "ten_or_more_units": 17842,
+          "mobile_home": 97,
+          "boat_rv_van_other": 23
+        },
+        "bedroom_counts": {
+          "no_bedroom": 3008,
+          "one_bedroom": 11928,
+          "two_bedrooms": 9541,
+          "three_bedrooms": 6944,
+          "four_bedrooms": 4817,
+          "five_or_more_bedrooms": 1297
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 268,
+          "built_1940_to_1959": 288,
+          "built_1960_to_1979": 4914,
+          "built_1980_to_1999": 15228,
+          "built_2000_to_2009": 10671,
+          "built_2010_to_2019": 6011,
+          "built_2020_or_later": 155
+        },
+        "shares_pct": {
+          "single_unit_detached": 31.63,
+          "single_unit_attached": 4.89,
+          "two_or_more_units_in_structure": 63.16,
+          "studio_or_one_bedroom": 39.79,
+          "two_bedrooms": 25.42,
+          "three_or_more_bedrooms": 34.79,
+          "built_2000_or_later": 44.86,
+          "built_2020_or_later": 0.41
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 18,
+      "name": "BRIAR FOREST",
+      "facts": {
+        "total_housing_units": 21519,
+        "structure_counts": {
+          "single_unit_detached": 8569,
+          "single_unit_attached": 1213,
+          "two_units": 488,
+          "three_or_four_units": 1735,
+          "five_to_nine_units": 1394,
+          "ten_or_more_units": 8019,
+          "mobile_home": 100,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1079,
+          "one_bedroom": 4990,
+          "two_bedrooms": 5845,
+          "three_bedrooms": 4145,
+          "four_bedrooms": 4441,
+          "five_or_more_bedrooms": 1020
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 69,
+          "built_1940_to_1959": 396,
+          "built_1960_to_1979": 10954,
+          "built_1980_to_1999": 6546,
+          "built_2000_to_2009": 1948,
+          "built_2010_to_2019": 1456,
+          "built_2020_or_later": 150
+        },
+        "shares_pct": {
+          "single_unit_detached": 39.82,
+          "single_unit_attached": 5.64,
+          "two_or_more_units_in_structure": 54.07,
+          "studio_or_one_bedroom": 28.2,
+          "two_bedrooms": 27.16,
+          "three_or_more_bedrooms": 44.64,
+          "built_2000_or_later": 16.52,
+          "built_2020_or_later": 0.7
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 19,
+      "name": "WESTCHASE",
+      "facts": {
+        "total_housing_units": 19070,
+        "structure_counts": {
+          "single_unit_detached": 1471,
+          "single_unit_attached": 554,
+          "two_units": 653,
+          "three_or_four_units": 1312,
+          "five_to_nine_units": 2528,
+          "ten_or_more_units": 12462,
+          "mobile_home": 90,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1976,
+          "one_bedroom": 7827,
+          "two_bedrooms": 6950,
+          "three_bedrooms": 1387,
+          "four_bedrooms": 725,
+          "five_or_more_bedrooms": 205
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 73,
+          "built_1940_to_1959": 96,
+          "built_1960_to_1979": 4053,
+          "built_1980_to_1999": 7626,
+          "built_2000_to_2009": 4512,
+          "built_2010_to_2019": 2536,
+          "built_2020_or_later": 174
+        },
+        "shares_pct": {
+          "single_unit_detached": 7.71,
+          "single_unit_attached": 2.91,
+          "two_or_more_units_in_structure": 88.91,
+          "studio_or_one_bedroom": 51.41,
+          "two_bedrooms": 36.44,
+          "three_or_more_bedrooms": 12.15,
+          "built_2000_or_later": 37.87,
+          "built_2020_or_later": 0.91
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 20,
+      "name": "MID WEST",
+      "facts": {
+        "total_housing_units": 29436,
+        "structure_counts": {
+          "single_unit_detached": 3146,
+          "single_unit_attached": 1770,
+          "two_units": 495,
+          "three_or_four_units": 969,
+          "five_to_nine_units": 4603,
+          "ten_or_more_units": 18341,
+          "mobile_home": 114,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1881,
+          "one_bedroom": 13722,
+          "two_bedrooms": 9569,
+          "three_bedrooms": 3099,
+          "four_bedrooms": 1016,
+          "five_or_more_bedrooms": 150
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 419,
+          "built_1940_to_1959": 970,
+          "built_1960_to_1979": 14533,
+          "built_1980_to_1999": 7208,
+          "built_2000_to_2009": 2906,
+          "built_2010_to_2019": 3149,
+          "built_2020_or_later": 251
+        },
+        "shares_pct": {
+          "single_unit_detached": 10.69,
+          "single_unit_attached": 6.01,
+          "two_or_more_units_in_structure": 82.92,
+          "studio_or_one_bedroom": 53.01,
+          "two_bedrooms": 32.51,
+          "three_or_more_bedrooms": 14.49,
+          "built_2000_or_later": 21.42,
+          "built_2020_or_later": 0.85
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 2
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 21,
+      "name": "GREATER UPTOWN",
+      "facts": {
+        "total_housing_units": 36937,
+        "structure_counts": {
+          "single_unit_detached": 6240,
+          "single_unit_attached": 3478,
+          "two_units": 373,
+          "three_or_four_units": 1250,
+          "five_to_nine_units": 2558,
+          "ten_or_more_units": 22935,
+          "mobile_home": 103,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1766,
+          "one_bedroom": 12744,
+          "two_bedrooms": 13155,
+          "three_bedrooms": 5433,
+          "four_bedrooms": 2492,
+          "five_or_more_bedrooms": 1347
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 161,
+          "built_1940_to_1959": 1568,
+          "built_1960_to_1979": 13742,
+          "built_1980_to_1999": 8654,
+          "built_2000_to_2009": 6301,
+          "built_2010_to_2019": 6126,
+          "built_2020_or_later": 387
+        },
+        "shares_pct": {
+          "single_unit_detached": 16.89,
+          "single_unit_attached": 9.42,
+          "two_or_more_units_in_structure": 73.41,
+          "studio_or_one_bedroom": 39.28,
+          "two_bedrooms": 35.61,
+          "three_or_more_bedrooms": 25.1,
+          "built_2000_or_later": 34.69,
+          "built_2020_or_later": 1.05
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 22,
+      "name": "WASHINGTON AVENUE COALITION / MEMORIAL PARK",
+      "facts": {
+        "total_housing_units": 25382,
+        "structure_counts": {
+          "single_unit_detached": 8467,
+          "single_unit_attached": 4574,
+          "two_units": 61,
+          "three_or_four_units": 233,
+          "five_to_nine_units": 963,
+          "ten_or_more_units": 11085,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 2742,
+          "one_bedroom": 5948,
+          "two_bedrooms": 5229,
+          "three_bedrooms": 10389,
+          "four_bedrooms": 1005,
+          "five_or_more_bedrooms": 70
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 668,
+          "built_1940_to_1959": 394,
+          "built_1960_to_1979": 1109,
+          "built_1980_to_1999": 3027,
+          "built_2000_to_2009": 8455,
+          "built_2010_to_2019": 9663,
+          "built_2020_or_later": 2065
+        },
+        "shares_pct": {
+          "single_unit_detached": 33.36,
+          "single_unit_attached": 18.02,
+          "two_or_more_units_in_structure": 48.63,
+          "studio_or_one_bedroom": 34.24,
+          "two_bedrooms": 20.6,
+          "three_or_more_bedrooms": 45.17,
+          "built_2000_or_later": 79.52,
+          "built_2020_or_later": 8.14
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 23,
+      "name": "AFTON OAKS / RIVER OAKS AREA",
+      "facts": {
+        "total_housing_units": 10024,
+        "structure_counts": {
+          "single_unit_detached": 3287,
+          "single_unit_attached": 586,
+          "two_units": 99,
+          "three_or_four_units": 102,
+          "five_to_nine_units": 193,
+          "ten_or_more_units": 5725,
+          "mobile_home": 32,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 888,
+          "one_bedroom": 2641,
+          "two_bedrooms": 2335,
+          "three_bedrooms": 2131,
+          "four_bedrooms": 1301,
+          "five_or_more_bedrooms": 729
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 713,
+          "built_1940_to_1959": 1215,
+          "built_1960_to_1979": 1134,
+          "built_1980_to_1999": 1897,
+          "built_2000_to_2009": 1465,
+          "built_2010_to_2019": 2987,
+          "built_2020_or_later": 613
+        },
+        "shares_pct": {
+          "single_unit_detached": 32.79,
+          "single_unit_attached": 5.85,
+          "two_or_more_units_in_structure": 61.04,
+          "studio_or_one_bedroom": 35.21,
+          "two_bedrooms": 23.29,
+          "three_or_more_bedrooms": 41.51,
+          "built_2000_or_later": 50.53,
+          "built_2020_or_later": 6.12
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 24,
+      "name": "NEARTOWN - MONTROSE",
+      "facts": {
+        "total_housing_units": 22854,
+        "structure_counts": {
+          "single_unit_detached": 5385,
+          "single_unit_attached": 3334,
+          "two_units": 796,
+          "three_or_four_units": 1446,
+          "five_to_nine_units": 1163,
+          "ten_or_more_units": 10718,
+          "mobile_home": 14,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 2345,
+          "one_bedroom": 7506,
+          "two_bedrooms": 6353,
+          "three_bedrooms": 5363,
+          "four_bedrooms": 1127,
+          "five_or_more_bedrooms": 161
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 2937,
+          "built_1940_to_1959": 1941,
+          "built_1960_to_1979": 3457,
+          "built_1980_to_1999": 4026,
+          "built_2000_to_2009": 3786,
+          "built_2010_to_2019": 5674,
+          "built_2020_or_later": 1035
+        },
+        "shares_pct": {
+          "single_unit_detached": 23.56,
+          "single_unit_attached": 14.59,
+          "two_or_more_units_in_structure": 61.8,
+          "studio_or_one_bedroom": 43.1,
+          "two_bedrooms": 27.8,
+          "three_or_more_bedrooms": 29.1,
+          "built_2000_or_later": 45.92,
+          "built_2020_or_later": 4.53
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 2
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 25,
+      "name": "ALIEF",
+      "facts": {
+        "total_housing_units": 38090,
+        "structure_counts": {
+          "single_unit_detached": 17076,
+          "single_unit_attached": 3432,
+          "two_units": 766,
+          "three_or_four_units": 1510,
+          "five_to_nine_units": 3796,
+          "ten_or_more_units": 11095,
+          "mobile_home": 414,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 2051,
+          "one_bedroom": 5238,
+          "two_bedrooms": 12191,
+          "three_bedrooms": 13963,
+          "four_bedrooms": 4193,
+          "five_or_more_bedrooms": 454
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 613,
+          "built_1940_to_1959": 1066,
+          "built_1960_to_1979": 16335,
+          "built_1980_to_1999": 14519,
+          "built_2000_to_2009": 3774,
+          "built_2010_to_2019": 1638,
+          "built_2020_or_later": 146
+        },
+        "shares_pct": {
+          "single_unit_detached": 44.83,
+          "single_unit_attached": 9.01,
+          "two_or_more_units_in_structure": 45.07,
+          "studio_or_one_bedroom": 19.14,
+          "two_bedrooms": 32.01,
+          "three_or_more_bedrooms": 48.86,
+          "built_2000_or_later": 14.59,
+          "built_2020_or_later": 0.38
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 26,
+      "name": "SHARPSTOWN",
+      "facts": {
+        "total_housing_units": 30787,
+        "structure_counts": {
+          "single_unit_detached": 7627,
+          "single_unit_attached": 1129,
+          "two_units": 915,
+          "three_or_four_units": 2109,
+          "five_to_nine_units": 3583,
+          "ten_or_more_units": 15307,
+          "mobile_home": 97,
+          "boat_rv_van_other": 21
+        },
+        "bedroom_counts": {
+          "no_bedroom": 3345,
+          "one_bedroom": 10443,
+          "two_bedrooms": 8950,
+          "three_bedrooms": 5626,
+          "four_bedrooms": 2072,
+          "five_or_more_bedrooms": 351
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 187,
+          "built_1940_to_1959": 2776,
+          "built_1960_to_1979": 17009,
+          "built_1980_to_1999": 8270,
+          "built_2000_to_2009": 1752,
+          "built_2010_to_2019": 792,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 24.77,
+          "single_unit_attached": 3.67,
+          "two_or_more_units_in_structure": 71.18,
+          "studio_or_one_bedroom": 44.79,
+          "two_bedrooms": 29.07,
+          "three_or_more_bedrooms": 26.14,
+          "built_2000_or_later": 8.26,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 27,
+      "name": "GULFTON",
+      "facts": {
+        "total_housing_units": 18113,
+        "structure_counts": {
+          "single_unit_detached": 1373,
+          "single_unit_attached": 300,
+          "two_units": 432,
+          "three_or_four_units": 1710,
+          "five_to_nine_units": 2214,
+          "ten_or_more_units": 11986,
+          "mobile_home": 98,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 2447,
+          "one_bedroom": 8907,
+          "two_bedrooms": 5138,
+          "three_bedrooms": 1221,
+          "four_bedrooms": 350,
+          "five_or_more_bedrooms": 50
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 468,
+          "built_1940_to_1959": 1243,
+          "built_1960_to_1979": 9880,
+          "built_1980_to_1999": 4423,
+          "built_2000_to_2009": 1620,
+          "built_2010_to_2019": 434,
+          "built_2020_or_later": 46
+        },
+        "shares_pct": {
+          "single_unit_detached": 7.58,
+          "single_unit_attached": 1.66,
+          "two_or_more_units_in_structure": 90.22,
+          "studio_or_one_bedroom": 62.68,
+          "two_bedrooms": 28.37,
+          "three_or_more_bedrooms": 8.95,
+          "built_2000_or_later": 11.59,
+          "built_2020_or_later": 0.25
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 28,
+      "name": "UNIVERSITY PLACE",
+      "facts": {
+        "total_housing_units": 8748,
+        "structure_counts": {
+          "single_unit_detached": 3446,
+          "single_unit_attached": 798,
+          "two_units": 490,
+          "three_or_four_units": 146,
+          "five_to_nine_units": 315,
+          "ten_or_more_units": 3498,
+          "mobile_home": 56,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 494,
+          "one_bedroom": 2258,
+          "two_bedrooms": 1994,
+          "three_bedrooms": 2141,
+          "four_bedrooms": 1478,
+          "five_or_more_bedrooms": 384
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1913,
+          "built_1940_to_1959": 1058,
+          "built_1960_to_1979": 612,
+          "built_1980_to_1999": 1824,
+          "built_2000_to_2009": 1200,
+          "built_2010_to_2019": 1867,
+          "built_2020_or_later": 274
+        },
+        "shares_pct": {
+          "single_unit_detached": 39.39,
+          "single_unit_attached": 9.12,
+          "two_or_more_units_in_structure": 50.86,
+          "studio_or_one_bedroom": 31.46,
+          "two_bedrooms": 22.79,
+          "three_or_more_bedrooms": 45.76,
+          "built_2000_or_later": 38.19,
+          "built_2020_or_later": 3.13
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 29,
+      "name": "WESTWOOD",
+      "facts": {
+        "total_housing_units": 8846,
+        "structure_counts": {
+          "single_unit_detached": 700,
+          "single_unit_attached": 73,
+          "two_units": 187,
+          "three_or_four_units": 1016,
+          "five_to_nine_units": 1807,
+          "ten_or_more_units": 5025,
+          "mobile_home": 37,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1272,
+          "one_bedroom": 4158,
+          "two_bedrooms": 2597,
+          "three_bedrooms": 677,
+          "four_bedrooms": 143,
+          "five_or_more_bedrooms": 0
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 99,
+          "built_1940_to_1959": 163,
+          "built_1960_to_1979": 5061,
+          "built_1980_to_1999": 2759,
+          "built_2000_to_2009": 537,
+          "built_2010_to_2019": 194,
+          "built_2020_or_later": 34
+        },
+        "shares_pct": {
+          "single_unit_detached": 7.91,
+          "single_unit_attached": 0.83,
+          "two_or_more_units_in_structure": 90.83,
+          "studio_or_one_bedroom": 61.38,
+          "two_bedrooms": 29.36,
+          "three_or_more_bedrooms": 9.27,
+          "built_2000_or_later": 8.65,
+          "built_2020_or_later": 0.38
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 30,
+      "name": "BRAEBURN",
+      "facts": {
+        "total_housing_units": 7550,
+        "structure_counts": {
+          "single_unit_detached": 2030,
+          "single_unit_attached": 437,
+          "two_units": 145,
+          "three_or_four_units": 412,
+          "five_to_nine_units": 888,
+          "ten_or_more_units": 3638,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 664,
+          "one_bedroom": 2761,
+          "two_bedrooms": 1883,
+          "three_bedrooms": 1894,
+          "four_bedrooms": 336,
+          "five_or_more_bedrooms": 11
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 48,
+          "built_1940_to_1959": 1291,
+          "built_1960_to_1979": 4479,
+          "built_1980_to_1999": 1345,
+          "built_2000_to_2009": 293,
+          "built_2010_to_2019": 77,
+          "built_2020_or_later": 17
+        },
+        "shares_pct": {
+          "single_unit_detached": 26.89,
+          "single_unit_attached": 5.79,
+          "two_or_more_units_in_structure": 67.32,
+          "studio_or_one_bedroom": 45.36,
+          "two_bedrooms": 24.94,
+          "three_or_more_bedrooms": 29.68,
+          "built_2000_or_later": 5.13,
+          "built_2020_or_later": 0.23
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 31,
+      "name": "MEYERLAND AREA",
+      "facts": {
+        "total_housing_units": 9361,
+        "structure_counts": {
+          "single_unit_detached": 5350,
+          "single_unit_attached": 140,
+          "two_units": 88,
+          "three_or_four_units": 619,
+          "five_to_nine_units": 319,
+          "ten_or_more_units": 2821,
+          "mobile_home": 11,
+          "boat_rv_van_other": 14
+        },
+        "bedroom_counts": {
+          "no_bedroom": 324,
+          "one_bedroom": 1608,
+          "two_bedrooms": 2026,
+          "three_bedrooms": 2513,
+          "four_bedrooms": 2231,
+          "five_or_more_bedrooms": 658
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 158,
+          "built_1940_to_1959": 2100,
+          "built_1960_to_1979": 4762,
+          "built_1980_to_1999": 759,
+          "built_2000_to_2009": 712,
+          "built_2010_to_2019": 808,
+          "built_2020_or_later": 61
+        },
+        "shares_pct": {
+          "single_unit_detached": 57.15,
+          "single_unit_attached": 1.5,
+          "two_or_more_units_in_structure": 41.1,
+          "studio_or_one_bedroom": 20.64,
+          "two_bedrooms": 21.64,
+          "three_or_more_bedrooms": 57.71,
+          "built_2000_or_later": 16.89,
+          "built_2020_or_later": 0.65
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 32,
+      "name": "BRAESWOOD",
+      "facts": {
+        "total_housing_units": 12604,
+        "structure_counts": {
+          "single_unit_detached": 4360,
+          "single_unit_attached": 701,
+          "two_units": 127,
+          "three_or_four_units": 221,
+          "five_to_nine_units": 728,
+          "ten_or_more_units": 6441,
+          "mobile_home": 25,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 611,
+          "one_bedroom": 4284,
+          "two_bedrooms": 3226,
+          "three_bedrooms": 2290,
+          "four_bedrooms": 1440,
+          "five_or_more_bedrooms": 753
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 37,
+          "built_1940_to_1959": 1895,
+          "built_1960_to_1979": 2093,
+          "built_1980_to_1999": 3633,
+          "built_2000_to_2009": 2279,
+          "built_2010_to_2019": 2404,
+          "built_2020_or_later": 263
+        },
+        "shares_pct": {
+          "single_unit_detached": 34.59,
+          "single_unit_attached": 5.56,
+          "two_or_more_units_in_structure": 59.64,
+          "studio_or_one_bedroom": 38.84,
+          "two_bedrooms": 25.6,
+          "three_or_more_bedrooms": 35.57,
+          "built_2000_or_later": 39.24,
+          "built_2020_or_later": 2.09
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 33,
+      "name": "MEDICAL CENTER AREA",
+      "facts": {
+        "total_housing_units": 2146,
+        "structure_counts": {
+          "single_unit_detached": 208,
+          "single_unit_attached": 231,
+          "two_units": 5,
+          "three_or_four_units": 130,
+          "five_to_nine_units": 105,
+          "ten_or_more_units": 1467,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 199,
+          "one_bedroom": 882,
+          "two_bedrooms": 727,
+          "three_bedrooms": 243,
+          "four_bedrooms": 81,
+          "five_or_more_bedrooms": 15
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 78,
+          "built_1940_to_1959": 149,
+          "built_1960_to_1979": 234,
+          "built_1980_to_1999": 788,
+          "built_2000_to_2009": 99,
+          "built_2010_to_2019": 774,
+          "built_2020_or_later": 25
+        },
+        "shares_pct": {
+          "single_unit_detached": 9.69,
+          "single_unit_attached": 10.76,
+          "two_or_more_units_in_structure": 79.54,
+          "studio_or_one_bedroom": 50.37,
+          "two_bedrooms": 33.88,
+          "three_or_more_bedrooms": 15.8,
+          "built_2000_or_later": 41.85,
+          "built_2020_or_later": 1.16
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 34,
+      "name": "ASTRODOME AREA",
+      "facts": {
+        "total_housing_units": 11948,
+        "structure_counts": {
+          "single_unit_detached": 514,
+          "single_unit_attached": 687,
+          "two_units": 202,
+          "three_or_four_units": 1576,
+          "five_to_nine_units": 1118,
+          "ten_or_more_units": 7823,
+          "mobile_home": 28,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 697,
+          "one_bedroom": 5619,
+          "two_bedrooms": 5006,
+          "three_bedrooms": 508,
+          "four_bedrooms": 108,
+          "five_or_more_bedrooms": 11
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 120,
+          "built_1940_to_1959": 314,
+          "built_1960_to_1979": 1663,
+          "built_1980_to_1999": 6184,
+          "built_2000_to_2009": 2019,
+          "built_2010_to_2019": 1356,
+          "built_2020_or_later": 293
+        },
+        "shares_pct": {
+          "single_unit_detached": 4.3,
+          "single_unit_attached": 5.75,
+          "two_or_more_units_in_structure": 89.71,
+          "studio_or_one_bedroom": 52.86,
+          "two_bedrooms": 41.9,
+          "three_or_more_bedrooms": 5.25,
+          "built_2000_or_later": 30.7,
+          "built_2020_or_later": 2.45
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 35,
+      "name": "SOUTH MAIN",
+      "facts": {
+        "total_housing_units": 7298,
+        "structure_counts": {
+          "single_unit_detached": 1212,
+          "single_unit_attached": 99,
+          "two_units": 347,
+          "three_or_four_units": 243,
+          "five_to_nine_units": 686,
+          "ten_or_more_units": 4712,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 518,
+          "one_bedroom": 3679,
+          "two_bedrooms": 1757,
+          "three_bedrooms": 1136,
+          "four_bedrooms": 187,
+          "five_or_more_bedrooms": 21
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 255,
+          "built_1940_to_1959": 152,
+          "built_1960_to_1979": 1401,
+          "built_1980_to_1999": 1538,
+          "built_2000_to_2009": 1105,
+          "built_2010_to_2019": 2491,
+          "built_2020_or_later": 357
+        },
+        "shares_pct": {
+          "single_unit_detached": 16.61,
+          "single_unit_attached": 1.36,
+          "two_or_more_units_in_structure": 82.05,
+          "studio_or_one_bedroom": 57.51,
+          "two_bedrooms": 24.08,
+          "three_or_more_bedrooms": 18.42,
+          "built_2000_or_later": 54.17,
+          "built_2020_or_later": 4.89
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 36,
+      "name": "BRAYS OAKS",
+      "facts": {
+        "total_housing_units": 25148,
+        "structure_counts": {
+          "single_unit_detached": 9084,
+          "single_unit_attached": 1171,
+          "two_units": 268,
+          "three_or_four_units": 2208,
+          "five_to_nine_units": 3073,
+          "ten_or_more_units": 9128,
+          "mobile_home": 181,
+          "boat_rv_van_other": 35
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1993,
+          "one_bedroom": 7574,
+          "two_bedrooms": 6392,
+          "three_bedrooms": 4971,
+          "four_bedrooms": 3717,
+          "five_or_more_bedrooms": 501
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 335,
+          "built_1940_to_1959": 933,
+          "built_1960_to_1979": 12416,
+          "built_1980_to_1999": 9027,
+          "built_2000_to_2009": 1787,
+          "built_2010_to_2019": 630,
+          "built_2020_or_later": 20
+        },
+        "shares_pct": {
+          "single_unit_detached": 36.12,
+          "single_unit_attached": 4.66,
+          "two_or_more_units_in_structure": 58.36,
+          "studio_or_one_bedroom": 38.04,
+          "two_bedrooms": 25.42,
+          "three_or_more_bedrooms": 36.54,
+          "built_2000_or_later": 9.69,
+          "built_2020_or_later": 0.08
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 37,
+      "name": "WESTBURY",
+      "facts": {
+        "total_housing_units": 8935,
+        "structure_counts": {
+          "single_unit_detached": 5320,
+          "single_unit_attached": 233,
+          "two_units": 15,
+          "three_or_four_units": 816,
+          "five_to_nine_units": 513,
+          "ten_or_more_units": 2010,
+          "mobile_home": 27,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 421,
+          "one_bedroom": 1268,
+          "two_bedrooms": 1883,
+          "three_bedrooms": 4412,
+          "four_bedrooms": 841,
+          "five_or_more_bedrooms": 109
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 13,
+          "built_1940_to_1959": 2177,
+          "built_1960_to_1979": 5216,
+          "built_1980_to_1999": 1083,
+          "built_2000_to_2009": 355,
+          "built_2010_to_2019": 90,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 59.54,
+          "single_unit_attached": 2.61,
+          "two_or_more_units_in_structure": 37.54,
+          "studio_or_one_bedroom": 18.9,
+          "two_bedrooms": 21.07,
+          "three_or_more_bedrooms": 60.01,
+          "built_2000_or_later": 4.98,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 38,
+      "name": "NEAR SOUTHWEST",
+      "facts": {
+        "total_housing_units": 6864,
+        "structure_counts": {
+          "single_unit_detached": 3483,
+          "single_unit_attached": 66,
+          "two_units": 72,
+          "three_or_four_units": 238,
+          "five_to_nine_units": 497,
+          "ten_or_more_units": 2397,
+          "mobile_home": 111,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 537,
+          "one_bedroom": 1524,
+          "two_bedrooms": 1492,
+          "three_bedrooms": 2711,
+          "four_bedrooms": 542,
+          "five_or_more_bedrooms": 57
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 72,
+          "built_1940_to_1959": 2371,
+          "built_1960_to_1979": 2024,
+          "built_1980_to_1999": 633,
+          "built_2000_to_2009": 973,
+          "built_2010_to_2019": 567,
+          "built_2020_or_later": 224
+        },
+        "shares_pct": {
+          "single_unit_detached": 50.74,
+          "single_unit_attached": 0.96,
+          "two_or_more_units_in_structure": 46.68,
+          "studio_or_one_bedroom": 30.03,
+          "two_bedrooms": 21.74,
+          "three_or_more_bedrooms": 48.22,
+          "built_2000_or_later": 25.7,
+          "built_2020_or_later": 3.26
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 39,
+      "name": "FONDREN GARDENS",
+      "facts": {
+        "total_housing_units": 1322,
+        "structure_counts": {
+          "single_unit_detached": 491,
+          "single_unit_attached": 20,
+          "two_units": 76,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 46,
+          "ten_or_more_units": 660,
+          "mobile_home": 30,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 71,
+          "one_bedroom": 343,
+          "two_bedrooms": 494,
+          "three_bedrooms": 183,
+          "four_bedrooms": 135,
+          "five_or_more_bedrooms": 97
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 5,
+          "built_1940_to_1959": 273,
+          "built_1960_to_1979": 279,
+          "built_1980_to_1999": 424,
+          "built_2000_to_2009": 237,
+          "built_2010_to_2019": 104,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 37.14,
+          "single_unit_attached": 1.51,
+          "two_or_more_units_in_structure": 59.15,
+          "studio_or_one_bedroom": 31.32,
+          "two_bedrooms": 37.37,
+          "three_or_more_bedrooms": 31.39,
+          "built_2000_or_later": 25.79,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 40,
+      "name": "CENTRAL SOUTHWEST",
+      "facts": {
+        "total_housing_units": 24821,
+        "structure_counts": {
+          "single_unit_detached": 19380,
+          "single_unit_attached": 568,
+          "two_units": 63,
+          "three_or_four_units": 579,
+          "five_to_nine_units": 737,
+          "ten_or_more_units": 2407,
+          "mobile_home": 1087,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 496,
+          "one_bedroom": 1208,
+          "two_bedrooms": 3567,
+          "three_bedrooms": 12600,
+          "four_bedrooms": 6683,
+          "five_or_more_bedrooms": 267
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 109,
+          "built_1940_to_1959": 2305,
+          "built_1960_to_1979": 7495,
+          "built_1980_to_1999": 3659,
+          "built_2000_to_2009": 7098,
+          "built_2010_to_2019": 3810,
+          "built_2020_or_later": 346
+        },
+        "shares_pct": {
+          "single_unit_detached": 78.08,
+          "single_unit_attached": 2.29,
+          "two_or_more_units_in_structure": 15.25,
+          "studio_or_one_bedroom": 6.87,
+          "two_bedrooms": 14.37,
+          "three_or_more_bedrooms": 78.76,
+          "built_2000_or_later": 45.34,
+          "built_2020_or_later": 1.39
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 41,
+      "name": "FORT BEND HOUSTON",
+      "facts": {
+        "total_housing_units": 10952,
+        "structure_counts": {
+          "single_unit_detached": 9947,
+          "single_unit_attached": 501,
+          "two_units": 26,
+          "three_or_four_units": 102,
+          "five_to_nine_units": 11,
+          "ten_or_more_units": 255,
+          "mobile_home": 110,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 33,
+          "one_bedroom": 175,
+          "two_bedrooms": 941,
+          "three_bedrooms": 7482,
+          "four_bedrooms": 2099,
+          "five_or_more_bedrooms": 222
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 98,
+          "built_1940_to_1959": 209,
+          "built_1960_to_1979": 5286,
+          "built_1980_to_1999": 3912,
+          "built_2000_to_2009": 1063,
+          "built_2010_to_2019": 360,
+          "built_2020_or_later": 25
+        },
+        "shares_pct": {
+          "single_unit_detached": 90.82,
+          "single_unit_attached": 4.57,
+          "two_or_more_units_in_structure": 3.6,
+          "studio_or_one_bedroom": 1.9,
+          "two_bedrooms": 8.59,
+          "three_or_more_bedrooms": 89.51,
+          "built_2000_or_later": 13.22,
+          "built_2020_or_later": 0.23
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 42,
+      "name": "IAH / AIRPORT AREA",
+      "facts": {
+        "total_housing_units": 5668,
+        "structure_counts": {
+          "single_unit_detached": 1974,
+          "single_unit_attached": 50,
+          "two_units": 100,
+          "three_or_four_units": 414,
+          "five_to_nine_units": 340,
+          "ten_or_more_units": 2503,
+          "mobile_home": 264,
+          "boat_rv_van_other": 23
+        },
+        "bedroom_counts": {
+          "no_bedroom": 171,
+          "one_bedroom": 1218,
+          "two_bedrooms": 1963,
+          "three_bedrooms": 1843,
+          "four_bedrooms": 432,
+          "five_or_more_bedrooms": 40
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 111,
+          "built_1940_to_1959": 319,
+          "built_1960_to_1979": 1150,
+          "built_1980_to_1999": 1806,
+          "built_2000_to_2009": 1388,
+          "built_2010_to_2019": 752,
+          "built_2020_or_later": 141
+        },
+        "shares_pct": {
+          "single_unit_detached": 34.83,
+          "single_unit_attached": 0.88,
+          "two_or_more_units_in_structure": 59.23,
+          "studio_or_one_bedroom": 24.51,
+          "two_bedrooms": 34.63,
+          "three_or_more_bedrooms": 40.84,
+          "built_2000_or_later": 40.24,
+          "built_2020_or_later": 2.49
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 43,
+      "name": "KINGWOOD AREA",
+      "facts": {
+        "total_housing_units": 25558,
+        "structure_counts": {
+          "single_unit_detached": 19044,
+          "single_unit_attached": 378,
+          "two_units": 131,
+          "three_or_four_units": 717,
+          "five_to_nine_units": 744,
+          "ten_or_more_units": 4444,
+          "mobile_home": 100,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 786,
+          "one_bedroom": 2462,
+          "two_bedrooms": 3316,
+          "three_bedrooms": 6230,
+          "four_bedrooms": 10359,
+          "five_or_more_bedrooms": 2405
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 259,
+          "built_1940_to_1959": 245,
+          "built_1960_to_1979": 5662,
+          "built_1980_to_1999": 13067,
+          "built_2000_to_2009": 3106,
+          "built_2010_to_2019": 2602,
+          "built_2020_or_later": 617
+        },
+        "shares_pct": {
+          "single_unit_detached": 74.51,
+          "single_unit_attached": 1.48,
+          "two_or_more_units_in_structure": 23.62,
+          "studio_or_one_bedroom": 12.71,
+          "two_bedrooms": 12.97,
+          "three_or_more_bedrooms": 74.32,
+          "built_2000_or_later": 24.75,
+          "built_2020_or_later": 2.41
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 44,
+      "name": "LAKE HOUSTON",
+      "facts": {
+        "total_housing_units": 12051,
+        "structure_counts": {
+          "single_unit_detached": 10270,
+          "single_unit_attached": 78,
+          "two_units": 20,
+          "three_or_four_units": 67,
+          "five_to_nine_units": 86,
+          "ten_or_more_units": 1183,
+          "mobile_home": 333,
+          "boat_rv_van_other": 14
+        },
+        "bedroom_counts": {
+          "no_bedroom": 135,
+          "one_bedroom": 1113,
+          "two_bedrooms": 653,
+          "three_bedrooms": 3982,
+          "four_bedrooms": 4587,
+          "five_or_more_bedrooms": 1581
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 58,
+          "built_1940_to_1959": 122,
+          "built_1960_to_1979": 1127,
+          "built_1980_to_1999": 2316,
+          "built_2000_to_2009": 3680,
+          "built_2010_to_2019": 4437,
+          "built_2020_or_later": 312
+        },
+        "shares_pct": {
+          "single_unit_detached": 85.22,
+          "single_unit_attached": 0.65,
+          "two_or_more_units_in_structure": 11.25,
+          "studio_or_one_bedroom": 10.36,
+          "two_bedrooms": 5.42,
+          "three_or_more_bedrooms": 84.23,
+          "built_2000_or_later": 69.94,
+          "built_2020_or_later": 2.59
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 1,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 45,
+      "name": "NORTHSIDE/NORTHLINE",
+      "facts": {
+        "total_housing_units": 18755,
+        "structure_counts": {
+          "single_unit_detached": 11222,
+          "single_unit_attached": 381,
+          "two_units": 788,
+          "three_or_four_units": 572,
+          "five_to_nine_units": 717,
+          "ten_or_more_units": 4087,
+          "mobile_home": 989,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 920,
+          "one_bedroom": 2858,
+          "two_bedrooms": 5331,
+          "three_bedrooms": 7506,
+          "four_bedrooms": 1902,
+          "five_or_more_bedrooms": 237
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 302,
+          "built_1940_to_1959": 6548,
+          "built_1960_to_1979": 6554,
+          "built_1980_to_1999": 2294,
+          "built_2000_to_2009": 1838,
+          "built_2010_to_2019": 1139,
+          "built_2020_or_later": 79
+        },
+        "shares_pct": {
+          "single_unit_detached": 59.83,
+          "single_unit_attached": 2.03,
+          "two_or_more_units_in_structure": 32.87,
+          "studio_or_one_bedroom": 20.14,
+          "two_bedrooms": 28.42,
+          "three_or_more_bedrooms": 51.43,
+          "built_2000_or_later": 16.29,
+          "built_2020_or_later": 0.42
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 46,
+      "name": "EASTEX - JENSEN AREA",
+      "facts": {
+        "total_housing_units": 9525,
+        "structure_counts": {
+          "single_unit_detached": 6404,
+          "single_unit_attached": 367,
+          "two_units": 327,
+          "three_or_four_units": 260,
+          "five_to_nine_units": 237,
+          "ten_or_more_units": 1645,
+          "mobile_home": 286,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 452,
+          "one_bedroom": 736,
+          "two_bedrooms": 3733,
+          "three_bedrooms": 3196,
+          "four_bedrooms": 1210,
+          "five_or_more_bedrooms": 197
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 554,
+          "built_1940_to_1959": 3395,
+          "built_1960_to_1979": 2703,
+          "built_1980_to_1999": 1473,
+          "built_2000_to_2009": 893,
+          "built_2010_to_2019": 385,
+          "built_2020_or_later": 121
+        },
+        "shares_pct": {
+          "single_unit_detached": 67.23,
+          "single_unit_attached": 3.85,
+          "two_or_more_units_in_structure": 25.92,
+          "studio_or_one_bedroom": 12.47,
+          "two_bedrooms": 39.19,
+          "three_or_more_bedrooms": 48.33,
+          "built_2000_or_later": 14.69,
+          "built_2020_or_later": 1.27
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 47,
+      "name": "EAST LITTLE YORK / HOMESTEAD",
+      "facts": {
+        "total_housing_units": 7779,
+        "structure_counts": {
+          "single_unit_detached": 6355,
+          "single_unit_attached": 249,
+          "two_units": 22,
+          "three_or_four_units": 474,
+          "five_to_nine_units": 109,
+          "ten_or_more_units": 228,
+          "mobile_home": 342,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 18,
+          "one_bedroom": 414,
+          "two_bedrooms": 990,
+          "three_bedrooms": 4872,
+          "four_bedrooms": 1088,
+          "five_or_more_bedrooms": 395
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 100,
+          "built_1940_to_1959": 1831,
+          "built_1960_to_1979": 4080,
+          "built_1980_to_1999": 877,
+          "built_2000_to_2009": 449,
+          "built_2010_to_2019": 361,
+          "built_2020_or_later": 79
+        },
+        "shares_pct": {
+          "single_unit_detached": 81.69,
+          "single_unit_attached": 3.2,
+          "two_or_more_units_in_structure": 10.71,
+          "studio_or_one_bedroom": 5.55,
+          "two_bedrooms": 12.73,
+          "three_or_more_bedrooms": 81.69,
+          "built_2000_or_later": 11.43,
+          "built_2020_or_later": 1.02
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 48,
+      "name": "TRINITY / HOUSTON GARDENS",
+      "facts": {
+        "total_housing_units": 7051,
+        "structure_counts": {
+          "single_unit_detached": 5855,
+          "single_unit_attached": 118,
+          "two_units": 294,
+          "three_or_four_units": 52,
+          "five_to_nine_units": 146,
+          "ten_or_more_units": 539,
+          "mobile_home": 46,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 133,
+          "one_bedroom": 563,
+          "two_bedrooms": 2376,
+          "three_bedrooms": 3092,
+          "four_bedrooms": 786,
+          "five_or_more_bedrooms": 101
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 342,
+          "built_1940_to_1959": 3371,
+          "built_1960_to_1979": 2118,
+          "built_1980_to_1999": 336,
+          "built_2000_to_2009": 502,
+          "built_2010_to_2019": 266,
+          "built_2020_or_later": 117
+        },
+        "shares_pct": {
+          "single_unit_detached": 83.04,
+          "single_unit_attached": 1.67,
+          "two_or_more_units_in_structure": 14.62,
+          "studio_or_one_bedroom": 9.87,
+          "two_bedrooms": 33.7,
+          "three_or_more_bedrooms": 56.43,
+          "built_2000_or_later": 12.55,
+          "built_2020_or_later": 1.66
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 49,
+      "name": "EAST HOUSTON",
+      "facts": {
+        "total_housing_units": 7905,
+        "structure_counts": {
+          "single_unit_detached": 6085,
+          "single_unit_attached": 239,
+          "two_units": 112,
+          "three_or_four_units": 80,
+          "five_to_nine_units": 261,
+          "ten_or_more_units": 1082,
+          "mobile_home": 46,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 48,
+          "one_bedroom": 633,
+          "two_bedrooms": 1515,
+          "three_bedrooms": 4706,
+          "four_bedrooms": 867,
+          "five_or_more_bedrooms": 136
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 160,
+          "built_1940_to_1959": 2780,
+          "built_1960_to_1979": 2388,
+          "built_1980_to_1999": 835,
+          "built_2000_to_2009": 524,
+          "built_2010_to_2019": 1032,
+          "built_2020_or_later": 186
+        },
+        "shares_pct": {
+          "single_unit_detached": 76.98,
+          "single_unit_attached": 3.02,
+          "two_or_more_units_in_structure": 19.42,
+          "studio_or_one_bedroom": 8.61,
+          "two_bedrooms": 19.17,
+          "three_or_more_bedrooms": 72.22,
+          "built_2000_or_later": 22.04,
+          "built_2020_or_later": 2.35
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 50,
+      "name": "SETTEGAST",
+      "facts": {
+        "total_housing_units": 1626,
+        "structure_counts": {
+          "single_unit_detached": 1157,
+          "single_unit_attached": 57,
+          "two_units": 19,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 36,
+          "ten_or_more_units": 315,
+          "mobile_home": 42,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 0,
+          "one_bedroom": 252,
+          "two_bedrooms": 644,
+          "three_bedrooms": 586,
+          "four_bedrooms": 114,
+          "five_or_more_bedrooms": 30
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 47,
+          "built_1940_to_1959": 574,
+          "built_1960_to_1979": 264,
+          "built_1980_to_1999": 330,
+          "built_2000_to_2009": 131,
+          "built_2010_to_2019": 178,
+          "built_2020_or_later": 101
+        },
+        "shares_pct": {
+          "single_unit_detached": 71.16,
+          "single_unit_attached": 3.51,
+          "two_or_more_units_in_structure": 22.76,
+          "studio_or_one_bedroom": 15.5,
+          "two_bedrooms": 39.61,
+          "three_or_more_bedrooms": 44.9,
+          "built_2000_or_later": 25.22,
+          "built_2020_or_later": 6.21
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 51,
+      "name": "NEAR NORTHSIDE",
+      "facts": {
+        "total_housing_units": 10707,
+        "structure_counts": {
+          "single_unit_detached": 7542,
+          "single_unit_attached": 358,
+          "two_units": 591,
+          "three_or_four_units": 419,
+          "five_to_nine_units": 368,
+          "ten_or_more_units": 1278,
+          "mobile_home": 150,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 781,
+          "one_bedroom": 1535,
+          "two_bedrooms": 3897,
+          "three_bedrooms": 3767,
+          "four_bedrooms": 647,
+          "five_or_more_bedrooms": 79
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 2303,
+          "built_1940_to_1959": 4152,
+          "built_1960_to_1979": 1656,
+          "built_1980_to_1999": 310,
+          "built_2000_to_2009": 265,
+          "built_2010_to_2019": 1520,
+          "built_2020_or_later": 499
+        },
+        "shares_pct": {
+          "single_unit_detached": 70.44,
+          "single_unit_attached": 3.34,
+          "two_or_more_units_in_structure": 24.81,
+          "studio_or_one_bedroom": 21.63,
+          "two_bedrooms": 36.4,
+          "three_or_more_bedrooms": 41.96,
+          "built_2000_or_later": 21.33,
+          "built_2020_or_later": 4.66
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 52,
+      "name": "KASHMERE GARDENS",
+      "facts": {
+        "total_housing_units": 4647,
+        "structure_counts": {
+          "single_unit_detached": 3318,
+          "single_unit_attached": 160,
+          "two_units": 112,
+          "three_or_four_units": 105,
+          "five_to_nine_units": 175,
+          "ten_or_more_units": 712,
+          "mobile_home": 65,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 147,
+          "one_bedroom": 495,
+          "two_bedrooms": 2111,
+          "three_bedrooms": 1686,
+          "four_bedrooms": 129,
+          "five_or_more_bedrooms": 79
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 459,
+          "built_1940_to_1959": 1902,
+          "built_1960_to_1979": 1141,
+          "built_1980_to_1999": 325,
+          "built_2000_to_2009": 225,
+          "built_2010_to_2019": 509,
+          "built_2020_or_later": 85
+        },
+        "shares_pct": {
+          "single_unit_detached": 71.4,
+          "single_unit_attached": 3.44,
+          "two_or_more_units_in_structure": 23.76,
+          "studio_or_one_bedroom": 13.82,
+          "two_bedrooms": 45.43,
+          "three_or_more_bedrooms": 40.76,
+          "built_2000_or_later": 17.62,
+          "built_2020_or_later": 1.83
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 53,
+      "name": "EL DORADO / OATES PRAIRIE",
+      "facts": {
+        "total_housing_units": 1039,
+        "structure_counts": {
+          "single_unit_detached": 826,
+          "single_unit_attached": 5,
+          "two_units": 0,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 0,
+          "ten_or_more_units": 202,
+          "mobile_home": 6,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 0,
+          "one_bedroom": 46,
+          "two_bedrooms": 299,
+          "three_bedrooms": 390,
+          "four_bedrooms": 305,
+          "five_or_more_bedrooms": 0
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 68,
+          "built_1940_to_1959": 365,
+          "built_1960_to_1979": 262,
+          "built_1980_to_1999": 67,
+          "built_2000_to_2009": 83,
+          "built_2010_to_2019": 180,
+          "built_2020_or_later": 15
+        },
+        "shares_pct": {
+          "single_unit_detached": 79.5,
+          "single_unit_attached": 0.48,
+          "two_or_more_units_in_structure": 19.44,
+          "studio_or_one_bedroom": 4.43,
+          "two_bedrooms": 28.78,
+          "three_or_more_bedrooms": 66.89,
+          "built_2000_or_later": 26.76,
+          "built_2020_or_later": 1.44
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 54,
+      "name": "HUNTERWOOD",
+      "facts": {
+        "total_housing_units": 499,
+        "structure_counts": {
+          "single_unit_detached": 447,
+          "single_unit_attached": 0,
+          "two_units": 7,
+          "three_or_four_units": 0,
+          "five_to_nine_units": 4,
+          "ten_or_more_units": 40,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 5,
+          "one_bedroom": 4,
+          "two_bedrooms": 58,
+          "three_bedrooms": 317,
+          "four_bedrooms": 115,
+          "five_or_more_bedrooms": 0
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 0,
+          "built_1940_to_1959": 0,
+          "built_1960_to_1979": 174,
+          "built_1980_to_1999": 96,
+          "built_2000_to_2009": 76,
+          "built_2010_to_2019": 153,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 89.58,
+          "single_unit_attached": 0.0,
+          "two_or_more_units_in_structure": 10.22,
+          "studio_or_one_bedroom": 1.8,
+          "two_bedrooms": 11.62,
+          "three_or_more_bedrooms": 86.57,
+          "built_2000_or_later": 45.89,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 55,
+      "name": "GREATER FIFTH WARD",
+      "facts": {
+        "total_housing_units": 8656,
+        "structure_counts": {
+          "single_unit_detached": 5579,
+          "single_unit_attached": 401,
+          "two_units": 310,
+          "three_or_four_units": 312,
+          "five_to_nine_units": 338,
+          "ten_or_more_units": 1530,
+          "mobile_home": 168,
+          "boat_rv_van_other": 18
+        },
+        "bedroom_counts": {
+          "no_bedroom": 578,
+          "one_bedroom": 1075,
+          "two_bedrooms": 3254,
+          "three_bedrooms": 3221,
+          "four_bedrooms": 500,
+          "five_or_more_bedrooms": 27
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1426,
+          "built_1940_to_1959": 2509,
+          "built_1960_to_1979": 1590,
+          "built_1980_to_1999": 1178,
+          "built_2000_to_2009": 813,
+          "built_2010_to_2019": 938,
+          "built_2020_or_later": 201
+        },
+        "shares_pct": {
+          "single_unit_detached": 64.45,
+          "single_unit_attached": 4.63,
+          "two_or_more_units_in_structure": 28.77,
+          "studio_or_one_bedroom": 19.1,
+          "two_bedrooms": 37.59,
+          "three_or_more_bedrooms": 43.3,
+          "built_2000_or_later": 22.55,
+          "built_2020_or_later": 2.32
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 56,
+      "name": "DENVER HARBOR / PORT HOUSTON",
+      "facts": {
+        "total_housing_units": 5646,
+        "structure_counts": {
+          "single_unit_detached": 4354,
+          "single_unit_attached": 444,
+          "two_units": 125,
+          "three_or_four_units": 311,
+          "five_to_nine_units": 79,
+          "ten_or_more_units": 263,
+          "mobile_home": 71,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 336,
+          "one_bedroom": 587,
+          "two_bedrooms": 1849,
+          "three_bedrooms": 2425,
+          "four_bedrooms": 397,
+          "five_or_more_bedrooms": 52
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 594,
+          "built_1940_to_1959": 3286,
+          "built_1960_to_1979": 1013,
+          "built_1980_to_1999": 487,
+          "built_2000_to_2009": 78,
+          "built_2010_to_2019": 136,
+          "built_2020_or_later": 52
+        },
+        "shares_pct": {
+          "single_unit_detached": 77.12,
+          "single_unit_attached": 7.86,
+          "two_or_more_units_in_structure": 13.78,
+          "studio_or_one_bedroom": 16.35,
+          "two_bedrooms": 32.75,
+          "three_or_more_bedrooms": 50.9,
+          "built_2000_or_later": 4.71,
+          "built_2020_or_later": 0.92
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 57,
+      "name": "PLEASANTVILLE AREA",
+      "facts": {
+        "total_housing_units": 1262,
+        "structure_counts": {
+          "single_unit_detached": 1142,
+          "single_unit_attached": 9,
+          "two_units": 20,
+          "three_or_four_units": 51,
+          "five_to_nine_units": 20,
+          "ten_or_more_units": 19,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 34,
+          "one_bedroom": 63,
+          "two_bedrooms": 267,
+          "three_bedrooms": 687,
+          "four_bedrooms": 166,
+          "five_or_more_bedrooms": 46
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 25,
+          "built_1940_to_1959": 923,
+          "built_1960_to_1979": 222,
+          "built_1980_to_1999": 84,
+          "built_2000_to_2009": 7,
+          "built_2010_to_2019": 0,
+          "built_2020_or_later": 1
+        },
+        "shares_pct": {
+          "single_unit_detached": 90.49,
+          "single_unit_attached": 0.71,
+          "two_or_more_units_in_structure": 8.72,
+          "studio_or_one_bedroom": 7.69,
+          "two_bedrooms": 21.16,
+          "three_or_more_bedrooms": 71.24,
+          "built_2000_or_later": 0.63,
+          "built_2020_or_later": 0.08
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 58,
+      "name": "NORTHSHORE",
+      "facts": {
+        "total_housing_units": 9099,
+        "structure_counts": {
+          "single_unit_detached": 4963,
+          "single_unit_attached": 101,
+          "two_units": 217,
+          "three_or_four_units": 401,
+          "five_to_nine_units": 746,
+          "ten_or_more_units": 2402,
+          "mobile_home": 269,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 107,
+          "one_bedroom": 1647,
+          "two_bedrooms": 2504,
+          "three_bedrooms": 3939,
+          "four_bedrooms": 796,
+          "five_or_more_bedrooms": 107
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 172,
+          "built_1940_to_1959": 2418,
+          "built_1960_to_1979": 4160,
+          "built_1980_to_1999": 1671,
+          "built_2000_to_2009": 532,
+          "built_2010_to_2019": 121,
+          "built_2020_or_later": 26
+        },
+        "shares_pct": {
+          "single_unit_detached": 54.54,
+          "single_unit_attached": 1.11,
+          "two_or_more_units_in_structure": 41.39,
+          "studio_or_one_bedroom": 19.28,
+          "two_bedrooms": 27.52,
+          "three_or_more_bedrooms": 53.21,
+          "built_2000_or_later": 7.46,
+          "built_2020_or_later": 0.29
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 59,
+      "name": "CLINTON PARK TRI-COMMUNITY",
+      "facts": {
+        "total_housing_units": 1233,
+        "structure_counts": {
+          "single_unit_detached": 1078,
+          "single_unit_attached": 13,
+          "two_units": 15,
+          "three_or_four_units": 31,
+          "five_to_nine_units": 8,
+          "ten_or_more_units": 81,
+          "mobile_home": 7,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 28,
+          "one_bedroom": 89,
+          "two_bedrooms": 353,
+          "three_bedrooms": 679,
+          "four_bedrooms": 80,
+          "five_or_more_bedrooms": 5
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 78,
+          "built_1940_to_1959": 711,
+          "built_1960_to_1979": 159,
+          "built_1980_to_1999": 56,
+          "built_2000_to_2009": 74,
+          "built_2010_to_2019": 23,
+          "built_2020_or_later": 133
+        },
+        "shares_pct": {
+          "single_unit_detached": 87.43,
+          "single_unit_attached": 1.05,
+          "two_or_more_units_in_structure": 10.95,
+          "studio_or_one_bedroom": 9.49,
+          "two_bedrooms": 28.63,
+          "three_or_more_bedrooms": 61.96,
+          "built_2000_or_later": 18.65,
+          "built_2020_or_later": 10.79
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 60,
+      "name": "FOURTH WARD",
+      "facts": {
+        "total_housing_units": 3809,
+        "structure_counts": {
+          "single_unit_detached": 536,
+          "single_unit_attached": 496,
+          "two_units": 65,
+          "three_or_four_units": 86,
+          "five_to_nine_units": 81,
+          "ten_or_more_units": 2545,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 307,
+          "one_bedroom": 1645,
+          "two_bedrooms": 1037,
+          "three_bedrooms": 741,
+          "four_bedrooms": 69,
+          "five_or_more_bedrooms": 10
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 62,
+          "built_1940_to_1959": 215,
+          "built_1960_to_1979": 117,
+          "built_1980_to_1999": 542,
+          "built_2000_to_2009": 1442,
+          "built_2010_to_2019": 1391,
+          "built_2020_or_later": 38
+        },
+        "shares_pct": {
+          "single_unit_detached": 14.07,
+          "single_unit_attached": 13.02,
+          "two_or_more_units_in_structure": 72.91,
+          "studio_or_one_bedroom": 51.25,
+          "two_bedrooms": 27.22,
+          "three_or_more_bedrooms": 21.53,
+          "built_2000_or_later": 75.37,
+          "built_2020_or_later": 1.0
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 61,
+      "name": "DOWNTOWN",
+      "facts": {
+        "total_housing_units": 8178,
+        "structure_counts": {
+          "single_unit_detached": 665,
+          "single_unit_attached": 434,
+          "two_units": 1,
+          "three_or_four_units": 56,
+          "five_to_nine_units": 208,
+          "ten_or_more_units": 6782,
+          "mobile_home": 32,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1355,
+          "one_bedroom": 4060,
+          "two_bedrooms": 1910,
+          "three_bedrooms": 733,
+          "four_bedrooms": 99,
+          "five_or_more_bedrooms": 21
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1301,
+          "built_1940_to_1959": 286,
+          "built_1960_to_1979": 432,
+          "built_1980_to_1999": 716,
+          "built_2000_to_2009": 1125,
+          "built_2010_to_2019": 3800,
+          "built_2020_or_later": 519
+        },
+        "shares_pct": {
+          "single_unit_detached": 8.13,
+          "single_unit_attached": 5.31,
+          "two_or_more_units_in_structure": 86.17,
+          "studio_or_one_bedroom": 66.21,
+          "two_bedrooms": 23.36,
+          "three_or_more_bedrooms": 10.43,
+          "built_2000_or_later": 66.57,
+          "built_2020_or_later": 6.35
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 62,
+      "name": "MIDTOWN",
+      "facts": {
+        "total_housing_units": 9402,
+        "structure_counts": {
+          "single_unit_detached": 580,
+          "single_unit_attached": 1144,
+          "two_units": 15,
+          "three_or_four_units": 183,
+          "five_to_nine_units": 258,
+          "ten_or_more_units": 7221,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1438,
+          "one_bedroom": 4269,
+          "two_bedrooms": 2532,
+          "three_bedrooms": 1096,
+          "four_bedrooms": 50,
+          "five_or_more_bedrooms": 17
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 395,
+          "built_1940_to_1959": 205,
+          "built_1960_to_1979": 765,
+          "built_1980_to_1999": 1514,
+          "built_2000_to_2009": 2600,
+          "built_2010_to_2019": 3761,
+          "built_2020_or_later": 162
+        },
+        "shares_pct": {
+          "single_unit_detached": 6.17,
+          "single_unit_attached": 12.17,
+          "two_or_more_units_in_structure": 81.65,
+          "studio_or_one_bedroom": 60.7,
+          "two_bedrooms": 26.93,
+          "three_or_more_bedrooms": 12.37,
+          "built_2000_or_later": 69.38,
+          "built_2020_or_later": 1.72
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 63,
+      "name": "SECOND WARD",
+      "facts": {
+        "total_housing_units": 6098,
+        "structure_counts": {
+          "single_unit_detached": 2902,
+          "single_unit_attached": 691,
+          "two_units": 427,
+          "three_or_four_units": 598,
+          "five_to_nine_units": 311,
+          "ten_or_more_units": 1170,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 867,
+          "one_bedroom": 1255,
+          "two_bedrooms": 1992,
+          "three_bedrooms": 1573,
+          "four_bedrooms": 335,
+          "five_or_more_bedrooms": 78
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1855,
+          "built_1940_to_1959": 743,
+          "built_1960_to_1979": 835,
+          "built_1980_to_1999": 471,
+          "built_2000_to_2009": 646,
+          "built_2010_to_2019": 1213,
+          "built_2020_or_later": 336
+        },
+        "shares_pct": {
+          "single_unit_detached": 47.59,
+          "single_unit_attached": 11.33,
+          "two_or_more_units_in_structure": 41.1,
+          "studio_or_one_bedroom": 34.8,
+          "two_bedrooms": 32.67,
+          "three_or_more_bedrooms": 32.57,
+          "built_2000_or_later": 36.0,
+          "built_2020_or_later": 5.51
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 2
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 64,
+      "name": "GREATER EASTWOOD",
+      "facts": {
+        "total_housing_units": 5634,
+        "structure_counts": {
+          "single_unit_detached": 3138,
+          "single_unit_attached": 218,
+          "two_units": 743,
+          "three_or_four_units": 451,
+          "five_to_nine_units": 172,
+          "ten_or_more_units": 826,
+          "mobile_home": 86,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 849,
+          "one_bedroom": 1198,
+          "two_bedrooms": 1767,
+          "three_bedrooms": 1305,
+          "four_bedrooms": 482,
+          "five_or_more_bedrooms": 33
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1729,
+          "built_1940_to_1959": 1464,
+          "built_1960_to_1979": 432,
+          "built_1980_to_1999": 599,
+          "built_2000_to_2009": 306,
+          "built_2010_to_2019": 781,
+          "built_2020_or_later": 324
+        },
+        "shares_pct": {
+          "single_unit_detached": 55.7,
+          "single_unit_attached": 3.87,
+          "two_or_more_units_in_structure": 38.91,
+          "studio_or_one_bedroom": 36.33,
+          "two_bedrooms": 31.36,
+          "three_or_more_bedrooms": 32.3,
+          "built_2000_or_later": 25.04,
+          "built_2020_or_later": 5.75
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 65,
+      "name": "HARRISBURG / MANCHESTER / SMITH ADDITION",
+      "facts": {
+        "total_housing_units": 911,
+        "structure_counts": {
+          "single_unit_detached": 694,
+          "single_unit_attached": 14,
+          "two_units": 7,
+          "three_or_four_units": 88,
+          "five_to_nine_units": 8,
+          "ten_or_more_units": 14,
+          "mobile_home": 86,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 18,
+          "one_bedroom": 66,
+          "two_bedrooms": 410,
+          "three_bedrooms": 352,
+          "four_bedrooms": 65,
+          "five_or_more_bedrooms": 0
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 191,
+          "built_1940_to_1959": 416,
+          "built_1960_to_1979": 82,
+          "built_1980_to_1999": 62,
+          "built_2000_to_2009": 71,
+          "built_2010_to_2019": 74,
+          "built_2020_or_later": 15
+        },
+        "shares_pct": {
+          "single_unit_detached": 76.18,
+          "single_unit_attached": 1.54,
+          "two_or_more_units_in_structure": 12.84,
+          "studio_or_one_bedroom": 9.22,
+          "two_bedrooms": 45.01,
+          "three_or_more_bedrooms": 45.77,
+          "built_2000_or_later": 17.56,
+          "built_2020_or_later": 1.65
+        }
+      },
+      "quality_flags": [
+        "published_name_alias"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "published_name": "HARRISBURG / MANCHESTER"
+      }
+    },
+    {
+      "neighborhood_id": 66,
+      "name": "MUSEUM PARK",
+      "facts": {
+        "total_housing_units": 3981,
+        "structure_counts": {
+          "single_unit_detached": 617,
+          "single_unit_attached": 546,
+          "two_units": 110,
+          "three_or_four_units": 15,
+          "five_to_nine_units": 63,
+          "ten_or_more_units": 2630,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 184,
+          "one_bedroom": 1346,
+          "two_bedrooms": 1456,
+          "three_bedrooms": 740,
+          "four_bedrooms": 231,
+          "five_or_more_bedrooms": 25
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 109,
+          "built_1940_to_1959": 128,
+          "built_1960_to_1979": 160,
+          "built_1980_to_1999": 865,
+          "built_2000_to_2009": 1525,
+          "built_2010_to_2019": 1058,
+          "built_2020_or_later": 135
+        },
+        "shares_pct": {
+          "single_unit_detached": 15.5,
+          "single_unit_attached": 13.72,
+          "two_or_more_units_in_structure": 70.79,
+          "studio_or_one_bedroom": 38.43,
+          "two_bedrooms": 36.57,
+          "three_or_more_bedrooms": 25.02,
+          "built_2000_or_later": 68.27,
+          "built_2020_or_later": 3.39
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 67,
+      "name": "GREATER THIRD WARD",
+      "facts": {
+        "total_housing_units": 6583,
+        "structure_counts": {
+          "single_unit_detached": 2912,
+          "single_unit_attached": 744,
+          "two_units": 645,
+          "three_or_four_units": 765,
+          "five_to_nine_units": 464,
+          "ten_or_more_units": 997,
+          "mobile_home": 55,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 260,
+          "one_bedroom": 1176,
+          "two_bedrooms": 2745,
+          "three_bedrooms": 2022,
+          "four_bedrooms": 354,
+          "five_or_more_bedrooms": 25
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 1810,
+          "built_1940_to_1959": 2022,
+          "built_1960_to_1979": 583,
+          "built_1980_to_1999": 403,
+          "built_2000_to_2009": 598,
+          "built_2010_to_2019": 857,
+          "built_2020_or_later": 309
+        },
+        "shares_pct": {
+          "single_unit_detached": 44.24,
+          "single_unit_attached": 11.3,
+          "two_or_more_units_in_structure": 43.61,
+          "studio_or_one_bedroom": 21.81,
+          "two_bedrooms": 41.7,
+          "three_or_more_bedrooms": 36.47,
+          "built_2000_or_later": 26.8,
+          "built_2020_or_later": 4.69
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 68,
+      "name": "GREATER OST / SOUTH UNION",
+      "facts": {
+        "total_housing_units": 9191,
+        "structure_counts": {
+          "single_unit_detached": 5343,
+          "single_unit_attached": 404,
+          "two_units": 202,
+          "three_or_four_units": 307,
+          "five_to_nine_units": 633,
+          "ten_or_more_units": 2136,
+          "mobile_home": 154,
+          "boat_rv_van_other": 13
+        },
+        "bedroom_counts": {
+          "no_bedroom": 337,
+          "one_bedroom": 1147,
+          "two_bedrooms": 3239,
+          "three_bedrooms": 3764,
+          "four_bedrooms": 607,
+          "five_or_more_bedrooms": 97
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 204,
+          "built_1940_to_1959": 4005,
+          "built_1960_to_1979": 1555,
+          "built_1980_to_1999": 1001,
+          "built_2000_to_2009": 1184,
+          "built_2010_to_2019": 1000,
+          "built_2020_or_later": 241
+        },
+        "shares_pct": {
+          "single_unit_detached": 58.13,
+          "single_unit_attached": 4.4,
+          "two_or_more_units_in_structure": 35.67,
+          "studio_or_one_bedroom": 16.15,
+          "two_bedrooms": 35.24,
+          "three_or_more_bedrooms": 48.61,
+          "built_2000_or_later": 26.38,
+          "built_2020_or_later": 2.62
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 69,
+      "name": "GULFGATE RIVERVIEW / PINE VALLEY",
+      "facts": {
+        "total_housing_units": 4156,
+        "structure_counts": {
+          "single_unit_detached": 2007,
+          "single_unit_attached": 0,
+          "two_units": 117,
+          "three_or_four_units": 247,
+          "five_to_nine_units": 369,
+          "ten_or_more_units": 1176,
+          "mobile_home": 239,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 423,
+          "one_bedroom": 1189,
+          "two_bedrooms": 863,
+          "three_bedrooms": 1322,
+          "four_bedrooms": 160,
+          "five_or_more_bedrooms": 199
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 276,
+          "built_1940_to_1959": 1140,
+          "built_1960_to_1979": 1341,
+          "built_1980_to_1999": 457,
+          "built_2000_to_2009": 328,
+          "built_2010_to_2019": 524,
+          "built_2020_or_later": 89
+        },
+        "shares_pct": {
+          "single_unit_detached": 48.29,
+          "single_unit_attached": 0.0,
+          "two_or_more_units_in_structure": 45.93,
+          "studio_or_one_bedroom": 38.79,
+          "two_bedrooms": 20.77,
+          "three_or_more_bedrooms": 40.45,
+          "built_2000_or_later": 22.64,
+          "built_2020_or_later": 2.14
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 70,
+      "name": "PECAN PARK",
+      "facts": {
+        "total_housing_units": 5211,
+        "structure_counts": {
+          "single_unit_detached": 2640,
+          "single_unit_attached": 305,
+          "two_units": 145,
+          "three_or_four_units": 331,
+          "five_to_nine_units": 488,
+          "ten_or_more_units": 1227,
+          "mobile_home": 75,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 382,
+          "one_bedroom": 1323,
+          "two_bedrooms": 1802,
+          "three_bedrooms": 1460,
+          "four_bedrooms": 226,
+          "five_or_more_bedrooms": 18
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 250,
+          "built_1940_to_1959": 1884,
+          "built_1960_to_1979": 1669,
+          "built_1980_to_1999": 757,
+          "built_2000_to_2009": 487,
+          "built_2010_to_2019": 163,
+          "built_2020_or_later": 0
+        },
+        "shares_pct": {
+          "single_unit_detached": 50.66,
+          "single_unit_attached": 5.85,
+          "two_or_more_units_in_structure": 42.05,
+          "studio_or_one_bedroom": 32.72,
+          "two_bedrooms": 34.58,
+          "three_or_more_bedrooms": 32.7,
+          "built_2000_or_later": 12.47,
+          "built_2020_or_later": 0.0
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 71,
+      "name": "SUNNYSIDE",
+      "facts": {
+        "total_housing_units": 9892,
+        "structure_counts": {
+          "single_unit_detached": 5865,
+          "single_unit_attached": 537,
+          "two_units": 674,
+          "three_or_four_units": 378,
+          "five_to_nine_units": 507,
+          "ten_or_more_units": 1872,
+          "mobile_home": 57,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 72,
+          "one_bedroom": 919,
+          "two_bedrooms": 2897,
+          "three_bedrooms": 4552,
+          "four_bedrooms": 1284,
+          "five_or_more_bedrooms": 168
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 173,
+          "built_1940_to_1959": 2475,
+          "built_1960_to_1979": 2202,
+          "built_1980_to_1999": 734,
+          "built_2000_to_2009": 1988,
+          "built_2010_to_2019": 2158,
+          "built_2020_or_later": 162
+        },
+        "shares_pct": {
+          "single_unit_detached": 59.29,
+          "single_unit_attached": 5.43,
+          "two_or_more_units_in_structure": 34.68,
+          "studio_or_one_bedroom": 10.02,
+          "two_bedrooms": 29.29,
+          "three_or_more_bedrooms": 60.7,
+          "built_2000_or_later": 43.55,
+          "built_2020_or_later": 1.64
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 72,
+      "name": "SOUTH PARK",
+      "facts": {
+        "total_housing_units": 7390,
+        "structure_counts": {
+          "single_unit_detached": 6798,
+          "single_unit_attached": 67,
+          "two_units": 28,
+          "three_or_four_units": 54,
+          "five_to_nine_units": 28,
+          "ten_or_more_units": 293,
+          "mobile_home": 120,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 95,
+          "one_bedroom": 288,
+          "two_bedrooms": 1429,
+          "three_bedrooms": 4315,
+          "four_bedrooms": 1137,
+          "five_or_more_bedrooms": 125
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 178,
+          "built_1940_to_1959": 4744,
+          "built_1960_to_1979": 1414,
+          "built_1980_to_1999": 544,
+          "built_2000_to_2009": 170,
+          "built_2010_to_2019": 271,
+          "built_2020_or_later": 69
+        },
+        "shares_pct": {
+          "single_unit_detached": 91.99,
+          "single_unit_attached": 0.91,
+          "two_or_more_units_in_structure": 5.45,
+          "studio_or_one_bedroom": 5.18,
+          "two_bedrooms": 19.34,
+          "three_or_more_bedrooms": 75.47,
+          "built_2000_or_later": 6.9,
+          "built_2020_or_later": 0.93
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 73,
+      "name": "GOLFCREST / BELLFORT / REVEILLE",
+      "facts": {
+        "total_housing_units": 18611,
+        "structure_counts": {
+          "single_unit_detached": 9087,
+          "single_unit_attached": 456,
+          "two_units": 496,
+          "three_or_four_units": 952,
+          "five_to_nine_units": 2237,
+          "ten_or_more_units": 4968,
+          "mobile_home": 383,
+          "boat_rv_van_other": 32
+        },
+        "bedroom_counts": {
+          "no_bedroom": 788,
+          "one_bedroom": 4937,
+          "two_bedrooms": 4753,
+          "three_bedrooms": 5946,
+          "four_bedrooms": 1942,
+          "five_or_more_bedrooms": 245
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 815,
+          "built_1940_to_1959": 5999,
+          "built_1960_to_1979": 7890,
+          "built_1980_to_1999": 2211,
+          "built_2000_to_2009": 885,
+          "built_2010_to_2019": 695,
+          "built_2020_or_later": 116
+        },
+        "shares_pct": {
+          "single_unit_detached": 48.83,
+          "single_unit_attached": 2.45,
+          "two_or_more_units_in_structure": 46.49,
+          "studio_or_one_bedroom": 30.76,
+          "two_bedrooms": 25.54,
+          "three_or_more_bedrooms": 43.7,
+          "built_2000_or_later": 9.11,
+          "built_2020_or_later": 0.62
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 74,
+      "name": "PARK PLACE",
+      "facts": {
+        "total_housing_units": 3270,
+        "structure_counts": {
+          "single_unit_detached": 1335,
+          "single_unit_attached": 44,
+          "two_units": 47,
+          "three_or_four_units": 329,
+          "five_to_nine_units": 274,
+          "ten_or_more_units": 1199,
+          "mobile_home": 42,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 197,
+          "one_bedroom": 1131,
+          "two_bedrooms": 920,
+          "three_bedrooms": 957,
+          "four_bedrooms": 63,
+          "five_or_more_bedrooms": 1
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 458,
+          "built_1940_to_1959": 594,
+          "built_1960_to_1979": 921,
+          "built_1980_to_1999": 923,
+          "built_2000_to_2009": 303,
+          "built_2010_to_2019": 59,
+          "built_2020_or_later": 11
+        },
+        "shares_pct": {
+          "single_unit_detached": 40.83,
+          "single_unit_attached": 1.35,
+          "two_or_more_units_in_structure": 56.54,
+          "studio_or_one_bedroom": 40.61,
+          "two_bedrooms": 28.13,
+          "three_or_more_bedrooms": 31.22,
+          "built_2000_or_later": 11.41,
+          "built_2020_or_later": 0.34
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 75,
+      "name": "MEADOWBROOK / ALLENDALE",
+      "facts": {
+        "total_housing_units": 7956,
+        "structure_counts": {
+          "single_unit_detached": 5376,
+          "single_unit_attached": 118,
+          "two_units": 58,
+          "three_or_four_units": 316,
+          "five_to_nine_units": 554,
+          "ten_or_more_units": 1484,
+          "mobile_home": 50,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 343,
+          "one_bedroom": 1212,
+          "two_bedrooms": 1832,
+          "three_bedrooms": 3436,
+          "four_bedrooms": 960,
+          "five_or_more_bedrooms": 172
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 132,
+          "built_1940_to_1959": 3605,
+          "built_1960_to_1979": 1921,
+          "built_1980_to_1999": 1155,
+          "built_2000_to_2009": 727,
+          "built_2010_to_2019": 373,
+          "built_2020_or_later": 42
+        },
+        "shares_pct": {
+          "single_unit_detached": 67.57,
+          "single_unit_attached": 1.48,
+          "two_or_more_units_in_structure": 30.32,
+          "studio_or_one_bedroom": 19.54,
+          "two_bedrooms": 23.03,
+          "three_or_more_bedrooms": 57.42,
+          "built_2000_or_later": 14.35,
+          "built_2020_or_later": 0.53
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 76,
+      "name": "SOUTH ACRES / CRESTMONT PARK",
+      "facts": {
+        "total_housing_units": 9091,
+        "structure_counts": {
+          "single_unit_detached": 7376,
+          "single_unit_attached": 275,
+          "two_units": 19,
+          "three_or_four_units": 343,
+          "five_to_nine_units": 163,
+          "ten_or_more_units": 783,
+          "mobile_home": 38,
+          "boat_rv_van_other": 93
+        },
+        "bedroom_counts": {
+          "no_bedroom": 123,
+          "one_bedroom": 558,
+          "two_bedrooms": 1331,
+          "three_bedrooms": 5377,
+          "four_bedrooms": 1616,
+          "five_or_more_bedrooms": 86
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 143,
+          "built_1940_to_1959": 1151,
+          "built_1960_to_1979": 3610,
+          "built_1980_to_1999": 720,
+          "built_2000_to_2009": 1531,
+          "built_2010_to_2019": 1497,
+          "built_2020_or_later": 440
+        },
+        "shares_pct": {
+          "single_unit_detached": 81.14,
+          "single_unit_attached": 3.02,
+          "two_or_more_units_in_structure": 14.39,
+          "studio_or_one_bedroom": 7.49,
+          "two_bedrooms": 14.64,
+          "three_or_more_bedrooms": 77.87,
+          "built_2000_or_later": 38.15,
+          "built_2020_or_later": 4.84
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 77,
+      "name": "MINNETEX",
+      "facts": {
+        "total_housing_units": 3956,
+        "structure_counts": {
+          "single_unit_detached": 2780,
+          "single_unit_attached": 0,
+          "two_units": 18,
+          "three_or_four_units": 115,
+          "five_to_nine_units": 204,
+          "ten_or_more_units": 709,
+          "mobile_home": 131,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 89,
+          "one_bedroom": 449,
+          "two_bedrooms": 513,
+          "three_bedrooms": 2488,
+          "four_bedrooms": 376,
+          "five_or_more_bedrooms": 42
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 5,
+          "built_1940_to_1959": 216,
+          "built_1960_to_1979": 598,
+          "built_1980_to_1999": 262,
+          "built_2000_to_2009": 512,
+          "built_2010_to_2019": 1784,
+          "built_2020_or_later": 579
+        },
+        "shares_pct": {
+          "single_unit_detached": 70.27,
+          "single_unit_attached": 0.0,
+          "two_or_more_units_in_structure": 26.44,
+          "studio_or_one_bedroom": 13.6,
+          "two_bedrooms": 12.97,
+          "three_or_more_bedrooms": 73.46,
+          "built_2000_or_later": 72.67,
+          "built_2020_or_later": 14.64
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 78,
+      "name": "GREATER HOBBY AREA",
+      "facts": {
+        "total_housing_units": 8241,
+        "structure_counts": {
+          "single_unit_detached": 4095,
+          "single_unit_attached": 117,
+          "two_units": 109,
+          "three_or_four_units": 470,
+          "five_to_nine_units": 690,
+          "ten_or_more_units": 2156,
+          "mobile_home": 605,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 330,
+          "one_bedroom": 913,
+          "two_bedrooms": 2492,
+          "three_bedrooms": 3197,
+          "four_bedrooms": 1176,
+          "five_or_more_bedrooms": 132
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 281,
+          "built_1940_to_1959": 462,
+          "built_1960_to_1979": 3181,
+          "built_1980_to_1999": 2092,
+          "built_2000_to_2009": 1025,
+          "built_2010_to_2019": 751,
+          "built_2020_or_later": 449
+        },
+        "shares_pct": {
+          "single_unit_detached": 49.69,
+          "single_unit_attached": 1.42,
+          "two_or_more_units_in_structure": 41.56,
+          "studio_or_one_bedroom": 15.08,
+          "two_bedrooms": 30.24,
+          "three_or_more_bedrooms": 54.67,
+          "built_2000_or_later": 27.0,
+          "built_2020_or_later": 5.45
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 79,
+      "name": "EDGEBROOK AREA",
+      "facts": {
+        "total_housing_units": 7793,
+        "structure_counts": {
+          "single_unit_detached": 4306,
+          "single_unit_attached": 12,
+          "two_units": 141,
+          "three_or_four_units": 325,
+          "five_to_nine_units": 820,
+          "ten_or_more_units": 2189,
+          "mobile_home": 0,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 440,
+          "one_bedroom": 1674,
+          "two_bedrooms": 1585,
+          "three_bedrooms": 3261,
+          "four_bedrooms": 794,
+          "five_or_more_bedrooms": 40
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 29,
+          "built_1940_to_1959": 2781,
+          "built_1960_to_1979": 3567,
+          "built_1980_to_1999": 1003,
+          "built_2000_to_2009": 165,
+          "built_2010_to_2019": 216,
+          "built_2020_or_later": 32
+        },
+        "shares_pct": {
+          "single_unit_detached": 55.25,
+          "single_unit_attached": 0.15,
+          "two_or_more_units_in_structure": 44.59,
+          "studio_or_one_bedroom": 27.13,
+          "two_bedrooms": 20.34,
+          "three_or_more_bedrooms": 52.55,
+          "built_2000_or_later": 5.3,
+          "built_2020_or_later": 0.41
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 80,
+      "name": "SOUTH BELT / ELLINGTON",
+      "facts": {
+        "total_housing_units": 22658,
+        "structure_counts": {
+          "single_unit_detached": 13295,
+          "single_unit_attached": 508,
+          "two_units": 147,
+          "three_or_four_units": 852,
+          "five_to_nine_units": 1368,
+          "ten_or_more_units": 5990,
+          "mobile_home": 479,
+          "boat_rv_van_other": 19
+        },
+        "bedroom_counts": {
+          "no_bedroom": 699,
+          "one_bedroom": 3436,
+          "two_bedrooms": 4326,
+          "three_bedrooms": 9735,
+          "four_bedrooms": 4245,
+          "five_or_more_bedrooms": 216
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 297,
+          "built_1940_to_1959": 1180,
+          "built_1960_to_1979": 5929,
+          "built_1980_to_1999": 5725,
+          "built_2000_to_2009": 6990,
+          "built_2010_to_2019": 2400,
+          "built_2020_or_later": 136
+        },
+        "shares_pct": {
+          "single_unit_detached": 58.68,
+          "single_unit_attached": 2.24,
+          "two_or_more_units_in_structure": 36.88,
+          "studio_or_one_bedroom": 18.25,
+          "two_bedrooms": 19.09,
+          "three_or_more_bedrooms": 62.65,
+          "built_2000_or_later": 42.04,
+          "built_2020_or_later": 0.6
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 81,
+      "name": "CLEAR LAKE",
+      "facts": {
+        "total_housing_units": 28185,
+        "structure_counts": {
+          "single_unit_detached": 15582,
+          "single_unit_attached": 946,
+          "two_units": 151,
+          "three_or_four_units": 1856,
+          "five_to_nine_units": 2047,
+          "ten_or_more_units": 7542,
+          "mobile_home": 25,
+          "boat_rv_van_other": 36
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1012,
+          "one_bedroom": 5813,
+          "two_bedrooms": 5385,
+          "three_bedrooms": 6674,
+          "four_bedrooms": 8354,
+          "five_or_more_bedrooms": 947
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 249,
+          "built_1940_to_1959": 458,
+          "built_1960_to_1979": 9975,
+          "built_1980_to_1999": 13957,
+          "built_2000_to_2009": 1666,
+          "built_2010_to_2019": 1592,
+          "built_2020_or_later": 288
+        },
+        "shares_pct": {
+          "single_unit_detached": 55.28,
+          "single_unit_attached": 3.36,
+          "two_or_more_units_in_structure": 41.14,
+          "studio_or_one_bedroom": 24.22,
+          "two_bedrooms": 19.11,
+          "three_or_more_bedrooms": 56.68,
+          "built_2000_or_later": 12.58,
+          "built_2020_or_later": 1.02
+        }
+      },
+      "quality_flags": [],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 82,
+      "name": "MAGNOLIA PARK",
+      "facts": {
+        "total_housing_units": 6154,
+        "structure_counts": {
+          "single_unit_detached": 4144,
+          "single_unit_attached": 422,
+          "two_units": 428,
+          "three_or_four_units": 290,
+          "five_to_nine_units": 181,
+          "ten_or_more_units": 632,
+          "mobile_home": 55,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 374,
+          "one_bedroom": 1095,
+          "two_bedrooms": 2939,
+          "three_bedrooms": 1290,
+          "four_bedrooms": 443,
+          "five_or_more_bedrooms": 13
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 2487,
+          "built_1940_to_1959": 1642,
+          "built_1960_to_1979": 787,
+          "built_1980_to_1999": 568,
+          "built_2000_to_2009": 191,
+          "built_2010_to_2019": 466,
+          "built_2020_or_later": 13
+        },
+        "shares_pct": {
+          "single_unit_detached": 67.34,
+          "single_unit_attached": 6.86,
+          "two_or_more_units_in_structure": 24.88,
+          "studio_or_one_bedroom": 23.87,
+          "two_bedrooms": 47.76,
+          "three_or_more_bedrooms": 28.37,
+          "built_2000_or_later": 10.89,
+          "built_2020_or_later": 0.21
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -2
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        }
+      }
+    },
+    {
+      "neighborhood_id": 83,
+      "name": "MACGREGOR",
+      "facts": {
+        "total_housing_units": 10360,
+        "structure_counts": {
+          "single_unit_detached": 4339,
+          "single_unit_attached": 399,
+          "two_units": 461,
+          "three_or_four_units": 677,
+          "five_to_nine_units": 685,
+          "ten_or_more_units": 3682,
+          "mobile_home": 117,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 414,
+          "one_bedroom": 2973,
+          "two_bedrooms": 3268,
+          "three_bedrooms": 2621,
+          "four_bedrooms": 902,
+          "five_or_more_bedrooms": 183
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 987,
+          "built_1940_to_1959": 2856,
+          "built_1960_to_1979": 1914,
+          "built_1980_to_1999": 765,
+          "built_2000_to_2009": 2599,
+          "built_2010_to_2019": 1099,
+          "built_2020_or_later": 141
+        },
+        "shares_pct": {
+          "single_unit_detached": 41.88,
+          "single_unit_attached": 3.85,
+          "two_or_more_units_in_structure": 53.14,
+          "studio_or_one_bedroom": 32.69,
+          "two_bedrooms": 31.54,
+          "three_or_more_bedrooms": 35.77,
+          "built_2000_or_later": 37.06,
+          "built_2020_or_later": 1.36
+        }
+      },
+      "quality_flags": [
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 84,
+      "name": "SPRING BRANCH NORTH",
+      "facts": {
+        "total_housing_units": 8727,
+        "structure_counts": {
+          "single_unit_detached": 4213,
+          "single_unit_attached": 603,
+          "two_units": 110,
+          "three_or_four_units": 408,
+          "five_to_nine_units": 652,
+          "ten_or_more_units": 2703,
+          "mobile_home": 39,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 370,
+          "one_bedroom": 1200,
+          "two_bedrooms": 1837,
+          "three_bedrooms": 2910,
+          "four_bedrooms": 2116,
+          "five_or_more_bedrooms": 293
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 26,
+          "built_1940_to_1959": 550,
+          "built_1960_to_1979": 5292,
+          "built_1980_to_1999": 1422,
+          "built_2000_to_2009": 412,
+          "built_2010_to_2019": 781,
+          "built_2020_or_later": 245
+        },
+        "shares_pct": {
+          "single_unit_detached": 48.28,
+          "single_unit_attached": 6.91,
+          "two_or_more_units_in_structure": 44.38,
+          "studio_or_one_bedroom": 17.99,
+          "two_bedrooms": 21.05,
+          "three_or_more_bedrooms": 60.95,
+          "built_2000_or_later": 16.48,
+          "built_2020_or_later": 2.81
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "bedroom_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 85,
+      "name": "SPRING BRANCH CENTRAL",
+      "facts": {
+        "total_housing_units": 10253,
+        "structure_counts": {
+          "single_unit_detached": 4679,
+          "single_unit_attached": 349,
+          "two_units": 231,
+          "three_or_four_units": 320,
+          "five_to_nine_units": 715,
+          "ten_or_more_units": 3659,
+          "mobile_home": 257,
+          "boat_rv_van_other": 44
+        },
+        "bedroom_counts": {
+          "no_bedroom": 310,
+          "one_bedroom": 1555,
+          "two_bedrooms": 3044,
+          "three_bedrooms": 4225,
+          "four_bedrooms": 977,
+          "five_or_more_bedrooms": 142
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 144,
+          "built_1940_to_1959": 1636,
+          "built_1960_to_1979": 3949,
+          "built_1980_to_1999": 1920,
+          "built_2000_to_2009": 554,
+          "built_2010_to_2019": 1594,
+          "built_2020_or_later": 457
+        },
+        "shares_pct": {
+          "single_unit_detached": 45.64,
+          "single_unit_attached": 3.4,
+          "two_or_more_units_in_structure": 48.03,
+          "studio_or_one_bedroom": 18.19,
+          "two_bedrooms": 29.69,
+          "three_or_more_bedrooms": 52.12,
+          "built_2000_or_later": 25.41,
+          "built_2020_or_later": 4.46
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 1
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": 1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 86,
+      "name": "SPRING BRANCH EAST",
+      "facts": {
+        "total_housing_units": 11990,
+        "structure_counts": {
+          "single_unit_detached": 5743,
+          "single_unit_attached": 284,
+          "two_units": 245,
+          "three_or_four_units": 742,
+          "five_to_nine_units": 829,
+          "ten_or_more_units": 3703,
+          "mobile_home": 444,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 437,
+          "one_bedroom": 2114,
+          "two_bedrooms": 3848,
+          "three_bedrooms": 3927,
+          "four_bedrooms": 1271,
+          "five_or_more_bedrooms": 393
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 153,
+          "built_1940_to_1959": 2649,
+          "built_1960_to_1979": 3159,
+          "built_1980_to_1999": 2095,
+          "built_2000_to_2009": 1291,
+          "built_2010_to_2019": 2167,
+          "built_2020_or_later": 474
+        },
+        "shares_pct": {
+          "single_unit_detached": 47.9,
+          "single_unit_attached": 2.37,
+          "two_or_more_units_in_structure": 46.03,
+          "studio_or_one_bedroom": 21.28,
+          "two_bedrooms": 32.09,
+          "three_or_more_bedrooms": 46.63,
+          "built_2000_or_later": 32.79,
+          "built_2020_or_later": 3.95
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -2
+        }
+      }
+    },
+    {
+      "neighborhood_id": 87,
+      "name": "GREENWAY / UPPER KIRBY AREA",
+      "facts": {
+        "total_housing_units": 19159,
+        "structure_counts": {
+          "single_unit_detached": 2096,
+          "single_unit_attached": 927,
+          "two_units": 53,
+          "three_or_four_units": 411,
+          "five_to_nine_units": 456,
+          "ten_or_more_units": 15078,
+          "mobile_home": 126,
+          "boat_rv_van_other": 12
+        },
+        "bedroom_counts": {
+          "no_bedroom": 1280,
+          "one_bedroom": 7908,
+          "two_bedrooms": 7081,
+          "three_bedrooms": 1969,
+          "four_bedrooms": 753,
+          "five_or_more_bedrooms": 168
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 163,
+          "built_1940_to_1959": 660,
+          "built_1960_to_1979": 2968,
+          "built_1980_to_1999": 6540,
+          "built_2000_to_2009": 3075,
+          "built_2010_to_2019": 5231,
+          "built_2020_or_later": 521
+        },
+        "shares_pct": {
+          "single_unit_detached": 10.94,
+          "single_unit_attached": 4.84,
+          "two_or_more_units_in_structure": 83.5,
+          "studio_or_one_bedroom": 47.96,
+          "two_bedrooms": 36.96,
+          "three_or_more_bedrooms": 15.08,
+          "built_2000_or_later": 46.07,
+          "built_2020_or_later": 2.72
+        }
+      },
+      "quality_flags": [
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": 0
+        },
+        "bedroom_counts": {
+          "source_page": 3,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    },
+    {
+      "neighborhood_id": 88,
+      "name": "LAWNDALE / WAYSIDE",
+      "facts": {
+        "total_housing_units": 5212,
+        "structure_counts": {
+          "single_unit_detached": 3131,
+          "single_unit_attached": 5,
+          "two_units": 53,
+          "three_or_four_units": 332,
+          "five_to_nine_units": 222,
+          "ten_or_more_units": 1446,
+          "mobile_home": 22,
+          "boat_rv_van_other": 0
+        },
+        "bedroom_counts": {
+          "no_bedroom": 605,
+          "one_bedroom": 932,
+          "two_bedrooms": 1502,
+          "three_bedrooms": 1683,
+          "four_bedrooms": 470,
+          "five_or_more_bedrooms": 20
+        },
+        "year_built_counts": {
+          "built_1939_or_earlier": 774,
+          "built_1940_to_1959": 2041,
+          "built_1960_to_1979": 1318,
+          "built_1980_to_1999": 431,
+          "built_2000_to_2009": 142,
+          "built_2010_to_2019": 341,
+          "built_2020_or_later": 164
+        },
+        "shares_pct": {
+          "single_unit_detached": 60.07,
+          "single_unit_attached": 0.1,
+          "two_or_more_units_in_structure": 39.39,
+          "studio_or_one_bedroom": 29.49,
+          "two_bedrooms": 28.82,
+          "three_or_more_bedrooms": 41.69,
+          "built_2000_or_later": 12.41,
+          "built_2020_or_later": 3.15
+        }
+      },
+      "quality_flags": [
+        "structure_counts_rounded_sum_differs_from_total",
+        "year_built_counts_rounded_sum_differs_from_total"
+      ],
+      "audit": {
+        "structure_counts": {
+          "source_page": 2,
+          "sum_difference_units": -1
+        },
+        "bedroom_counts": {
+          "source_page": 4,
+          "sum_difference_units": 0
+        },
+        "year_built_counts": {
+          "source_page": 3,
+          "sum_difference_units": -1
+        }
+      }
+    }
+  ]
+}

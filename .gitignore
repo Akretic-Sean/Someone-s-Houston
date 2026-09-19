@@ -49,3 +49,7 @@ Thumbs.db
 # Machine-local connector configuration and downloaded source data
 /.mcp.json
 /backend/data/raw/
+# Operational snapshots are served from Supabase and expire; never ship one as live data.
+/backend/data/current-feeds.json
+# Derived evidence is rebuilt from reviewed sources and published to Supabase.
+/backend/data/neighborhood-evidence.json

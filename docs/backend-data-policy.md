@@ -1,6 +1,6 @@
 # Supabase backend and relevant-data policy
 
-Decision recorded 2026-09-19: use Supabase for normalized source data, prepared neighborhood metrics, and saved reports. Keep the TypeScript scoring package and proposed Cloudflare Workers MCP/API services. Supabase replaces KV as the report store. This document specifies the implementation plan; no Hou Match project, schema, or importer has been provisioned yet.
+Decision recorded 2026-09-19: use Supabase for normalized source data, prepared neighborhood metrics, and future saved reports. The project now has 88 profiles/boundaries, facility inventories, and scheduled weather/gauge context. See [implemented API](api.md), [facility provenance](neighborhood-context.md), and [live-feed freshness/retention](live-feeds.md). Report storage, scoring and Cloudflare Workers MCP/API services below remain proposed; Supabase replaces KV in that plan.
 
 ## Import only what a relocation decision needs
 
@@ -57,9 +57,9 @@ Start with a prepared metrics table and an active-version pointer; a materialize
 ## Bounded retention and access
 
 - Keep only active-window normalized event data and current reference inputs. Keep the current and previous validated metrics versions for rollback; additionally retain minimal derived inputs referenced by unexpired reports until seven days after the final referencing report expires. Old versions are never selected for new reports merely because they remain stored.
-- Keep raw download staging private and expire it seven days after successful publication. Store selected fields only; do not ingest requester names, contact details, or free-text complaint narratives. Retain compact import manifests, checksums, counts, and source dates for reproducibility.
+- Keep raw download staging private. Implemented geodata staging is removed on successful publication; failed batches expire after one day. Current-condition rows replace the previous snapshot, with no historical observation archive; our scheduler history is pruned after seven days. Future event imports may retain staging for up to seven days if needed. Store selected fields only; do not ingest requester names, contact details, or free-text complaint narratives. Retain compact import manifests, checksums, counts, and source dates for reproducibility.
 - Reports contain no required candidate contact details. Store them privately, enforce token-specific access and expiration through the backend, and prevent public enumeration of the reports table. Explicit grants and RLS accompany any exposed tables; privileged keys stay on the server. Schedule expired-report cleanup separately from access checks.
-- Provisioning, migrations, scheduled jobs, and retention enforcement remain unimplemented.
+- Reference/context tables, 704 precomputed category-evidence rows, bounded staging retention and the current-feed scheduler are implemented. Scoring/report generation, private report storage/expiration and report retention jobs remain unimplemented. See `matrix-readiness.md` and `category-evidence.md` for current facts, gaps and refresh policy.
 
 ## Implementation checks
 
