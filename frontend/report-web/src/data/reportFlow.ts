@@ -12,7 +12,7 @@ export interface GeneratedReport { payload: ScoringPayload; generatedAt: string;
 const messages: Record<string, string> = {
   sign_in_required: 'Please sign in again to continue.',
   invalid_input: 'Review your notes and priorities, then try again.',
-  usage_limit: 'The AI usage limit has been reached. Try again in an hour, or continue with the factual report.',
+  usage_limit: 'The AI usage limit has been reached. Try again in an hour.',
   request_already_started: 'That request already started. Wait for it to finish before trying again.',
   evidence_unavailable: 'Current neighborhood evidence could not be loaded. Please retry shortly.',
   evidence_expired: 'The evidence changed while generating. Please generate again.',
@@ -31,7 +31,7 @@ async function invoke(body: Record<string, unknown>): Promise<unknown> {
       try { code = (await error.context.json()).error ?? ''; } catch { /* Use bounded message. */ }
       if (error.context.status === 401) code = 'sign_in_required';
     }
-    throw new Error(messages[code] ?? 'The AI service is temporarily unavailable. Please retry or continue with the factual report.');
+    throw new Error(messages[code] ?? 'The AI service is temporarily unavailable. Please retry shortly.');
   }
   return data;
 }

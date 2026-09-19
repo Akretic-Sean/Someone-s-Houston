@@ -118,17 +118,14 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
     window.scrollTo(0, 0);
   }
 
-  async function generate(withAi = true) {
+  async function generate() {
     if (generationPending.current || extracting) return;
     generationPending.current = true;
     setGenerating(true);
     setGenerateError(null);
     try {
       const { profile, ...options } = config;
-      const report: GeneratedReport = withAi ? await generateAiReport(options, profile) : {
-        payload: await data.refresh(), generatedAt: new Date().toISOString(),
-        narrative: { status: 'degraded', text: null, facts: [], expiresAt: new Date().toISOString() },
-      };
+      const report = await generateAiReport(options, profile);
       const result = scoreNeighborhoods(report.payload, config);
       if (!result.ranked.length) throw new Error('No neighborhoods have all of the evidence needed for these priorities. Review the missing-data details or retry after the data is refreshed.');
       setGenerated(report);
@@ -165,7 +162,7 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
       {view === 'create' && <CreateReport config={config} onChange={changeConfig}
         result={scoring.result} loading={data.loading} generating={generating} extracting={extracting} onExtracting={setExtracting}
         error={generateError ?? data.error ?? scoring.error}
-        onRetry={() => { setGenerateError(null); void data.refresh(true).catch(() => {}); }} onGenerate={() => generate(true)} onFactual={() => generate(false)} />}
+        onRetry={() => { setGenerateError(null); void data.refresh(true).catch(() => {}); }} onGenerate={generate} />}
       {view === 'report' && <CandidateReport config={config} result={reportScoring.result}
         loading={false} error={reportScoring.error} payload={generated?.payload ?? null}
         narrative={generated?.narrative ?? null} now={clock}

@@ -115,9 +115,19 @@ then reviewed and edited. The controls below the notes determine the ranking.
 
 **Generate report** loads evidence and computes the ranking on the server before
 
-requesting an AI explanation. **Continue with factual report** uses the same
+requesting an AI explanation. This is the only report-generation action. If the
 
-scoring model without a paid model call. Both paths preserve missing-data rules.
+server returns a degraded narrative, the ranked report and evidence still render.
+
+Quota errors ask the user to retry later; missing-data rules remain unchanged.
+
+Facility counts in evidence cards count records inside the neighborhood boundary,
+
+not access scores. Amenities and healthcare scores compare nearest straight-line
+
+distances across neighborhoods, including facilities outside the boundary; there
+
+is no one-mile cutoff. Distances start at the neighborhood reference point.
 
 See [the release checklist](../docs/hackathon-release.md) for backend deployment,
 

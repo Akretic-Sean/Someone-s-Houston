@@ -199,14 +199,14 @@ test('notes are reviewed before an authenticated AI report; changing priorities 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('an AI quota failure allows a factual report without another model request', async ({ page }) => {
+test('a single generate action shows an honest quota error', async ({ page }) => {
   const state = await mockApi(page, { aiStatus: 429 });
   await page.goto('/'); await signIn(page);
   await page.getByRole('button', { name: 'Generate report', exact: true }).click();
   await expect(page.getByRole('alert')).toContainText('AI usage limit');
-  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
-  await expect(page.getByText('Showing the factual report without an AI explanation.', { exact: false })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Continue with factual report', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toHaveCount(0);
+  await expect(page.getByRole('alert')).not.toContainText('continue with the factual report');
   expect(state.aiRequests.length).toBe(1);
 });
 
