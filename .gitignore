@@ -1,0 +1,47 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+credentials.json
+
+# Node / frontend
+node_modules/
+.next/
+.nuxt/
+.output/
+dist/
+build/
+coverage/
+.turbo/
+.vite/
+*.tsbuildinfo
+*.log
+
+# Python / backend
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.egg-info/
+
+# Local deployment state
+.vercel/
+.netlify/
+.wrangler/
+
+# Editor / operating system
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Agent-local settings
+.claude/settings.local.json
