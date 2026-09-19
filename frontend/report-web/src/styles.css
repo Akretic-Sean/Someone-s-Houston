@@ -1110,6 +1110,10 @@ tbody tr:hover {
   white-space: normal;
   z-index: 5;
 }
+.map-tip[data-flip='true'] {
+  bottom: auto;
+  top: calc(100% + 12px);
+}
 .map-tip-row {
   display: flex;
   justify-content: space-between;

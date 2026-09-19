@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { NeighborhoodProfile } from '../data/neighborhoodApi';
 import type { Office, ResolvedNeighborhood } from '../types';
 
@@ -66,8 +66,18 @@ export default function NeighborhoodMap({
   sourceLabel: string;
 }) {
   const project = useProjection(rows, office);
+  // Tooltips sit above the pin, but the report's sticky bar would cover one
+  // raised near the top of the viewport, so those flip below instead. Measured
+  // at hover time because it depends on scroll, not on map geometry.
+  const [flipped, setFlipped] = useState(false);
+  const STICKY_CLEARANCE = 190;
   const pickIds = new Set(picks.map((p) => p.neighborhoodId));
   const officePoint = project(office.lat, office.lon);
+
+  function pinNearTop(id: string): boolean {
+    const el = document.querySelector(`[data-pin="${id}"]`);
+    return el ? el.getBoundingClientRect().top < STICKY_CLEARANCE : false;
+  }
 
   return (
     <figure className="map-figure">
@@ -108,10 +118,17 @@ export default function NeighborhoodMap({
               key={n.id}
               type="button"
               className="map-pin map-pin-pick"
+              data-pin={n.id}
               data-active={active}
               style={{ left: `${p.x}%`, top: `${p.y}%` }}
-              onMouseEnter={() => onHover(n.id)}
-              onFocus={() => onHover(n.id)}
+              onMouseEnter={(e) => {
+                setFlipped(e.currentTarget.getBoundingClientRect().top < STICKY_CLEARANCE);
+                onHover(n.id);
+              }}
+              onFocus={(e) => {
+                setFlipped(e.currentTarget.getBoundingClientRect().top < STICKY_CLEARANCE);
+                onHover(n.id);
+              }}
               onBlur={() => onHover(null)}
               onClick={() => onHover(active ? null : n.id)}
               aria-describedby={active ? `map-tip-${n.id}` : undefined}
@@ -120,7 +137,12 @@ export default function NeighborhoodMap({
               <span className="sr-only">{n.name}</span>
 
               {active ? (
-                <span className="map-tip" id={`map-tip-${n.id}`} role="tooltip">
+                <span
+                  className="map-tip"
+                  data-flip={flipped}
+                  id={`map-tip-${n.id}`}
+                  role="tooltip"
+                >
                   <span className="map-tip-name">{n.name}</span>
                   <span className="map-tip-row">
                     <span>Median household income</span>
@@ -157,8 +179,14 @@ export default function NeighborhoodMap({
             <button
               type="button"
               data-active={hovered === n.id}
-              onMouseEnter={() => onHover(n.id)}
-              onFocus={() => onHover(n.id)}
+              onMouseEnter={() => {
+                setFlipped(pinNearTop(n.id));
+                onHover(n.id);
+              }}
+              onFocus={() => {
+                setFlipped(pinNearTop(n.id));
+                onHover(n.id);
+              }}
               onMouseLeave={() => onHover(null)}
               onBlur={() => onHover(null)}
             >
