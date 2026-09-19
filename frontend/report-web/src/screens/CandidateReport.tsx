@@ -10,6 +10,7 @@ import { useNeighborhoods } from '../hooks/useNeighborhoods';
 import EvidenceCards from '../evidence/EvidenceCards';
 import { useEvidence } from '../evidence/useEvidence';
 import { buildCategoryViews, findDestination } from '../evidence/select';
+import ListingWatchDialog from '../watch/ListingWatchDialog';
 import type { Report, ResolvedNeighborhood } from '../types';
 
 /**
@@ -129,6 +130,7 @@ export default function CandidateReport({
   const { rows, loading, error, retry } = useNeighborhoods();
   const [hovered, setHovered] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [watchOpen, setWatchOpen] = useState(false);
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
@@ -181,6 +183,19 @@ export default function CandidateReport({
         </button>
         <button type="button" className="btn" onClick={() => window.print()}>
           Print / PDF
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => setWatchOpen(true)}
+          disabled={resolved.length === 0}
+          title={
+            resolved.length === 0
+              ? 'Available once the neighborhood data has loaded'
+              : undefined
+          }
+        >
+          Listing Watch
         </button>
       </div>
 
@@ -519,6 +534,15 @@ export default function CandidateReport({
           <p style={{ marginTop: 10 }}>{report.disclaimer}</p>
         </footer>
       </main>
+
+      <ListingWatchDialog
+        open={watchOpen}
+        onClose={() => setWatchOpen(false)}
+        reportId={report.id}
+        officeId={config.office}
+        picks={resolved.map((n) => ({ neighborhoodId: n.neighborhoodId, name: n.name }))}
+        onDone={onToast}
+      />
     </>
   );
 }

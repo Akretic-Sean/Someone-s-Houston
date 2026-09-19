@@ -15,3 +15,13 @@ if (SUPABASE_PUBLISHABLE_KEY.startsWith('sb_secret_')) {
     'A secret Supabase key is configured for the browser bundle. Use the sb_publishable_ key.',
   );
 }
+
+/**
+ * Listing Watch Agent webhook. The browser POSTs a consented watch request
+ * here; scheduling, scraping and delivery happen server-side. Unset until the
+ * endpoint exists, in which case the UI says so rather than pretending.
+ */
+export const LISTING_WATCH_WEBHOOK: string =
+  import.meta.env.VITE_LISTING_WATCH_WEBHOOK_URL ?? '';
+
+export const hasListingWatch = Boolean(LISTING_WATCH_WEBHOOK);
