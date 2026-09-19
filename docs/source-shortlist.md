@@ -2,6 +2,8 @@
 
 Researched 2026-09-19. Priorities reflect the relocation-report scope and the [bounded data policy](backend-data-policy.md). "Verified" means the specific metadata/sample check described below succeeded, not that a production importer or scoring method is complete. No bulk historical datasets were imported during this research.
 
+Implementation update: priority 1 is now [imported and available](neighborhood-layer.md), with all 88 economic profiles validated against the published 2024 tables. The remaining readiness notes below describe the earlier research checks.
+
 ## Top priorities
 
 | Priority | Specific source | Product use | Access and narrow import scope | Readiness |

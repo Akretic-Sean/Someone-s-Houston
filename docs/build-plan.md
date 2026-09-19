@@ -4,7 +4,7 @@
 
 Hackathon track: **Houston Open Data**. Status: planning.
 
-Backend decision, 2026-09-19: use **Supabase** for prepared neighborhood data and saved reports. The [backend data policy](backend-data-policy.md) defines bounded import windows, freshness checks, and the fast report path. It supersedes the original KV storage proposal and live-first scoring approach. Hosting remains proposed; no Hou Match database or product service has been deployed.
+Backend decision, 2026-09-19: use **Supabase** for prepared neighborhood data and saved reports. The first [neighborhood reference layer](neighborhood-layer.md) is live: 88 validated City profiles, a read-only REST API, and a local Claude MCP connector. The [backend data policy](backend-data-policy.md) defines bounded import windows, freshness checks, and the fast report path. It supersedes the original KV storage proposal and live-first scoring approach. Report/scoring services and Cloudflare hosting remain proposed.
 
 ---
 

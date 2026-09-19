@@ -1,0 +1,633 @@
+{
+  "source_period_start": 2020,
+  "source_period_end": 2024,
+  "verified_on": "2026-09-19",
+  "sources": [
+    {
+      "url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/7-Median-Household-Income-and-Median-Housing-Value.pdf",
+      "sha256": "60c2725f5731c3025136d984b79b112e16da225935ba42f576191122118e40bb"
+    },
+    {
+      "url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/8-Median-Gross-Rent-2024.pdf",
+      "sha256": "b03b16f5b168dd966638612be172a9f5361d65c5c08022c766bfeb71dd2a8e1e"
+    }
+  ],
+  "neighborhoods": [
+    {
+      "neighborhood_id": 1,
+      "name": "WILLOWBROOK",
+      "median_household_income": 68670,
+      "median_home_value": 314066,
+      "median_gross_rent": 1540
+    },
+    {
+      "neighborhood_id": 2,
+      "name": "GREATER GREENSPOINT",
+      "median_household_income": 34249,
+      "median_home_value": 154957,
+      "median_gross_rent": 1039
+    },
+    {
+      "neighborhood_id": 3,
+      "name": "CARVERDALE",
+      "median_household_income": 84898,
+      "median_home_value": 254793,
+      "median_gross_rent": 1607
+    },
+    {
+      "neighborhood_id": 4,
+      "name": "FAIRBANKS / NORTHWEST CROSSING",
+      "median_household_income": 55024,
+      "median_home_value": 238472,
+      "median_gross_rent": 1299
+    },
+    {
+      "neighborhood_id": 5,
+      "name": "GREATER INWOOD",
+      "median_household_income": 53298,
+      "median_home_value": 201106,
+      "median_gross_rent": 1150
+    },
+    {
+      "neighborhood_id": 6,
+      "name": "ACRES HOME",
+      "median_household_income": 41052,
+      "median_home_value": 196308,
+      "median_gross_rent": 962
+    },
+    {
+      "neighborhood_id": 7,
+      "name": "HIDDEN VALLEY",
+      "median_household_income": 49725,
+      "median_home_value": 194804,
+      "median_gross_rent": null
+    },
+    {
+      "neighborhood_id": 8,
+      "name": "WESTBRANCH",
+      "median_household_income": 78277,
+      "median_home_value": 234158,
+      "median_gross_rent": 1665
+    },
+    {
+      "neighborhood_id": 9,
+      "name": "ADDICKS PARK TEN",
+      "median_household_income": 87129,
+      "median_home_value": 372879,
+      "median_gross_rent": 1561
+    },
+    {
+      "neighborhood_id": 10,
+      "name": "SPRING BRANCH WEST",
+      "median_household_income": 62573,
+      "median_home_value": 412569,
+      "median_gross_rent": 1446
+    },
+    {
+      "neighborhood_id": 11,
+      "name": "LANGWOOD",
+      "median_household_income": 39515,
+      "median_home_value": 281261,
+      "median_gross_rent": 1274
+    },
+    {
+      "neighborhood_id": 12,
+      "name": "CENTRAL NORTHWEST",
+      "median_household_income": 104195,
+      "median_home_value": 491644,
+      "median_gross_rent": 1323
+    },
+    {
+      "neighborhood_id": 13,
+      "name": "INDEPENDENCE HEIGHTS",
+      "median_household_income": 70385,
+      "median_home_value": 270884,
+      "median_gross_rent": 1145
+    },
+    {
+      "neighborhood_id": 14,
+      "name": "LAZYBROOK / TIMBERGROVE",
+      "median_household_income": 88447,
+      "median_home_value": 517622,
+      "median_gross_rent": 1398
+    },
+    {
+      "neighborhood_id": 15,
+      "name": "GREATER HEIGHTS",
+      "median_household_income": 146102,
+      "median_home_value": 721555,
+      "median_gross_rent": 1630
+    },
+    {
+      "neighborhood_id": 16,
+      "name": "MEMORIAL",
+      "median_household_income": 115855,
+      "median_home_value": 695089,
+      "median_gross_rent": 1693
+    },
+    {
+      "neighborhood_id": 17,
+      "name": "ELDRIDGE / WEST OAKS",
+      "median_household_income": 77822,
+      "median_home_value": 381473,
+      "median_gross_rent": 1508
+    },
+    {
+      "neighborhood_id": 18,
+      "name": "BRIAR FOREST",
+      "median_household_income": 90914,
+      "median_home_value": 411229,
+      "median_gross_rent": 1399
+    },
+    {
+      "neighborhood_id": 19,
+      "name": "WESTCHASE",
+      "median_household_income": 61698,
+      "median_home_value": 449999,
+      "median_gross_rent": 1366
+    },
+    {
+      "neighborhood_id": 20,
+      "name": "MID WEST",
+      "median_household_income": 57140,
+      "median_home_value": 274577,
+      "median_gross_rent": 1334
+    },
+    {
+      "neighborhood_id": 21,
+      "name": "GREATER UPTOWN",
+      "median_household_income": 96455,
+      "median_home_value": 684647,
+      "median_gross_rent": 1715
+    },
+    {
+      "neighborhood_id": 22,
+      "name": "WASHINGTON AVENUE COALITION / MEMORIAL PARK",
+      "median_household_income": 143609,
+      "median_home_value": 569131,
+      "median_gross_rent": 2020
+    },
+    {
+      "neighborhood_id": 23,
+      "name": "AFTON OAKS / RIVER OAKS AREA",
+      "median_household_income": 145110,
+      "median_home_value": 1389727,
+      "median_gross_rent": 2054
+    },
+    {
+      "neighborhood_id": 24,
+      "name": "NEARTOWN - MONTROSE",
+      "median_household_income": 101930,
+      "median_home_value": 656792,
+      "median_gross_rent": 1763
+    },
+    {
+      "neighborhood_id": 25,
+      "name": "ALIEF",
+      "median_household_income": 49608,
+      "median_home_value": 191880,
+      "median_gross_rent": 1286
+    },
+    {
+      "neighborhood_id": 26,
+      "name": "SHARPSTOWN",
+      "median_household_income": 53039,
+      "median_home_value": 204086,
+      "median_gross_rent": 1121
+    },
+    {
+      "neighborhood_id": 27,
+      "name": "GULFTON",
+      "median_household_income": 40941,
+      "median_home_value": 295023,
+      "median_gross_rent": 1018
+    },
+    {
+      "neighborhood_id": 28,
+      "name": "UNIVERSITY PLACE",
+      "median_household_income": 159413,
+      "median_home_value": 971442,
+      "median_gross_rent": 2009
+    },
+    {
+      "neighborhood_id": 29,
+      "name": "WESTWOOD",
+      "median_household_income": 38001,
+      "median_home_value": 112861,
+      "median_gross_rent": 1011
+    },
+    {
+      "neighborhood_id": 30,
+      "name": "BRAEBURN",
+      "median_household_income": 42774,
+      "median_home_value": 208276,
+      "median_gross_rent": 1035
+    },
+    {
+      "neighborhood_id": 31,
+      "name": "MEYERLAND AREA",
+      "median_household_income": 118284,
+      "median_home_value": 500156,
+      "median_gross_rent": 1472
+    },
+    {
+      "neighborhood_id": 32,
+      "name": "BRAESWOOD",
+      "median_household_income": 101744,
+      "median_home_value": 739054,
+      "median_gross_rent": 1565
+    },
+    {
+      "neighborhood_id": 33,
+      "name": "MEDICAL CENTER AREA",
+      "median_household_income": 89591,
+      "median_home_value": 555821,
+      "median_gross_rent": 1765
+    },
+    {
+      "neighborhood_id": 34,
+      "name": "ASTRODOME AREA",
+      "median_household_income": 59805,
+      "median_home_value": 167716,
+      "median_gross_rent": 1491
+    },
+    {
+      "neighborhood_id": 35,
+      "name": "SOUTH MAIN",
+      "median_household_income": 66006,
+      "median_home_value": 226183,
+      "median_gross_rent": 1436
+    },
+    {
+      "neighborhood_id": 36,
+      "name": "BRAYS OAKS",
+      "median_household_income": 50697,
+      "median_home_value": 230972,
+      "median_gross_rent": 1115
+    },
+    {
+      "neighborhood_id": 37,
+      "name": "WESTBURY",
+      "median_household_income": 85057,
+      "median_home_value": 309912,
+      "median_gross_rent": 1233
+    },
+    {
+      "neighborhood_id": 38,
+      "name": "NEAR SOUTHWEST",
+      "median_household_income": 77651,
+      "median_home_value": 387811,
+      "median_gross_rent": 1348
+    },
+    {
+      "neighborhood_id": 39,
+      "name": "FONDREN GARDENS",
+      "median_household_income": 58452,
+      "median_home_value": 162968,
+      "median_gross_rent": 1285
+    },
+    {
+      "neighborhood_id": 40,
+      "name": "CENTRAL SOUTHWEST",
+      "median_household_income": 65013,
+      "median_home_value": 197345,
+      "median_gross_rent": 1262
+    },
+    {
+      "neighborhood_id": 41,
+      "name": "FORT BEND HOUSTON",
+      "median_household_income": 69293,
+      "median_home_value": 196395,
+      "median_gross_rent": 1573
+    },
+    {
+      "neighborhood_id": 42,
+      "name": "IAH / AIRPORT AREA",
+      "median_household_income": 36820,
+      "median_home_value": 140927,
+      "median_gross_rent": 1179
+    },
+    {
+      "neighborhood_id": 43,
+      "name": "KINGWOOD AREA",
+      "median_household_income": 115163,
+      "median_home_value": 356621,
+      "median_gross_rent": 1569
+    },
+    {
+      "neighborhood_id": 44,
+      "name": "LAKE HOUSTON",
+      "median_household_income": 119723,
+      "median_home_value": 357945,
+      "median_gross_rent": 1204
+    },
+    {
+      "neighborhood_id": 45,
+      "name": "NORTHSIDE/NORTHLINE",
+      "median_household_income": 46167,
+      "median_home_value": 162459,
+      "median_gross_rent": 981
+    },
+    {
+      "neighborhood_id": 46,
+      "name": "EASTEX - JENSEN AREA",
+      "median_household_income": 36837,
+      "median_home_value": 159025,
+      "median_gross_rent": 1104
+    },
+    {
+      "neighborhood_id": 47,
+      "name": "EAST LITTLE YORK / HOMESTEAD",
+      "median_household_income": 38712,
+      "median_home_value": 130170,
+      "median_gross_rent": 1108
+    },
+    {
+      "neighborhood_id": 48,
+      "name": "TRINITY / HOUSTON GARDENS",
+      "median_household_income": 44862,
+      "median_home_value": 110850,
+      "median_gross_rent": 1070
+    },
+    {
+      "neighborhood_id": 49,
+      "name": "EAST HOUSTON",
+      "median_household_income": 37736,
+      "median_home_value": 134990,
+      "median_gross_rent": 1151
+    },
+    {
+      "neighborhood_id": 50,
+      "name": "SETTEGAST",
+      "median_household_income": 12386,
+      "median_home_value": 41631,
+      "median_gross_rent": 337
+    },
+    {
+      "neighborhood_id": 51,
+      "name": "NEAR NORTHSIDE",
+      "median_household_income": 57116,
+      "median_home_value": 248053,
+      "median_gross_rent": 1075
+    },
+    {
+      "neighborhood_id": 52,
+      "name": "KASHMERE GARDENS",
+      "median_household_income": 37336,
+      "median_home_value": 170945,
+      "median_gross_rent": 933
+    },
+    {
+      "neighborhood_id": 53,
+      "name": "EL DORADO / OATES PRAIRIE",
+      "median_household_income": 43909,
+      "median_home_value": 112231,
+      "median_gross_rent": 1246
+    },
+    {
+      "neighborhood_id": 54,
+      "name": "HUNTERWOOD",
+      "median_household_income": 54296,
+      "median_home_value": 199420,
+      "median_gross_rent": 1258
+    },
+    {
+      "neighborhood_id": 55,
+      "name": "GREATER FIFTH WARD",
+      "median_household_income": 42548,
+      "median_home_value": 191349,
+      "median_gross_rent": 963
+    },
+    {
+      "neighborhood_id": 56,
+      "name": "DENVER HARBOR / PORT HOUSTON",
+      "median_household_income": 46262,
+      "median_home_value": 144359,
+      "median_gross_rent": 904
+    },
+    {
+      "neighborhood_id": 57,
+      "name": "PLEASANTVILLE AREA",
+      "median_household_income": 61093,
+      "median_home_value": 136694,
+      "median_gross_rent": 921
+    },
+    {
+      "neighborhood_id": 58,
+      "name": "NORTHSHORE",
+      "median_household_income": 54486,
+      "median_home_value": 157194,
+      "median_gross_rent": 1132
+    },
+    {
+      "neighborhood_id": 59,
+      "name": "CLINTON PARK TRI-COMMUNITY",
+      "median_household_income": 40682,
+      "median_home_value": 94483,
+      "median_gross_rent": 1118
+    },
+    {
+      "neighborhood_id": 60,
+      "name": "FOURTH WARD",
+      "median_household_income": 87397,
+      "median_home_value": 391979,
+      "median_gross_rent": 1842
+    },
+    {
+      "neighborhood_id": 61,
+      "name": "DOWNTOWN",
+      "median_household_income": 108664,
+      "median_home_value": 346140,
+      "median_gross_rent": 1940
+    },
+    {
+      "neighborhood_id": 62,
+      "name": "MIDTOWN",
+      "median_household_income": 96473,
+      "median_home_value": 388688,
+      "median_gross_rent": 1811
+    },
+    {
+      "neighborhood_id": 63,
+      "name": "SECOND WARD",
+      "median_household_income": 58402,
+      "median_home_value": 333515,
+      "median_gross_rent": 1307
+    },
+    {
+      "neighborhood_id": 64,
+      "name": "GREATER EASTWOOD",
+      "median_household_income": 43262,
+      "median_home_value": 316801,
+      "median_gross_rent": 864
+    },
+    {
+      "neighborhood_id": 65,
+      "name": "HARRISBURG / MANCHESTER / SMITH ADDITION",
+      "median_household_income": 47493,
+      "median_home_value": 56402,
+      "median_gross_rent": 970
+    },
+    {
+      "neighborhood_id": 66,
+      "name": "MUSEUM PARK",
+      "median_household_income": 114586,
+      "median_home_value": 606170,
+      "median_gross_rent": 1852
+    },
+    {
+      "neighborhood_id": 67,
+      "name": "GREATER THIRD WARD",
+      "median_household_income": 48008,
+      "median_home_value": 385133,
+      "median_gross_rent": 799
+    },
+    {
+      "neighborhood_id": 68,
+      "name": "GREATER OST / SOUTH UNION",
+      "median_household_income": 29359,
+      "median_home_value": 165698,
+      "median_gross_rent": 1155
+    },
+    {
+      "neighborhood_id": 69,
+      "name": "GULFGATE RIVERVIEW / PINE VALLEY",
+      "median_household_income": 52042,
+      "median_home_value": 187784,
+      "median_gross_rent": 1157
+    },
+    {
+      "neighborhood_id": 70,
+      "name": "PECAN PARK",
+      "median_household_income": 51685,
+      "median_home_value": 168288,
+      "median_gross_rent": 967
+    },
+    {
+      "neighborhood_id": 71,
+      "name": "SUNNYSIDE",
+      "median_household_income": 33852,
+      "median_home_value": 150122,
+      "median_gross_rent": 1220
+    },
+    {
+      "neighborhood_id": 72,
+      "name": "SOUTH PARK",
+      "median_household_income": 34729,
+      "median_home_value": 130653,
+      "median_gross_rent": 1222
+    },
+    {
+      "neighborhood_id": 73,
+      "name": "GOLFCREST / BELLFORT / REVEILLE",
+      "median_household_income": 50212,
+      "median_home_value": 186137,
+      "median_gross_rent": 967
+    },
+    {
+      "neighborhood_id": 74,
+      "name": "PARK PLACE",
+      "median_household_income": 41312,
+      "median_home_value": 114497,
+      "median_gross_rent": 1125
+    },
+    {
+      "neighborhood_id": 75,
+      "name": "MEADOWBROOK / ALLENDALE",
+      "median_household_income": 58346,
+      "median_home_value": 153736,
+      "median_gross_rent": 1055
+    },
+    {
+      "neighborhood_id": 76,
+      "name": "SOUTH ACRES / CRESTMONT PARK",
+      "median_household_income": 68417,
+      "median_home_value": 199279,
+      "median_gross_rent": 1320
+    },
+    {
+      "neighborhood_id": 77,
+      "name": "MINNETEX",
+      "median_household_income": 63923,
+      "median_home_value": 228538,
+      "median_gross_rent": 1296
+    },
+    {
+      "neighborhood_id": 78,
+      "name": "GREATER HOBBY AREA",
+      "median_household_income": 59633,
+      "median_home_value": 214309,
+      "median_gross_rent": 1217
+    },
+    {
+      "neighborhood_id": 79,
+      "name": "EDGEBROOK AREA",
+      "median_household_income": 54669,
+      "median_home_value": 164388,
+      "median_gross_rent": 1126
+    },
+    {
+      "neighborhood_id": 80,
+      "name": "SOUTH BELT / ELLINGTON",
+      "median_household_income": 71176,
+      "median_home_value": 208002,
+      "median_gross_rent": 1298
+    },
+    {
+      "neighborhood_id": 81,
+      "name": "CLEAR LAKE",
+      "median_household_income": 102754,
+      "median_home_value": 326227,
+      "median_gross_rent": 1266
+    },
+    {
+      "neighborhood_id": 82,
+      "name": "MAGNOLIA PARK",
+      "median_household_income": 35905,
+      "median_home_value": 155768,
+      "median_gross_rent": 1035
+    },
+    {
+      "neighborhood_id": 83,
+      "name": "MACGREGOR",
+      "median_household_income": 67250,
+      "median_home_value": 376485,
+      "median_gross_rent": 1329
+    },
+    {
+      "neighborhood_id": 84,
+      "name": "SPRING BRANCH NORTH",
+      "median_household_income": 80717,
+      "median_home_value": 381738,
+      "median_gross_rent": 1462
+    },
+    {
+      "neighborhood_id": 85,
+      "name": "SPRING BRANCH CENTRAL",
+      "median_household_income": 55805,
+      "median_home_value": 356940,
+      "median_gross_rent": 1098
+    },
+    {
+      "neighborhood_id": 86,
+      "name": "SPRING BRANCH EAST",
+      "median_household_income": 80641,
+      "median_home_value": 521780,
+      "median_gross_rent": 1282
+    },
+    {
+      "neighborhood_id": 87,
+      "name": "GREENWAY / UPPER KIRBY AREA",
+      "median_household_income": 107318,
+      "median_home_value": 558554,
+      "median_gross_rent": 1904
+    },
+    {
+      "neighborhood_id": 88,
+      "name": "LAWNDALE / WAYSIDE",
+      "median_household_income": 65324,
+      "median_home_value": 308716,
+      "median_gross_rent": 1010
+    }
+  ]
+}

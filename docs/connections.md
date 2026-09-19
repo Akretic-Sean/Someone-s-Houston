@@ -1,6 +1,6 @@
 # Hou Match connections
 
-The [build plan](build-plan.md) proposes TypeScript, two MCP servers on Cloudflare Workers, and shared data/scoring packages. Supabase is now selected for prepared neighborhood data and saved reports. The [backend data policy](backend-data-policy.md) defines relevant import windows and the fast report path. No application runtime has been implemented yet.
+The first [neighborhood reference layer](neighborhood-layer.md) is live in Supabase, with a read-only API and a local TypeScript MCP server for Claude. See the [backend setup](../backend/README.md) and [API contract](api.md). The [build plan](build-plan.md) still proposes hosted MCP/report services; the [backend data policy](backend-data-policy.md) defines relevant import windows.
 
 Start with [Phase 0 data notes](data-notes.md) for source checks. The earlier [neighborhood data research](neighborhood-data-research.md) remains an exploratory source catalog; its broader product features are outside the current report scope.
 
@@ -8,12 +8,12 @@ Start with [Phase 0 data notes](data-notes.md) for source checks. The earlier [n
 
 | Connection | Purpose | Current state |
 | --- | --- | --- |
-| GitHub: `Akretic-Sean/hou-match` | Shared code and pull requests | Public repository; Oleggo1 has accepted write access |
+| GitHub: `Akretic-Sean/Someone-s-Houston` | Shared code and pull requests | Public repository, renamed from `hou-match`; Oleggo1 has accepted write access |
 | Houston Open Data | Discover datasets and read source data | Public CKAN API verified on 2026-09-19 |
 | Cloudflare Workers | Proposed MCP/API hosting | Deployment not configured by this setup |
-| Supabase project | Selected relational/spatial data and report storage | Hou Match project not created yet |
+| Supabase project | Prepared reference data; future report storage | Existing `Someone-s-Houston`, `hknzivrgihnqzvsafkkr`, Free plan, `us-east-1` |
 | Supabase agent connection | Let each developer's agent inspect the project | Backend owner's connection verified; partner authenticates separately |
-| Supabase application connection | Runtime access for imports and report services | Environment template only; no application connection |
+| Supabase application connection | Public neighborhood reference reads | 88 profiles imported; REST and local MCP live tests passed |
 
 ## Houston: ready to use
 
@@ -43,19 +43,19 @@ References: [Houston Open Data](https://data.houstontx.gov/), [CKAN Action API](
 
 ## Supabase project and runtime
 
-Create a project named `hou-match` in the intended organization for normalized spatial data, prepared metrics, and reports. Organization, cost confirmation, and project creation remain pending. Choose its region alongside the backend host. Record the project reference and URL here once available. Set up Oleggo1's Supabase access separately if his agent needs database access; GitHub repository membership does not configure a Supabase connection.
+Reuse the existing [Someone-s-Houston project](https://supabase.com/dashboard/project/hknzivrgihnqzvsafkkr). Its API URL is `https://hknzivrgihnqzvsafkkr.supabase.co`; no additional project or paid plan is needed for this data layer. Oleg's frontend and neighborhood MCP need only the URL and publishable key. Administrative/developer MCP access uses his own Supabase account separately; GitHub membership does not grant dashboard access.
 
-Copy `backend/.env.example` to `backend/.env` locally. Fill the project reference, API URL, and publishable key. Add a secret key only to a backend process that requires privileged access. Publishable keys can be used in a frontend with appropriate Row Level Security policies; secret keys bypass RLS and belong only on the server. Runtime-specific configuration remains to be implemented.
+Copy `backend/.env.example` to `backend/.env` locally and fill the publishable key. Add a secret key only for the backend owner's ingestion process. The neighborhood table has RLS plus explicit read-only grants; its publishable key can be used in the frontend. Secret keys bypass RLS and belong only on the server. See the backend README for tested commands.
 
 Reference: [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).
 
-When creating tables for the Data API, include explicit grants for the roles and operations the application needs, enable RLS, and add matching policies in the same migration. New projects no longer automatically grant access to new tables. Verify using the application's role/key as well as the privileged database connection. See [Supabase's updated table-access defaults](https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically).
+When creating tables for the Data API, include explicit grants for the roles and operations the application needs, enable RLS, and add matching policies in the same migration. Do not rely on default grants; project settings and creation dates can differ. Verify using the application's role/key as well as the privileged database connection. See [Supabase's updated table-access defaults](https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically).
 
 ## Agent connections
 
-Connect the Supabase integration in your coding environment using your own Supabase login. Once the project exists, confirm the project reference before database work.
+Connect the Supabase integration in your coding environment using your own Supabase login. Confirm project reference `hknzivrgihnqzvsafkkr` before database work.
 
-For Claude Code, copy `.mcp.json.example` to the ignored `.mcp.json`, set `SUPABASE_PROJECT_REF` in the environment that launches Claude, and authenticate with `claude /mcp` in a terminal. Alternatively, replace the variable in your local file with the actual project reference. The template limits access to that project and begins with read-only database, docs, and development tools. OAuth handles login; do not put access tokens in the repository. When backend migrations are ready, configure the backend agent for write access to the intended development project.
+For Claude Code, `.mcp.json.example` now has two entries: the product's local `hou-match-neighborhoods` tools (URL/publishable key), and optional developer `supabase` tools (OAuth). The project reference is filled in and the developer entry is read-only. Follow the backend README to build/configure the local connector, and use `/mcp` to authenticate the developer entry if needed. Keep tokens and real configuration outside Git.
 
 This Supabase MCP connection is for developer tools. It is separate from the build plan's Houston Open Data MCP and Pitch MCP, which are product services. Application code uses the Supabase API/client library with runtime configuration.
 
@@ -67,6 +67,6 @@ Reference: [Supabase MCP setup and configuration](https://supabase.com/docs/guid
 2. Capture dated, versioned snapshots and reference inputs. Keep source periods separate from download times.
 3. Agree on the report JSON contract in `docs/api.md`, including source dates, unavailable metrics, snapshot fallback, and report expiration, so Oleggo can build the page against a fixture.
 4. Implement the shared TypeScript CKAN client, the read-only Open Data MCP, and deterministic scoring; the Pitch MCP calls the shared packages directly.
-5. Configure the Supabase project, migrations/access policies, bounded import jobs, and proposed Workers host. Verify the application's access separately from the developer MCP connection.
+5. Extend the existing Supabase schema/importer for the remaining validated layers and report storage. The 88-row neighborhood table, read policies, initial import and local MCP are complete; proposed Workers hosting remains unconfigured.
 
-Current proposed flow: Houston/Census/reference inputs -> normalized, versioned data -> scoring -> Pitch MCP -> stored report JSON -> Oleggo's report page. This setup has not deployed either MCP server or created a report store.
+Current proposed report flow: Houston/Census/reference inputs -> normalized, versioned data -> scoring -> Pitch MCP -> stored report JSON -> Oleggo's page. The neighborhood reference layer is available now; hosted MCP services and report storage are not yet implemented.

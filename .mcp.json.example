@@ -1,8 +1,16 @@
 {
   "mcpServers": {
+    "hou-match-neighborhoods": {
+      "command": "node",
+      "args": ["backend/dist/mcp.js"],
+      "env": {
+        "SUPABASE_URL": "https://hknzivrgihnqzvsafkkr.supabase.co",
+        "SUPABASE_PUBLISHABLE_KEY": "${SUPABASE_PUBLISHABLE_KEY}"
+      }
+    },
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=${SUPABASE_PROJECT_REF}&read_only=true&features=database,docs,development"
+      "url": "https://mcp.supabase.com/mcp?project_ref=hknzivrgihnqzvsafkkr&read_only=true&features=database,docs,development"
     }
   }
 }

@@ -10,12 +10,12 @@ Shared public repository for our hackathon website.
 
 ## Start working
 
-1. Oleggo1: accept the GitHub collaborator invitation while signed in to your own account.
+1. Oleggo1's collaborator invitation is accepted; use your own GitHub account.
 2. Clone the repository in the environment where your coding agent runs:
 
    ```sh
-   git clone https://github.com/Akretic-Sean/hou-match.git
-   cd hou-match
+   git clone https://github.com/Akretic-Sean/Someone-s-Houston.git
+   cd Someone-s-Houston
    ```
 
 3. Read `AGENTS.md`. Claude users should also read `CLAUDE.md`.
@@ -43,6 +43,6 @@ Authenticate GitHub in the environment where the agent runs using your own GitHu
 
 ## Project setup
 
-This repository currently contains collaboration scaffolding. Frameworks, dependencies, run commands, and deployment targets are still to be chosen. Each owner should update their folder's README with installation, development, and test commands when adding the application.
+The first backend layer is live: 88 Houston Super Neighborhood profiles in Supabase, a read-only API and a local Claude MCP connector. Start with [backend setup](backend/README.md), the [API contract](docs/api.md), and [data/cost notes](docs/neighborhood-layer.md). Frontend integration, report generation and hosted MCP deployment remain in progress/planning.
 
 Commit example configuration with placeholder values in `.env.example`. Keep actual API keys and credentials in local environment files or the hosting provider's secret settings.

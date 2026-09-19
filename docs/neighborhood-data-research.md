@@ -9,7 +9,7 @@ Researched and probed on 2026-09-19. Product goal: help tech recruits compare Ho
 - Houston's CKAN catalog and DataStore endpoints respond without an API key. The discovery utility and metadata inventory are in this branch.
 - Additional City of Houston ArcGIS services responded to public read queries for neighborhood boundaries, parks, school locations, and floodplain features.
 - NWS and modern USGS APIs returned current responses without credentials during testing.
-- The backend owner's Supabase developer connector is authenticated. A `hou-match` project has not been created; there is no running application database or scheduled import yet.
+- The backend owner's Supabase developer connector is authenticated. Subsequent setup reused the existing `Someone-s-Houston` project and imported the [88-row neighborhood layer](neighborhood-layer.md). No scheduled import was enabled.
 - METRO, TranStar, and a traffic-aware routing provider have not been connected.
 
 ## Exploratory sources
