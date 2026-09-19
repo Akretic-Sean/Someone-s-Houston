@@ -269,7 +269,7 @@ neighborhood score/factor or hero fact; that gap must be resolved during integra
 ### `GET /reports`
 
 - Status: proposed
-- Purpose: the recruiter dashboard list.
+- Purpose: the dashboard's report list.
 - Success: `200` with `{ "kpis": [], "reports": [] }`. A report summary is
   `{ id, name, origin, role, status, date }` where status is `Viewed` / `Shared` /
   `Draft` / `Expert opt-in`.

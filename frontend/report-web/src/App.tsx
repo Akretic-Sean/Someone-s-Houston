@@ -30,7 +30,7 @@ const INITIAL_CONFIG: ReportConfig = {
 };
 
 const TABS: Array<[View, string]> = [
-  ['dashboard', '1 · Recruiter dashboard'],
+  ['dashboard', '1 · Dashboard'],
   ['create', '2 · Create report'],
   ['report', '3 · Candidate report'],
 ];

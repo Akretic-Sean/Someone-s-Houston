@@ -4,7 +4,7 @@ Owner: @Oleggo1.
 
 | App | Folder | What it is |
 | --- | --- | --- |
-| `report-web` | `report-web/` | Recruiter dashboard, report builder, and the candidate-facing report page |
+| `report-web` | `report-web/` | Dashboard, report builder, and the candidate-facing report page |
 
 ## Stack
 
@@ -34,7 +34,7 @@ the build.
 The app is frontend-only and renders mocked data. Three screens, switchable from the bar
 at the top of the page:
 
-1. **Recruiter dashboard** — KPIs and the recent-reports table.
+1. **Dashboard** — KPIs and the recent-reports table.
 2. **Create report** — import a call transcript from a meeting-notes connector, review the
    extracted candidate profile (each field carries a confidence), set the office hub, the
    comparison mode and the priority weights.
