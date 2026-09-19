@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { scoreNeighborhoodsWithEstimates } from '../../../shared/scoring-estimates.mjs';
 import Login from './screens/Login';
+import { listReports, saveReport, type SavedReport } from './data/savedReports';
 import { supabase } from './lib/supabase';
 import Dashboard from './screens/Dashboard';
 import CreateReport from './screens/CreateReport';
@@ -100,6 +101,48 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
   const [clock, setClock] = useState(Date.now());
   const [generateError, setGenerateError] = useState<string | null>(null);
   const data = useScoringData();
+  const [savedRows, setSavedRows] = useState<SavedReport[]>([]);
+  const [savedCount, setSavedCount] = useState(0);
+  const [savedError, setSavedError] = useState('');
+  const [demoError, setDemoError] = useState('');
+  const [saveNotice, setSaveNotice] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [listing, setListing] = useState(false);
+  const pendingSave = useRef<{ id: string; config: ReportConfig; report: GeneratedReport } | null>(null);
+  const rawName = session?.user.user_metadata?.full_name || session?.user.user_metadata?.username || session?.user.user_metadata?.name;
+  const displayName = typeof rawName === 'string' && rawName.trim() ? rawName : session?.user.email ?? 'Your account';
+  async function loadSaved() {
+    if (!session) return;
+    setListing(true); setSavedError('');
+    try { const result = await listReports(session.user.id); setSavedRows(result.rows); setSavedCount(result.count); }
+    catch (error) { setSavedError(error instanceof Error ? error.message : 'Could not load reports.'); }
+    finally { setListing(false); }
+  }
+  useEffect(() => { void loadSaved(); }, []);
+  async function persistPending() {
+    if (!session || !pendingSave.current || saving) return;
+    setSaving(true); setSaveNotice('Saving report…');
+    try {
+      const pending = pendingSave.current;
+      await saveReport(pending.id, session.user.id, pending.config, pending.report);
+      pendingSave.current = null; setSaveNotice('Saved to your dashboard.'); void loadSaved();
+    } catch (error) { setSaveNotice(error instanceof Error ? error.message : 'Could not save report.'); }
+    finally { setSaving(false); }
+  }
+  async function openSaved(row: SavedReport, demo = false) {
+    if (generationPending.current) return;
+    generationPending.current = true; setGenerating(true); setSavedError(''); setDemoError('');
+    try {
+      const payload = await data.refresh();
+      scoreNeighborhoodsWithEstimates(payload, row.config);
+      if (!row.config.profile || Object.values(row.config.profile).some(value => typeof value !== 'string')) throw new Error('Invalid saved preferences.');
+      setConfig(row.config);
+      setGenerated({ payload, generatedAt: new Date().toISOString(), narrative: { status: 'degraded', text: null, facts: [], expiresAt: new Date().toISOString() } });
+      setSaveNotice(demo ? 'Synthetic candidate scenario calculated using current Supabase evidence. This demo report is not saved.' : 'Saved priorities restored with current evidence. Original generation snapshot is retained privately in Supabase.');
+      go('report');
+    } catch { (demo ? setDemoError : setSavedError)('Could not load this report with current evidence. Please retry.'); }
+    finally { generationPending.current = false; setGenerating(false); }
+  }
   useEffect(() => {
     const tick = () => setClock(Date.now());
     const timer = window.setInterval(tick, 30_000);
@@ -139,6 +182,8 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
       if (!result.ranked.length) throw new Error('No neighborhoods have all of the evidence needed for these priorities. Review the missing-data details or retry after the data is refreshed.');
       setGenerated(report);
       go('report');
+      if (session) { pendingSave.current = { id: crypto.randomUUID(), config, report }; await persistPending(); }
+      else setSaveNotice('Sign in to save reports.');
     } catch (error) {
       setGenerateError(error instanceof Error ? error.message : 'Could not generate the report. Please retry.');
     } finally { generationPending.current = false; setGenerating(false); }
@@ -156,17 +201,18 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
         <span className="proto-label">Someone’s Houston</span>
         <button className="pill" aria-pressed={view === 'create'} disabled={generating || extracting} onClick={() => go('create')}>Configure priorities</button>
         <button className="pill" aria-pressed={view === 'report'} disabled={!generated || generating || extracting} onClick={() => go('report')}>Neighborhood report</button>
-        <button className="pill" aria-pressed={view === 'dashboard'} disabled={generating || extracting} onClick={() => go('dashboard')}>Sample dashboard</button>
+        <button className="pill" aria-pressed={view === 'dashboard'} disabled={generating || extracting} onClick={() => go('dashboard')}>My dashboard</button>
         {session && <button type="button" className="pill" onClick={onSignOut} disabled={signingOut}>
           {signingOut ? 'Signing out…' : 'Sign out'}
         </button>}
       </div>
       {authError && <p className="prototype-notice" role="alert">{authError}</p>}
+      {saveNotice && <p className="prototype-notice" role="status">{saveNotice} {pendingSave.current && <button disabled={saving} onClick={() => void persistPending()}>Retry save</button>}</p>}
       {view === 'dashboard' && <>
-        <p className="prototype-notice">Dashboard and connector demonstrations use sample records. Reports generated through Configure priorities use live Supabase evidence and are not saved.</p>
-        <Dashboard nav={dashboardNav} onNav={setDashboardNav} connectors={connectors}
+        <p className="prototype-notice">Reports are private to your signed-in account. Reopening restores saved priorities using current Supabase evidence. Connector controls remain demonstrations.</p>
+        <Dashboard demoError={demoError} displayName={displayName} email={session?.user.email ?? ''} reports={savedRows} count={savedCount} loading={listing || generating} error={savedError} onRetry={() => void loadSaved()} nav={dashboardNav} onNav={setDashboardNav} connectors={connectors}
           onToggleConnector={(id: ConnectorId) => setConnectors(c => ({ ...c, [id]: c[id] === 'connected' ? 'idle' : 'connected' }))}
-          onOpenReport={() => go('create')} onCreate={() => go('create')} />
+          onDemoReport={(row) => void openSaved(row, true)} onOpenReport={(row) => void openSaved(row)} onCreate={() => go('create')} />
       </>}
       {view === 'create' && <CreateReport config={config} onChange={changeConfig}
         result={scoring.result} loading={data.loading} generating={generating} extracting={extracting} onExtracting={setExtracting}
