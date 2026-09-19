@@ -4,6 +4,7 @@ import { Client } from '@modelcontextprotocol/client';
 import { StdioClientTransport } from '@modelcontextprotocol/client/stdio';
 import { createNeighborhoodClient } from '../dist/neighborhoods.js';
 import { createContextClient } from '../dist/context.js';
+import { DEFAULT_WEIGHTS } from '../../shared/scoring.mjs';
 import { createEvidenceClient } from '../dist/evidence.js';
 
 const url = process.env.SUPABASE_URL;
@@ -47,7 +48,12 @@ const transport = new StdioClientTransport({
 });
 try {
   await mcp.connect(transport);
-  assert.equal((await mcp.listTools()).tools.length, 5);
+  assert.equal((await mcp.listTools()).tools.length, 7);
+  const baseline = { weights: { ...DEFAULT_WEIGHTS }, tenure: 'rent', mode: 'offer', office: 'ion', airport: 'nearest' };
+  const comparison = await mcp.callTool({ name: 'compare_neighborhood_scenarios', arguments: { baseline, alternative: { ...baseline, mode: 'remote' } } });
+  assert.equal(comparison.isError, undefined);
+  assert.ok(comparison.structuredContent.baseline.ranked_count > 0);
+  assert.equal(comparison.structuredContent.alternative.effective_weights.commute, 0);
   const result = await mcp.callTool({ name: 'get_neighborhood', arguments: { neighborhood_id: 62 } });
   assert.equal(result.isError, undefined);
   assert.equal(JSON.parse(result.content[0].text).neighborhood.name, 'MIDTOWN');
@@ -58,6 +64,10 @@ try {
   assert.equal(conditionsResult.isError, undefined);
   assert.equal(JSON.parse(conditionsResult.content[0].text).feeds.length, 2);
   const evidenceResult = await mcp.callTool({ name: 'get_neighborhood_evidence', arguments: { neighborhood_id: 62 } });
+  const relocationResult = await mcp.callTool({ name: 'get_neighborhood_relocation_context', arguments: { neighborhood_id: 62 } });
+  assert.equal(relocationResult.isError, undefined);
+  assert.equal(relocationResult.structuredContent.neighborhood_id, 62);
+  assert.equal(relocationResult.structuredContent.scoring_effect, 'none');
   assert.equal(evidenceResult.isError, undefined);
   assert.equal(JSON.parse(evidenceResult.content[0].text).profile_id, 'report-priorities-v1');
 } finally { await mcp.close(); }
