@@ -117,3 +117,8 @@ The server-only AI SDK/OpenRouter extraction and narration boundary is documente
 in [the model-layer guide](../docs/model-layer.md), including pinned versions,
 Deno checks, secret configuration and the protected synthetic runtime check.
 This does not yet connect AI generation to the report frontend or persist reports.
+
+
+## All-neighborhood comparison
+
+The optional [all-88 shared calculation](../docs/all-88-frontend-guide.md) ranks the full cohort on common current measurements without changing the strict model or filling source gaps. `npm run test:all-neighborhoods` verifies rent/buy and offer/remote against one live public snapshot. Uses the same ignored public-key configuration as `test:live`.

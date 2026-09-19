@@ -38,6 +38,10 @@ IDs are integers 1–88. Frontend mock slugs are not canonical IDs: resolve them
 - Housing structure, bedroom and construction-year tables are separate marginals; do not invent combined listing inventory. USDA groceries cover SNAP-authorized grocery/supermarket/superstore records only; zero records does not establish no food access. Dining remains missing.
 - Evidence distances are straight-line from a neighborhood reference point to an inventory/address proxy, never route minutes. Medical inventories do not establish insurance acceptance, specialty access or clinical quality. Flood percentages describe mapped land area, not the chance a home floods; heed coverage/conflict flags and null values.
 
+## Optional all-88 comparison
+
+The explicit `scoreAllNeighborhoods` wrapper in `shared/scoring-coverage.mjs` implements a common-coverage view; follow [the frontend guide](all-88-frontend-guide.md). Remove incomplete selected categories globally, display the omissions and actual weights, retain original settings and full-priority results, and never claim that missing source data was repaired. This is the only approved alternative coverage policy; no per-neighborhood redistribution or synthetic values.
+
 ## Frontend and backend access
 
 - Frontend uses the publishable key and the documented public REST/RPC paths; it does not call the ingestion Edge Function or use MCP as its HTTP data API.

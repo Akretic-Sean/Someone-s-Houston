@@ -2,6 +2,10 @@
 
 Start here for teammate/Claude integration. Read `CLAUDE.md`, [the API contract](api.md) and [the scoring method](scoring-matrix.md). Pull the current shared branch into your normal feature branch without discarding changes. Reuse the existing frontend data and authentication layers; do not merge unrelated PRs automatically.
 
+## Compare all 88 (explicit optional view)
+
+Use [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new `scoreAllNeighborhoods` shared wrapper. It ranks all 88 using common current categories and returns visible omissions, effective weights and the unchanged full-priority result. It does not fill missing data or change the default scorer.
+
 ## Copy-paste task
 
 > Connect the frontend features I request to the existing Supabase backend. Read CLAUDE.md, docs/frontend-backend-handoff.md and docs/api.md first. Preserve teammate changes and the existing login flow. For neighborhood ranking, load get_neighborhood_scoring_data once and use the shared scoreNeighborhoods implementation in shared/scoring.mjs; do not invent another formula or use mock scores. Bind rent/buy, office, airport, weights and remote mode to that function. Load detailed evidence only for selected IDs, and retain source dates, missing values and expiry handling. Keep route minutes, safety tiers, taxes and unsupported personal financial claims unavailable. Reports are in-session only; do not claim they were saved, shared or delivered. Run the connection preflight, scoring tests and frontend build, verify the acceptance cases in this handoff, and report what actually passed. Ask for configuration only if the publishable key is missing; do not create a new project or use admin credentials.

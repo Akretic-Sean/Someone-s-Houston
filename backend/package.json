@@ -17,6 +17,7 @@
     "relocation:prepare": "python tools/prepare-relocation-context.py",
     "relocation:publish": "npm run build && node --env-file-if-exists=.env dist/publish-relocation-context.js",
     "mcp": "node --env-file-if-exists=.env dist/mcp.js",
+    "test:all-neighborhoods": "npm run build && node --env-file-if-exists=.env tools/check-all-neighborhoods.mjs",
     "demo:proof": "npm run build && node --env-file-if-exists=.env tools/prove-backend.mjs",
     "test:live": "npm run build && node --env-file-if-exists=.env test/live.mjs",
     "test:frontend": "npm run build && node tools/check-frontend-connection.mjs"
