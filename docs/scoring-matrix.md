@@ -67,4 +67,6 @@ The existing `get_neighborhood_evidence` REST/MCP response deliberately retains 
 
 This version generates an in-session ranked report. It does not persist or share reports, deliver leads, calculate taxes/take-home pay, establish personal salary standing, infer safety tiers, produce drive minutes or use a narrative LLM. Current weather/gauges remain context and do not change the flood score. Source-backed explanations must retain these limits.
 
+The optional Listing Watch dialog is independent of scoring. Its service is unconfigured, so no watch or email is created. Its browser-session correlation ID does not imply report persistence, and future listing/property results must not silently alter this model's neighborhood measurements.
+
 Run backend and shared scoring tests, the frontend build and the public connection preflight as described in [the handoff](frontend-backend-handoff.md). In the browser, verify that weights, rent/buy, office and airport choices recompute the shortlist; remote mode omits commute; all-zero effective weights are rejected; missing/expired inputs withhold rankings; and no mocked claims are displayed. A build/preflight alone is not a rendered-browser or deployed-host test.

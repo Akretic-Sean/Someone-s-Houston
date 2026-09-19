@@ -1,4 +1,4 @@
-/** What the browser sends to create a watch. Mirrors the `create_watch` tool. */
+/** Request contract for the separately configured listing-watch webhook. */
 export interface WatchRequest {
   /** Browser-session correlation ID; this version does not persist report records. */
   reportId: string;

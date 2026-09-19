@@ -167,6 +167,14 @@ In-session ranking is implemented by the shared model and compact data RPC above
 
 The user's latest screenshot confirms the frontend weight IDs below. [The current evidence matrix](matrix-readiness.md) uses `backend/data/reference/report-priorities.v1.json`; the earlier 100-point draft is superseded. Raw defaults total 54 and produce the screenshot percentages after normalization/display rounding. The shared comparison model applies these weights using the documented limited measurements.
 
+## Optional Listing Watch integration
+
+**Status: frontend request adapter only; no watch service is configured or deployed by P0.** The preserved dialog uses the real ranked shortlist. With `VITE_LISTING_WATCH_WEBHOOK_URL` unset, it shows an unavailable state, disables submission and sends nothing. This variable is optional for scoring and must never contain a secret token.
+
+If a separate service is later supplied, `frontend/report-web/src/watch/api.ts` sends a JSON POST to that URL with `Content-Type: application/json` and a 15-second timeout. `src/watch/types.ts` is the frontend request shape: `{ reportId, neighborhoodIds, neighborhoodNames, listingType, softCriteria, officeId, delivery: { channel: "email", email }, consent: true, cadence: "weekly", expiresAfterWeeks: 12 }`. `listingType` is `sale|rent|both`; neighborhood IDs are the City's canonical integers. The current `reportId` is a `session-…` browser correlation identifier, **not** a persisted report key or authorization credential.
+
+The UI requires a selected neighborhood, email and explicit consent before calling the adapter. A future service must independently validate the request and consent, protect contact details, and implement scheduling, expiry, listing retrieval and delivery. None of those operations is provided by the Supabase scoring RPC or current five MCP tools. The adapter treats an HTTP success as request acceptance only; it does not establish that a watch was stored or any email delivered. No live listing inventory or property scores enter the neighborhood matrix.
+
 ## Proposed report API
 
 Status: **proposed by the frontend, not yet agreed or implemented.** The following

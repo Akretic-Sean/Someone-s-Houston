@@ -14,6 +14,8 @@ Narrow the task by appending “Connect only [scoring / map / evidence cards / f
 
 **Not implemented:** stored/shared reports, private candidate tables and ownership rules, candidate extraction, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery, safety tiers or LLM-written recommendations. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
 
+**Listing Watch:** its optional dialog is preserved and receives the actual ranked shortlist. The watch service is not configured in this build; submission is disabled and nothing is sent. Its `session-…` correlation ID is not a saved-report ID. The scoring RPC does not schedule watches or send email. See [the separate watch integration contract](api.md#optional-listing-watch-integration).
+
 ## Configuration and first check
 
 Use ignored `frontend/report-web/.env.local` (or the app's existing env setup):
@@ -88,6 +90,7 @@ Current P0 integration points:
 | `src/screens/CreateReport.tsx` | Direct preference configuration; no fake transcript extraction. |
 | `src/screens/CandidateReport.tsx` | Ranked shortlist, all-neighborhood statuses, evidence and score breakdowns. |
 | `src/components/NeighborhoodMap.tsx` | Selectable reference points for all 88 neighborhoods. Boundary polygons remain a separate available RPC. |
+| `src/watch/ListingWatchDialog.tsx`, `api.ts`, `types.ts` | Optional consented request to a separately configured watch webhook; currently unavailable. Uses canonical IDs from the ranked shortlist. |
 
 The dashboard's sample content is labeled as such and must not open a fabricated report. Auth was not present in the frontend branch used for this P0 integration; retain the separate auth implementation when that work merges.
 
@@ -103,6 +106,8 @@ The shared scoring module is browser-safe and dependency-free. Backend ingestion
 6. Verify map pan/zoom and input changes do not refetch large datasets. Coalesce in-flight reads, cache selected-ID evidence, and keep basemap attribution. All 88 areas can remain visible with their ranking status.
 7. Preserve sign-in, session restoration and sign-out if present. Verify deployed build variables/network calls separately. Do not claim that reports persist across reload, have a shareable URL, or deliver a lead.
 8. Report connected screens, limitations, files changed and checks actually run; explicitly identify browser/deployment checks that could not be performed.
+
+P0 validation recorded on 2026-09-19: 80 backend tests and seven frontend client tests passed, along with the frontend build, live API checks and SQL scoring/access guards. Local browser checks passed for preference controls, mobile layout and error states. These checks do not certify an external Listing Watch service. A public frontend deployment was not performed as part of this work.
 
 ## Optional agent MCP
 
