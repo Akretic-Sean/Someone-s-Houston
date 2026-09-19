@@ -11,6 +11,8 @@ import EvidenceCards from '../evidence/EvidenceCards';
 import { useEvidence } from '../evidence/useEvidence';
 import { buildCategoryViews, findDestination } from '../evidence/select';
 import ListingWatchDialog from '../watch/ListingWatchDialog';
+import ListingWatchSection from '../listings/ListingWatchSection';
+import { hasListingWatch } from '../config';
 import type { Report, ResolvedNeighborhood } from '../types';
 
 /**
@@ -411,6 +413,11 @@ export default function CandidateReport({
             </>
           ) : null}
         </section>
+
+        <ListingWatchSection
+          onOpenWatch={() => setWatchOpen(true)}
+          watchEnabled={hasListingWatch}
+        />
 
         <section>
           <h2 className="section-title">How the week actually works</h2>

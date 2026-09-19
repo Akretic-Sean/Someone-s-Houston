@@ -25,3 +25,9 @@ export const LISTING_WATCH_WEBHOOK: string =
   import.meta.env.VITE_LISTING_WATCH_WEBHOOK_URL ?? '';
 
 export const hasListingWatch = Boolean(LISTING_WATCH_WEBHOOK);
+
+/**
+ * Houston Watch listings API. Holds the Apify token server-side and allow-lists
+ * this origin; this app never talks to Apify directly.
+ */
+export const LISTINGS_API: string = import.meta.env.VITE_LISTINGS_API_URL ?? '';
