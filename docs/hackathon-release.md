@@ -21,6 +21,13 @@ The current production Site URL/redirect in Supabase is
 `https://someones-houston.vercel.app/`. Update Authentication → URL Configuration
 if that primary address changes. The project API URL and key stay the same.
 
+This release keeps the frontend and AI endpoint on the same existing strict
+scoring RPC/model. PR #14's additional source-bounded, all-88 ranking is a
+separate integration: when adopting it, update both the frontend and
+`report-flow` to carry the complete estimates envelope and disclose its bounds.
+Do not combine an estimated frontend ranking with an explanation of the strict
+server ranking. See [the all-88 integration guide](all-88-frontend-guide.md).
+
 ## Email login for the hackathon
 
 The user selected Supabase's built-in email service to avoid another provider.
