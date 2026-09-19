@@ -104,6 +104,7 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
   const [savedRows, setSavedRows] = useState<SavedReport[]>([]);
   const [savedCount, setSavedCount] = useState(0);
   const [savedError, setSavedError] = useState('');
+  const [demoError, setDemoError] = useState('');
   const [saveNotice, setSaveNotice] = useState('');
   const [saving, setSaving] = useState(false);
   const [listing, setListing] = useState(false);
@@ -120,7 +121,7 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
   useEffect(() => { void loadSaved(); }, []);
   async function persistPending() {
     if (!session || !pendingSave.current || saving) return;
-    setSaving(true); setSaveNotice('Saving report—');
+    setSaving(true); setSaveNotice('Saving report…');
     try {
       const pending = pendingSave.current;
       await saveReport(pending.id, session.user.id, pending.config, pending.report);
@@ -128,18 +129,18 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
     } catch (error) { setSaveNotice(error instanceof Error ? error.message : 'Could not save report.'); }
     finally { setSaving(false); }
   }
-  async function openSaved(row: SavedReport) {
+  async function openSaved(row: SavedReport, demo = false) {
     if (generationPending.current) return;
-    generationPending.current = true; setGenerating(true); setSavedError('');
+    generationPending.current = true; setGenerating(true); setSavedError(''); setDemoError('');
     try {
       const payload = await data.refresh();
       scoreNeighborhoodsWithEstimates(payload, row.config);
       if (!row.config.profile || Object.values(row.config.profile).some(value => typeof value !== 'string')) throw new Error('Invalid saved preferences.');
       setConfig(row.config);
       setGenerated({ payload, generatedAt: new Date().toISOString(), narrative: { status: 'degraded', text: null, facts: [], expiresAt: new Date().toISOString() } });
-      setSaveNotice('Saved priorities restored with current evidence. Original generation snapshot is retained privately in Supabase.');
+      setSaveNotice(demo ? 'Synthetic candidate scenario calculated using current Supabase evidence. This demo report is not saved.' : 'Saved priorities restored with current evidence. Original generation snapshot is retained privately in Supabase.');
       go('report');
-    } catch { setSavedError('Could not reopen this report with current evidence. Please retry.'); }
+    } catch { (demo ? setDemoError : setSavedError)('Could not load this report with current evidence. Please retry.'); }
     finally { generationPending.current = false; setGenerating(false); }
   }
   useEffect(() => {
@@ -209,9 +210,9 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
       {saveNotice && <p className="prototype-notice" role="status">{saveNotice} {pendingSave.current && <button disabled={saving} onClick={() => void persistPending()}>Retry save</button>}</p>}
       {view === 'dashboard' && <>
         <p className="prototype-notice">Reports are private to your signed-in account. Reopening restores saved priorities using current Supabase evidence. Connector controls remain demonstrations.</p>
-        <Dashboard displayName={displayName} email={session?.user.email ?? ''} reports={savedRows} count={savedCount} loading={listing || generating} error={savedError} onRetry={() => void loadSaved()} nav={dashboardNav} onNav={setDashboardNav} connectors={connectors}
+        <Dashboard demoError={demoError} displayName={displayName} email={session?.user.email ?? ''} reports={savedRows} count={savedCount} loading={listing || generating} error={savedError} onRetry={() => void loadSaved()} nav={dashboardNav} onNav={setDashboardNav} connectors={connectors}
           onToggleConnector={(id: ConnectorId) => setConnectors(c => ({ ...c, [id]: c[id] === 'connected' ? 'idle' : 'connected' }))}
-          onOpenReport={(row) => void openSaved(row)} onCreate={() => go('create')} />
+          onDemoReport={(row) => void openSaved(row, true)} onOpenReport={(row) => void openSaved(row)} onCreate={() => go('create')} />
       </>}
       {view === 'create' && <CreateReport config={config} onChange={changeConfig}
         result={scoring.result} loading={data.loading} generating={generating} extracting={extracting} onExtracting={setExtracting}

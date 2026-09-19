@@ -373,3 +373,33 @@ test('private dashboard saves and reopens after reload', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
   await expect(page.getByText('Saved priorities restored with current evidence.', { exact: false })).toBeVisible();
 });
+
+
+test('synthetic candidates, reports and insights stay linked without database writes', async ({ page }) => {
+  await mockApi(page);
+  let writes = 0;
+  await page.route('**/rest/v1/saved_reports*', async route => {
+    if (route.request().method() !== 'GET') writes++;
+    return route.fulfill({ json: [], headers: { 'content-range': '*/0' } });
+  });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await page.getByRole('button', { name: 'Explore synthetic demo', exact: true }).click();
+  await expect(page.getByText('Synthetic demo:', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Candidates', exact: true }).click();
+  await page.getByRole('button', { name: 'View 2 reports for Maya Chen', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Rent near work', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Explore buying', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remote lifestyle', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Insights', exact: true }).click();
+  await expect(page.getByText('2 of 4 demo reports', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Inspect Jordan Brooks: Remote lifestyle', exact: true }).click();
+  await page.getByRole('button', { name: 'Calculate with live Houston evidence', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Synthetic candidate scenario calculated', { exact: false })).toBeVisible();
+  await expect(page.getByText('Commute is excluded in fully remote mode.', { exact: false })).toBeVisible();
+  expect(writes).toBe(0);
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
+  await expect(page.getByText('No saved reports yet.', { exact: false })).toBeVisible();
+});

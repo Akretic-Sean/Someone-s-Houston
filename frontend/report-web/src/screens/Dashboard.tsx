@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DemoWorkspace from './DemoWorkspace';
 import { Brand, Card, initials } from '../components/Bits';
 import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
 import type { SavedReport } from '../data/savedReports';
@@ -6,7 +7,7 @@ import type { SavedReport } from '../data/savedReports';
 const NAV = ['Reports', 'Candidates', 'Connectors', 'Insights', 'Settings'] as const;
 
 export default function Dashboard({
-  displayName, email, reports, count, loading, error, onRetry,
+  displayName, email, reports, count, loading, error, onRetry, onDemoReport, demoError,
   nav,
   onNav,
   connectors,
@@ -15,6 +16,8 @@ export default function Dashboard({
   onCreate,
 }: {
   displayName: string; email: string; reports: SavedReport[]; count: number; loading: boolean; error: string; onRetry: () => void;
+  demoError: string;
+  onDemoReport: (row: SavedReport) => void;
   nav: string;
   onNav: (nav: string) => void;
   connectors: ConnectorStates;
@@ -23,6 +26,7 @@ export default function Dashboard({
   onCreate: () => void;
 }) {
   const [query, setQuery] = useState('');
+  const [demo, setDemo] = useState(false);
 
   const rows = reports.filter((r) =>
     `${r.title} ${r.config.profile.city} ${r.config.profile.role}`.toLowerCase().includes(query.toLowerCase()),
@@ -53,7 +57,8 @@ export default function Dashboard({
       </aside>
 
       <main className="dash-main">
-        {nav === 'Reports' ? (
+        <div className="sec-head"><button className="pill" aria-pressed={!demo} onClick={() => setDemo(false)}>My saved reports</button><button className="pill" aria-pressed={demo} onClick={() => { setDemo(true); onNav('Reports'); }}>Explore synthetic demo</button></div>
+        {demo ? <DemoWorkspace nav={nav} onNav={onNav} onCalculate={onDemoReport} loading={loading} error={demoError} /> : nav === 'Reports' ? (
           <>
             <div className="dash-head">
               <div>
@@ -68,7 +73,7 @@ export default function Dashboard({
             </div>
 
             <div className="kpis"><Card><div className="kpi-label">Saved reports</div><div className="kpi-value">{loading || error ? '—' : count}</div><div className="kpi-sub">Your private Supabase records</div></Card></div>
-            {loading && <p role="status">Loading reports—</p>}
+            {loading && <p role="status">Loading reports…</p>}
             {error && <p role="alert">{error} <button onClick={onRetry}>Retry</button></p>}
             <Card>
               <div className="sec-head">
@@ -121,7 +126,7 @@ export default function Dashboard({
                     ))}
                   </tbody>
                 </table>
-                {!loading && !error && rows.length === 0 ? <div className="empty">{query ? `No reports match —${query}—.` : 'No saved reports yet. Create a relocation report to get started.'}</div> : null}
+                {!loading && !error && rows.length === 0 ? <div className="empty">{query ? `No reports match “${query}”.` : 'No saved reports yet. Create a relocation report to get started.'}</div> : null}
               </div>
             </Card>
           </>
