@@ -1,5 +1,7 @@
 # Hou Match backend
 
+Frontend teammates: use [the frontend/backend handoff](../docs/frontend-backend-handoff.md) for a ready-to-use agent prompt, environment setup, field mappings and connection checks. From the repository root, `npm --prefix backend run test:frontend` verifies the existing frontend configuration against the public data endpoints; it does not modify the database.
+
 Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase provides the hosted database and REST API; the neighborhood MCP runs locally over stdio. Cloudflare hosting, report generation and scoring are still proposed.
 
 ## Ready now
@@ -9,7 +11,8 @@ Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase 
 - `public.neighborhood_profiles`: 88 validated City records, public read-only, with source periods and missing-value flags.
 - 88 PostGIS boundaries plus eight facility sources, joined once during import. Three read-only RPCs serve the map, neighborhood facilities and current conditions.
 - NWS alerts and USGS water gauges refresh centrally every 15 minutes; expired data is withheld from current-condition reads.
-- Shared cached clients: `src/neighborhoods.ts` and `src/context.ts`. Four read-only Claude tools in `src/mcp.ts`.
+- Eight report-priority categories and 704 precomputed evidence records, exposed through `get_neighborhood_evidence`.
+- Shared cached clients: `src/neighborhoods.ts`, `src/context.ts` and `src/evidence.ts`. Five read-only Claude tools in `src/mcp.ts`.
 - [Frontend/API contract](../docs/api.md), [facility provenance](../docs/neighborhood-context.md), [map integration/demo](../docs/map-integration.md), [live-feed operations](../docs/live-feeds.md).
 
 ## Install and test

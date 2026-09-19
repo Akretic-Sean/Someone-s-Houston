@@ -3,6 +3,7 @@
 ## Start here
 
 - Read `docs/api.md` before changing a request, response, or frontend data binding.
+- For “connect the frontend” tasks, follow `docs/frontend-backend-handoff.md`: it maps live facts to UI fields, accounts for existing frontend/auth work and provides a connection preflight. Do not coerce evidence into mock report types that require unsupported scores or tiers.
 - The user's latest screenshot confirms `afford`, `commute`, `flood`, `amen`, `fit`, `food`, `air`, `health`. Use `backend/data/reference/report-priorities.v1.json` and `docs/matrix-readiness.md`. Raw defaults total 54; normalize all eight weights and round only for display. The earlier `relocation-matrix.v1.json` is superseded. Safety is not weighted; its tier is unavailable pending validated data/methodology.
 - Live reads include 88 profiles/boundaries, eight facility inventories, NWS/USGS context and the category-evidence RPC. The evidence layer precomputes housing, facility, grocery, destination and validated flood-map facts. Read its returned availability; do not infer completeness from the presence of a category.
 - `frontend/report-web` currently uses mock reports. `/reports` endpoints, scoring, tax calculations, routing and lead delivery remain proposed. Do not describe mock figures as database results or silently substitute them after a failed read.

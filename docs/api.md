@@ -1,5 +1,7 @@
 # Shared API contract
 
+For implementation setup, frontend file/field mapping and acceptance checks, start with [the frontend/backend handoff](frontend-backend-handoff.md). The endpoint definitions below remain the source of truth.
+
 Neighborhood profiles, maps, facility context and current-condition reads are **implemented and live**, 2026-09-19. The Supabase and local MCP sections below describe those available reads.
 
 The merged frontend (`frontend/report-web`) currently renders mock reports. Its proposed report endpoints and payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented or agreed backend endpoints. The frontend has not yet been connected to the live data APIs.

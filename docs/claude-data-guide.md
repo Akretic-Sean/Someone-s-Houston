@@ -2,6 +2,8 @@
 
 The goal is to make correct data use easy to verify. Project instructions explain the rules; bounded tools, schema validation, expiry checks and database permissions enforce the parts code can enforce. No prompt file guarantees that an agent will interpret every result correctly.
 
+**Connecting frontend screens:** start with [the frontend/backend handoff](frontend-backend-handoff.md). It includes a copy-paste implementation prompt, exact field mapping, branch-aware integration points and `npm --prefix backend run test:frontend`. MCP setup below is optional for frontend development; browser reads use REST/RPC.
+
 ## Oleg's one-time setup
 
 1. Pull the branch containing this guide, or `main` after it merges. Read root `CLAUDE.md` and `docs/api.md`.
