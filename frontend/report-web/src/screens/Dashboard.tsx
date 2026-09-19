@@ -3,7 +3,7 @@ import { Brand, Card, StatusPill, initials } from '../components/Bits';
 import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
 import { KPIS, REPORT_SUMMARIES } from '../data/report';
 
-const NAV = ['Reports', 'Candidates', 'Connectors', 'Insights', 'Settings'] as const;
+const NAV = ['Reports', 'People', 'Connectors', 'Insights', 'Settings'] as const;
 
 export default function Dashboard({
   nav,
@@ -46,7 +46,7 @@ export default function Dashboard({
         </nav>
         <div className="sidebar-user">
           <div style={{ fontWeight: 700, color: 'var(--text)' }}>Priya Natarajan</div>
-          Talent partner &mdash; Aurelia Robotics
+          Aurelia Robotics
         </div>
       </aside>
 
@@ -82,8 +82,8 @@ export default function Dashboard({
               <div className="sec-head">
                 <h2 style={{ fontSize: 16 }}>Recent reports</h2>
                 <input
-                  aria-label="Search candidates"
-                  placeholder="Search candidates"
+                  aria-label="Search reports"
+                  placeholder="Search by name, city or role"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   style={{
@@ -101,8 +101,8 @@ export default function Dashboard({
                 <table>
                   <thead>
                     <tr>
-                      <th>Candidate</th>
-                      <th>Origin</th>
+                      <th>Name</th>
+                      <th>Moving from</th>
                       <th>Role</th>
                       <th>Status</th>
                       <th>Updated</th>
@@ -129,7 +129,7 @@ export default function Dashboard({
                     ))}
                   </tbody>
                 </table>
-                {rows.length === 0 ? <div className="empty">No candidates match &ldquo;{query}&rdquo;.</div> : null}
+                {rows.length === 0 ? <div className="empty">Nothing matches &ldquo;{query}&rdquo;.</div> : null}
               </div>
             </Card>
           </>

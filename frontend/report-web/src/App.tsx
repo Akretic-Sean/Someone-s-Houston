@@ -10,7 +10,7 @@ import type { CandidateProfile, OfficeId, ReportMode, Tenure, Weights } from './
 export type View = 'dashboard' | 'create' | 'report';
 
 /**
- * What the recruiter configures on screen 2 and the report is rendered with on
+ * What is configured on screen 2 and the report is rendered with on
  * screen 3. In production this is the `build_report` request body.
  */
 export interface ReportConfig {
@@ -32,7 +32,7 @@ const INITIAL_CONFIG: ReportConfig = {
 const TABS: Array<[View, string]> = [
   ['dashboard', '1 · Dashboard'],
   ['create', '2 · Create report'],
-  ['report', '3 · Candidate report'],
+  ['report', '3 · Report'],
 ];
 
 export default function App() {

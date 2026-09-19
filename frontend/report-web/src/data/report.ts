@@ -100,7 +100,7 @@ const FINANCIAL_ROWS: FinancialRow[] = [
     delta: '−12% on paper',
     direction: 'caution',
     note: 'The offer is lower before taxes and cost of living are considered.',
-    source: 'Offer letter; recruiter-entered',
+    source: 'Offer letter; entered when this report was prepared',
   },
   {
     label: 'Estimated take-home pay',
@@ -254,12 +254,12 @@ export const MOCK_REPORT: Report = {
     'HAR listing medians',
   ],
   disclaimer:
-    'Estimates only. This report is educational and does not constitute tax, financial, real-estate, legal, or medical advice. Neighborhood indicators are computed from public data and the priority weights set with your recruiter; they are not a judgement about any community or the people who live there.',
+    'Estimates only. This report is educational and does not constitute tax, financial, real-estate, legal, or medical advice. Neighborhood indicators are computed from public data and the priority weights set when this report was prepared; they are not a judgement about any community or the people who live there.',
 };
 
 export const KPIS: Kpi[] = [
   { label: 'Reports created', value: '128', delta: '+14', sub: 'last 30 days' },
-  { label: 'Candidate views', value: '342', delta: '+61', sub: 'unique opens' },
+  { label: 'Report views', value: '342', delta: '+61', sub: 'unique opens' },
   { label: 'Expert opt-ins', value: '27', delta: '21%', sub: 'of viewed reports' },
 ];
 

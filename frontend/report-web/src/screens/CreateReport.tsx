@@ -22,7 +22,7 @@ const GENERATE_LABELS = [
   'Scoring neighborhoods with your weights…',
   'Estimating take-home and housing…',
   'Checking flood and city-service data…',
-  'Writing the candidate narrative…',
+  'Writing the narrative…',
 ];
 
 function ConfidenceDots({ level }: { level: Confidence }) {
@@ -182,9 +182,9 @@ export default function CreateReport({
           <>
             <h1 className="section-title">Start from the conversation</h1>
             <p className="section-lede">
-              Import the recruiter call from a meeting-notes tool, or paste the transcript. The
-              lifestyle detail that makes a report specific comes from what the candidate actually
-              said, not from a form.
+              Import the call from a meeting-notes tool, upload a transcript, or paste one. The
+              lifestyle detail that makes a report specific comes from what they actually said,
+              not from a form.
             </p>
 
             {connected.length > 0 ? (
@@ -293,7 +293,7 @@ export default function CreateReport({
                   <label className="field" style={{ display: 'block' }}>
                     <textarea
                       rows={6}
-                      placeholder="Paste the recruiter call transcript, upload a file, or import it above."
+                      placeholder="Paste the call transcript, upload a file, or import it above."
                       value={transcript}
                       onChange={(e) => setTranscript(e.target.value)}
                     />
@@ -314,7 +314,7 @@ export default function CreateReport({
             <h1 className="section-title">Check what we pulled out</h1>
             <p className="section-lede">
               Extraction is a starting point, not a source of truth. Each field carries a confidence
-              so you can see where to look first. Edit anything before it reaches the candidate.
+              so you can see where to look first. Edit anything before it reaches them.
             </p>
 
             <span className="eyebrow">Offer and role</span>
@@ -364,8 +364,8 @@ export default function CreateReport({
           <>
             <h1 className="section-title">Configure and generate</h1>
             <p className="section-lede">
-              Weights decide how the neighborhoods are ranked, and the report shows the candidate
-              which ones you set. Safety is reported as a tier on each area and is deliberately not
+              Weights decide how the neighborhoods are ranked, and the report shows which ones
+              you set. Safety is reported as a tier on each area and is deliberately not
               a slider.
             </p>
 

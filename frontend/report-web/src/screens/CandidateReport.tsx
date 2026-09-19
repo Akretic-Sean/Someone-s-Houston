@@ -422,7 +422,7 @@ export default function CandidateReport({
         <section>
           <h2 className="section-title">How the week actually works</h2>
           <p className="section-lede">
-            Built from what you told your recruiter, not from a generic city profile.
+            Built from what you shared, not from a generic city profile.
           </p>
           <div className="life">
             {report.lifestyle.map((card) => (
