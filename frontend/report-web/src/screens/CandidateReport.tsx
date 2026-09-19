@@ -1,9 +1,13 @@
 import { useMemo, useState } from 'react';
 import type { ReportConfig } from '../App';
 import { Card, Source } from '../components/Bits';
+import NeighborhoodMap from '../components/NeighborhoodMap';
 import { OFFICES, WEIGHT_DEFS } from '../data/offices';
 import { MOCK_REPORT } from '../data/report';
-import type { Neighborhood, Report } from '../types';
+import { sourceLabel } from '../data/neighborhoodApi';
+import { formatRent, parseSalary, resolveNeighborhoods } from '../data/resolve';
+import { useNeighborhoods } from '../hooks/useNeighborhoods';
+import type { Report, ResolvedNeighborhood } from '../types';
 
 /**
  * Renders a `Report`. The only thing it takes from the recruiter's config is
@@ -37,10 +41,24 @@ function useReport(config: ReportConfig): Report {
   }, [config]);
 }
 
-function NeighborhoodCard({ hood, rank }: { hood: Neighborhood; rank: number }) {
+function NeighborhoodCard({
+  hood,
+  rank,
+  hovered,
+  onHover,
+}: {
+  hood: ResolvedNeighborhood;
+  rank: number;
+  hovered: string | null;
+  onHover: (id: string | null) => void;
+}) {
   const [open, setOpen] = useState(false);
   return (
-    <Card>
+    <Card
+      className={hovered === hood.id ? 'hood-card hood-card-active' : 'hood-card'}
+      onMouseEnter={() => onHover(hood.id)}
+      onMouseLeave={() => onHover(null)}
+    >
       <div className="hood-head">
         <div>
           <div className="hood-rank">#{rank} match</div>
@@ -59,13 +77,24 @@ function NeighborhoodCard({ hood, rank }: { hood: Neighborhood; rank: number }) 
         <span className="tag" data-afford={hood.affordLevel}>
           {hood.afford}
         </span>
-        <span className="tag">{hood.rent}</span>
+        <span className="tag">{formatRent(hood.medianGrossRent)}</span>
         <span className="tag" data-flood={hood.flood}>
           Flood: {hood.flood}
         </span>
         <span className="tag">City services: {hood.services}</span>
         <span className="tag">{hood.momentum}</span>
       </div>
+
+      {hood.standing !== null ? (
+        <p className="standing">
+          Your salary is <strong>{hood.standing.toFixed(1)}×</strong> the median household
+          income here
+          {hood.medianHouseholdIncome !== null
+            ? ` ($${hood.medianHouseholdIncome.toLocaleString('en-US')})`
+            : ''}
+          .
+        </p>
+      ) : null}
 
       <p className="hood-why">{hood.why}</p>
 
@@ -105,11 +134,13 @@ export default function CandidateReport({
   onToast: (message: string) => void;
 }) {
   const report = useReport(config);
+  const { rows, loading, error, retry } = useNeighborhoods();
+  const [hovered, setHovered] = useState<string | null>(null);
   const [showAssumptions, setShowAssumptions] = useState(false);
   const [email, setEmail] = useState('');
   const [consent, setConsent] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(false);
+  const [leadError, setLeadError] = useState(false);
 
   const weightSummary = [...WEIGHT_DEFS]
     .sort((a, b) => report.weights[b.id] - report.weights[a.id])
@@ -117,24 +148,21 @@ export default function CandidateReport({
     .map((w) => w.label.toLowerCase())
     .join(', ');
 
-  const pins = [
-    { label: report.officeName.split(' /')[0], x: '56%', y: '58%', size: 10, office: true },
-    ...report.neighborhoods.map((n) => ({
-      label: n.name,
-      x: n.x,
-      y: n.y,
-      size: n.score / 6,
-      office: false,
-    })),
-  ];
+  const office = OFFICES.find((o) => o.id === config.office) ?? OFFICES[0];
+  // Standing compares what they will earn *in Houston* against the local
+  // median: the offer in offer mode, the carried-over salary in remote mode.
+  const houstonPay = parseSalary(
+    config.mode === 'remote' ? config.profile.salary : config.profile.offer,
+  );
+  const resolved = rows ? resolveNeighborhoods(report.neighborhoods, rows, houstonPay) : [];
 
   function submitLead(e: React.FormEvent) {
     e.preventDefault();
     if (!email.trim() || !consent) {
-      setError(true);
+      setLeadError(true);
       return;
     }
-    setError(false);
+    setLeadError(false);
     setSubmitted(true);
   }
 
@@ -252,26 +280,51 @@ export default function CandidateReport({
             compare these areas against each other, not against a fixed standard.
           </p>
 
-          <div className="map" role="img" aria-label="Abstract map of the recommended areas relative to the office">
-            <span className="map-note">ABSTRACT · NOT TO SCALE</span>
-            {pins.map((p) => (
-              <span
-                key={p.label}
-                className="pin"
-                data-office={p.office}
-                style={{ left: p.x, top: p.y }}
-              >
-                <span className="pin-dot" style={{ width: p.size, height: p.size }} />
-                {p.label}
-              </span>
-            ))}
-          </div>
+          {loading ? (
+            <Card>
+              <p className="line-text">
+                <span className="spinner" />
+                Loading City of Houston neighborhood data…
+              </p>
+            </Card>
+          ) : error ? (
+            <Card>
+              <span className="eyebrow">Neighborhood data unavailable</span>
+              <p className="note-text" style={{ margin: '8px 0 12px' }}>
+                {error.kind === 'auth'
+                  ? 'The neighborhood data layer is not configured for this build, so the map and the figures that depend on it are not shown. Nothing here has been estimated in its place.'
+                  : 'The City of Houston neighborhood data could not be read just now. Nothing has been estimated in its place.'}
+              </p>
+              {error.kind === 'unavailable' ? (
+                <button type="button" className="btn" onClick={retry}>
+                  Try again
+                </button>
+              ) : null}
+            </Card>
+          ) : (
+            <>
+              <NeighborhoodMap
+                rows={rows ?? []}
+                picks={resolved}
+                office={office}
+                hovered={hovered}
+                onHover={setHovered}
+                sourceLabel={sourceLabel(rows ?? [])}
+              />
 
-          <div className="hoods">
-            {report.neighborhoods.map((hood, i) => (
-              <NeighborhoodCard key={hood.id} hood={hood} rank={i + 1} />
-            ))}
-          </div>
+              <div className="hoods">
+                {resolved.map((hood, i) => (
+                  <NeighborhoodCard
+                    key={hood.id}
+                    hood={hood}
+                    rank={i + 1}
+                    hovered={hovered}
+                    onHover={setHovered}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </section>
 
         <section>
@@ -367,7 +420,7 @@ export default function CandidateReport({
                     I consent to Someone&rsquo;s Houston sharing my name, this report, and my email
                     with one vetted Houston relocation expert.
                   </label>
-                  {error ? (
+                  {leadError ? (
                     <div className="form-error">
                       Add an email and tick the consent box to continue.
                     </div>

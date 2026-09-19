@@ -18,6 +18,7 @@ import { DEFAULT_WEIGHTS } from './offices';
 const NEIGHBORHOODS: Neighborhood[] = [
   {
     id: 'midtown',
+    neighborhoodId: 62,
     name: 'Midtown',
     score: 91,
     commute: '8–14 min',
@@ -30,8 +31,6 @@ const NEIGHBORHOODS: Neighborhood[] = [
     momentum: 'Rising',
     why: 'You can walk or take the Red Line to The Ion, which also puts the Museum District a stop away for weekend art walks. A full-size grocery store sits within a 5-minute drive, and the Midtown-to-Montrose stretch covers Vietnamese and Tex-Mex spots plus a dense cluster of specialty coffee. A large climbing gym is about 10 minutes away.',
     safety: 'typical of',
-    x: '52%',
-    y: '52%',
     factors: [
       { label: 'Commute', weight: 96, note: '8–14 min' },
       { label: 'Affordability', weight: 78, note: '$ within range' },
@@ -43,6 +42,7 @@ const NEIGHBORHOODS: Neighborhood[] = [
   },
   {
     id: 'heights',
+    neighborhoodId: 15,
     name: 'The Heights',
     score: 86,
     commute: '15–25 min',
@@ -55,8 +55,6 @@ const NEIGHBORHOODS: Neighborhood[] = [
     momentum: 'Established',
     why: 'The MKT and White Oak Bayou trails give you long, shaded morning runs from your door, and the bike trail connects toward Downtown. Two full-service grocery stores, a farmers market, and a well-known coffee roaster are inside the neighborhood. Live-music venues cluster along 19th Street and Washington Avenue. Some blocks near the bayou sit in the 500-year floodplain, so check the parcel before signing.',
     safety: 'lower than',
-    x: '40%',
-    y: '28%',
     factors: [
       { label: 'Commute', weight: 74, note: '15–25 min' },
       { label: 'Affordability', weight: 62, note: 'buy is a stretch' },
@@ -68,6 +66,7 @@ const NEIGHBORHOODS: Neighborhood[] = [
   },
   {
     id: 'montrose',
+    neighborhoodId: 24,
     name: 'Montrose',
     score: 84,
     commute: '10–18 min',
@@ -80,8 +79,6 @@ const NEIGHBORHOODS: Neighborhood[] = [
     momentum: 'Steady',
     why: 'The most walkable dining scene among the three, with several of the Vietnamese and Tex-Mex spots you mentioned, and the Menil Collection and Museum District within a short bike ride. Grocery options range from a co-op to a large chain store. Nearest climbing gym is about 12 minutes; Buffalo Bayou Park is the closest long-run route.',
     safety: 'higher than',
-    x: '36%',
-    y: '62%',
     factors: [
       { label: 'Commute', weight: 84, note: '10–18 min' },
       { label: 'Affordability', weight: 76, note: '$ within range' },
