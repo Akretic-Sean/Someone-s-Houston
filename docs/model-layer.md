@@ -40,6 +40,12 @@ No real credential is in this repository.
 
 ## Teammate integration
 
+The `report-flow` Edge Function now provides the authenticated application
+integration, with private database-backed quotas and server-loaded scoring
+evidence. Its frontend adapter is `frontend/report-web/src/data/reportFlow.ts`.
+See [hackathon-release.md](hackathon-release.md) for the coordinated deployment.
+The module below remains reusable; the operator runtime check is not a user API.
+
 ```ts
 import { createReportModelClient, modelConfigFromEnv } from '../_shared/report-models/mod.ts';
 
