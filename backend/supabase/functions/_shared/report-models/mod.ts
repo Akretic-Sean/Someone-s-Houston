@@ -21,7 +21,12 @@ export type ModelConfig = {
 export type ModelResult<T> = {
   status: "generated" | "degraded";
   data: T;
-  diagnostic?: "provider" | "schema" | "references" | "timeout";
+  diagnostic?:
+    | "provider"
+    | "schema"
+    | "references"
+    | "timeout"
+    | "unsupported_prose";
   reason?:
     | "unconfigured"
     | "generation_or_validation_failed"
@@ -147,8 +152,13 @@ export function createReportModelClient(config: ModelConfig) {
           reason: "budget_exceeded",
         } as const;
       }
-      let diagnostic: "provider" | "schema" | "references" | "timeout" =
-        "provider";
+      let diagnostic:
+        | "provider"
+        | "schema"
+        | "references"
+        | "timeout"
+        | "unsupported_prose" = "provider";
+      let validationHint = "";
       for (let attempt = 0; attempt < 2; attempt++) {
         if (tokensRemaining < 800) {
           return {
@@ -164,7 +174,8 @@ export function createReportModelClient(config: ModelConfig) {
             narrationModels,
             NARRATION_PROMPT +
               (attempt
-                ? " Previous output failed validation; strictly follow all schema and reference rules."
+                ? " Previous output failed validation; strictly follow all schema and reference rules. " +
+                  validationHint
                 : ""),
             input,
             800,
@@ -186,8 +197,25 @@ export function createReportModelClient(config: ModelConfig) {
         } catch (error) {
           // Fixed diagnostic categories only; never expose SDK messages, bodies or output.
           const name = error instanceof Error ? error.name : "";
+          if (validating && error instanceof Error) {
+            // These are fixed messages from our validator, never provider content.
+            const hints: Record<string, string> = {
+              "Unknown reference":
+                "Use only supplied exact fact IDs and nonempty preference keys.",
+              "No supporting facts":
+                "Include a supplied fact ID in facts_used and cite its placeholder in prose.",
+              "Unknown fact placeholder":
+                "Every placeholder ID must match a supplied fact and facts_used exactly.",
+              "Unsupported prose":
+                "Remove ALL numeric text and spelled-out quantities outside fact placeholders. Do not make claims about safety, crime, flood risk, travel time, walkability or investments, even as disclaimers.",
+            };
+            validationHint = hints[error.message] ??
+              "Follow the schema exactly.";
+          }
           diagnostic = validating
-            ? "references"
+            ? error instanceof Error && error.message === "Unsupported prose"
+              ? "unsupported_prose"
+              : "references"
             : name === "TimeoutError" || name === "AbortError"
             ? "timeout"
             : name === "AI_NoObjectGeneratedError" || name === "ZodError"
