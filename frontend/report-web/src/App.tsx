@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import Dashboard from './screens/Dashboard';
+import Login from './screens/Login';
+import { supabase } from './lib/supabase';
 import CreateReport from './screens/CreateReport';
 import CandidateReport from './screens/CandidateReport';
 import { DEFAULT_WEIGHTS } from './data/offices';
@@ -38,6 +41,27 @@ export default function App() {
   const [view, setView] = useState<View>('dashboard');
   const [config, setConfig] = useState<ReportConfig>(INITIAL_CONFIG);
   const [toast, setToast] = useState('');
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(!supabase);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+      setAuthReady(true);
+    });
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, next) => {
+      setSession(next);
+      setAuthReady(true);
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  const signOut = useCallback(async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    setView('dashboard');
+  }, []);
 
   const go = useCallback((next: View) => {
     setView(next);
@@ -51,6 +75,17 @@ export default function App() {
     const t = setTimeout(() => setToast(''), 2200);
     return () => clearTimeout(t);
   }, [toast]);
+
+  if (supabase && (!authReady || !session)) {
+    if (!authReady) {
+      return <div className="app login-loading">Loading…</div>;
+    }
+    return (
+      <div className="app">
+        <Login />
+      </div>
+    );
+  }
 
   return (
     <div className="app">
@@ -67,7 +102,14 @@ export default function App() {
             {label}
           </button>
         ))}
-        <span className="proto-note">Frontend only · mocked data</span>
+        <span className="proto-note">
+          {supabase ? `Signed in · mocked data` : 'Frontend only · mocked data'}
+        </span>
+        {session ? (
+          <button type="button" className="pill" onClick={signOut}>
+            Sign out
+          </button>
+        ) : null}
       </div>
 
       {view === 'dashboard' && <Dashboard onOpenReport={() => go('report')} onCreate={() => go('create')} />}
