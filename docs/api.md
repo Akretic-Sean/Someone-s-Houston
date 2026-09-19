@@ -8,6 +8,8 @@ The P0 comparison flow uses a compact public scoring-data RPC and the shared det
 
 ## Neighborhood profiles
 
+**Optional expanded context:** `POST /rest/v1/rpc/get_neighborhood_relocation_context` with `{"p_neighborhood_id":62}` returns housing detail, school locations, METRO scheduled transit and historical 2024 reported offense counts. It does not alter scoring. See [the additive contract](expanded-context.md) for availability, periods, expiry, limitations and the sixth local MCP tool.
+
 - Base URL: `https://hknzivrgihnqzvsafkkr.supabase.co`.
 - Method/path: `GET /rest/v1/neighborhood_profiles` (Supabase PostgREST).
 - Header: `apikey: <SUPABASE_PUBLISHABLE_KEY>`. No account/login is required for this public City data. Never use an admin key in the frontend.
@@ -362,3 +364,21 @@ Handler errors are 403 unauthorized, 405 method,
 not include transcripts, provider credentials, or raw model errors.
 See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
 Production extraction/narration endpoints and stored reports remain unimplemented.
+
+
+## Agent scenario comparison (implemented, local MCP)
+
+`compare_neighborhood_scenarios` accepts `baseline` and `alternative` preference objects plus optional `limit` (1-5, default 3). Each preference requires all eight 0-10 `weights`, `tenure` rent/buy, `mode` offer/remote, `office` ion/downtown/energy/tmc/nasa, and `airport` iah/hou/nearest. All-zero effective weights are rejected before reading.
+
+Uses the existing public `get_neighborhood_scoring_data` RPC and shared model; **no new HTTP endpoint or database migration**. Returns version 1 with `model_version`, `evaluated_at`, `snapshot_sha256`, `evidence_versions`, echoed `preferences`, `baseline`/`alternative` summaries, and 88 `rank_changes`. Summaries include full scored `shortlist` rows, common normalized weights, excluded IDs/reasons and signed `winner_margin.categories` contributions. Contributions sum to the winner-minus-runner-up margin; negative values favor the runner-up. Missing ranks and margins remain null. Rank changes can reflect a change in eligibility as well as weights. `snapshot_sha256` fingerprints validated measurements excluding the changing evaluation time; it is not a signed source attestation.
+
+The client coalesces reads, caches at most one hour or the earliest usable source deadline, rejects oversized responses/admin keys, and never substitutes mock or expired fallback data. Tool failure uses MCP `isError: true`. Source URLs remain in `get_neighborhood_evidence`; match evidence versions before combining claims. See [examples and live proof](backend-demo-proof.md). Frontend continues using its existing direct RPC and shared model.
+
+
+## Source-bounded scoring (implemented)
+
+`POST /rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`, body `{}`, existing publishable key. Returns `{schema_version:1,policy_version:"source-bounded-v1",base:<get_neighborhood_scoring_data payload>,estimates:[...]}`. Each input contains neighborhood_id, category_id, metric, lower_bound, upper_bound, ranking_value (upper endpoint), method, source_url/period/checked_at/SHA256, refresh_due_at, boundary_version, base_evidence_version, audit, limitation. Only six reviewed missing inputs are permitted; expired or version-mismatched receipts are withheld. Original measurements remain null.
+
+Use `scoreNeighborhoodsWithEstimates(envelope, options, now?)` in `shared/scoring-estimates.mjs`. Returns the existing ScoringResult plus policyVersion, notice, estimateInputsUsed and per-row dataQuality/estimateInputsUsed. All selected weights remain; only the existing remote-mode commute rule disables a category. Validation failures throw INVALID_ESTIMATE_INPUT or existing scoring errors. Missing/expired receipts do not fabricate a result; affected rows remain unranked. Source-derived upper endpoints must be labeled in frontend cards/reports. See [the integration guide](all-88-frontend-guide.md).
+
+`publish_neighborhood_gap_inputs(p_rows)` is service-only, atomic, exactly six reviewed rows. Public table writes and publishing are denied. Refresh after evidence-version changes and within 31 days of actual retrieval.

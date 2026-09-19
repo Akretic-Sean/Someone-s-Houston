@@ -70,3 +70,8 @@ This version generates an in-session ranked report. It does not persist or share
 The optional Listing Watch dialog is independent of scoring. Its service is unconfigured, so no watch or email is created. Its browser-session correlation ID does not imply report persistence, and future listing/property results must not silently alter this model's neighborhood measurements.
 
 Run backend and shared scoring tests, the frontend build and the public connection preflight as described in [the handoff](frontend-backend-handoff.md). In the browser, verify that weights, rent/buy, office and airport choices recompute the shortlist; remote mode omits commute; all-zero effective weights are rejected; missing/expired inputs withhold rankings; and no mocked claims are displayed. A build/preflight alone is not a rendered-browser or deployed-host test.
+
+
+## Source-backed inputs for all 88
+
+The six missing rent/flood measurements have a separate, explicitly labeled conservative-input path. Keep every selected category; do not use the rejected global-exclusion approach. Read [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new RPC, shared wrapper, source bounds, badges, expiry and acceptance tests. Original observations and the strict model remain unchanged.

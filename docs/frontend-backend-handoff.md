@@ -10,6 +10,8 @@ Narrow the task by appending “Connect only [scoring / map / evidence cards / f
 
 ## Ready now versus remaining work
 
+**Optional family/transit/crime cards:** the additive [expanded-context API](expanded-context.md) reuses housing/school evidence and adds METRO schedule summaries plus historical 2024 offense counts. It does not change the eight-category score. Fetch only for the selected neighborhood; failures must not block report generation. Rebuild/reconnect the local MCP for its sixth read tool.
+
 **Implemented:** public profiles for 88 neighborhoods, boundaries, eight facility inventories, current weather/gauges, detailed eight-category evidence, a compact scoring-data RPC and a deterministic relative ranking model. The P0 frontend generates its ranked report in the current session and can recompute from cached data.
 
 **Not implemented:** stored/shared reports, private candidate tables and ownership rules, candidate extraction, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery, safety tiers or LLM-written recommendations. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
@@ -111,4 +113,9 @@ P0 validation recorded on 2026-09-19: 80 backend tests and seven frontend client
 
 ## Optional agent MCP
 
-The [Claude setup guide](claude-data-guide.md) describes five local read-only fact tools. MCP is optional for frontend work, and no scoring MCP tool is added by this change. The browser uses REST/RPC and the shared model; Claude should explain their returned facts/results rather than invent formulas.
+The [Claude setup guide](claude-data-guide.md) describes seven local read-only tools, including the shared-model scenario comparison in [the demo guide](backend-demo-proof.md). MCP remains optional for frontend work. The browser uses REST/RPC and the shared model; Claude should explain their returned facts/results rather than invent formulas.
+
+
+## Source-backed inputs for all 88
+
+The six missing rent/flood measurements have a separate, explicitly labeled conservative-input path. Keep every selected category; do not use the rejected global-exclusion approach. Read [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new RPC, shared wrapper, source bounds, badges, expiry and acceptance tests. Original observations and the strict model remain unchanged.
