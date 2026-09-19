@@ -1,5 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { scoreNeighborhoods } from '../../../shared/scoring.mjs';
+import Login from './screens/Login';
+import { supabase } from './lib/supabase';
 import Dashboard from './screens/Dashboard';
 import CreateReport from './screens/CreateReport';
 import CandidateReport from './screens/CandidateReport';
@@ -24,6 +27,67 @@ const INITIAL_CONFIG: ReportConfig = {
 };
 
 export default function App() {
+  const [session, setSession] = useState<Session | null>(null);
+  const [authReady, setAuthReady] = useState(!supabase);
+  const [authError, setAuthError] = useState('');
+  const [signingOut, setSigningOut] = useState(false);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let alive = true;
+    let receivedAuthEvent = false;
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => {
+      if (!alive) return;
+      receivedAuthEvent = true;
+      setSession(next);
+      setAuthError('');
+      setAuthReady(true);
+    });
+    void supabase.auth.getSession().then(({ data, error }) => {
+      if (!alive || receivedAuthEvent) return;
+      setSession(data.session);
+      setAuthError(error?.message ?? '');
+      setAuthReady(true);
+    }).catch(() => {
+      if (!alive || receivedAuthEvent) return;
+      setAuthError('Your session could not be restored. Please sign in again.');
+      setAuthReady(true);
+    });
+    return () => { alive = false; subscription.unsubscribe(); };
+  }, []);
+
+  async function signOut() {
+    if (!supabase || signingOut) return;
+    setSigningOut(true);
+    setAuthError('');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        // The SDK can clear this device even when remote session revocation fails.
+        const { data } = await supabase.auth.getSession();
+        setSession(data.session);
+        setAuthError(data.session ? 'Could not sign out. Please retry.'
+          : 'Signed out on this device. Could not confirm sign-out on other devices.');
+      } else { setSession(null); }
+    } catch {
+      setAuthError('Could not finish signing out. Reload to check your session.');
+    } finally { setSigningOut(false); }
+  }
+
+  if (supabase && !authReady) return <div className="app login-loading" role="status">Loading…</div>;
+  if (supabase && !session) return <div className="app">
+    {authError && <p className="prototype-notice" role="alert">{authError}</p>}
+    <Login />
+  </div>;
+
+  // Unmount on sign-out and reset in-session reports when the account changes.
+  return <ReportWorkspace key={session?.user.id ?? 'unconfigured'} session={session}
+    onSignOut={signOut} signingOut={signingOut} authError={authError} />;
+}
+
+function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
+  session: Session | null; onSignOut: () => Promise<void>; signingOut: boolean; authError: string;
+}) {
   const [view, setView] = useState<View>('create');
   const [config, setConfig] = useState<ReportConfig>(INITIAL_CONFIG);
   const [connectors, setConnectors] = useState<ConnectorStates>(DEFAULT_CONNECTORS);
@@ -71,7 +135,11 @@ export default function App() {
         <button className="pill" aria-pressed={view === 'create'} onClick={() => go('create')}>Configure priorities</button>
         <button className="pill" aria-pressed={view === 'report'} disabled={!generated} onClick={() => go('report')}>Neighborhood report</button>
         <button className="pill" aria-pressed={view === 'dashboard'} onClick={() => go('dashboard')}>Sample dashboard</button>
+        {session && <button type="button" className="pill" onClick={onSignOut} disabled={signingOut}>
+          {signingOut ? 'Signing out…' : 'Sign out'}
+        </button>}
       </div>
+      {authError && <p className="prototype-notice" role="alert">{authError}</p>}
       {view === 'dashboard' && <>
         <p className="prototype-notice">Dashboard and connector demonstrations use sample records. Reports generated through Configure priorities use live Supabase evidence and are not saved.</p>
         <Dashboard nav={dashboardNav} onNav={setDashboardNav} connectors={connectors}

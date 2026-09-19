@@ -92,7 +92,7 @@ Current P0 integration points:
 | `src/components/NeighborhoodMap.tsx` | Selectable reference points for all 88 neighborhoods. Boundary polygons remain a separate available RPC. |
 | `src/watch/ListingWatchDialog.tsx`, `api.ts`, `types.ts` | Optional consented request to a separately configured watch webhook; currently unavailable. Uses canonical IDs from the ranked shortlist. |
 
-The dashboard's sample content is labeled as such and must not open a fabricated report. Auth was not present in the frontend branch used for this P0 integration; retain the separate auth implementation when that work merges.
+The dashboard's sample content is labeled as such and must not open a fabricated report. The app uses the shared Supabase email/password login when configured. Session restoration gates the report workspace; signing out or changing accounts clears its in-session report state. Without configuration, login is absent and live report generation remains unavailable. Public reference reads still use the publishable key and do not authorize private candidate storage.
 
 The shared scoring module is browser-safe and dependency-free. Backend ingestion modules, Node-only helpers, env files and service credentials do not belong in the browser bundle. Backend validators/clients can be adapted deliberately, but importing their pinned `zod` dependency into another package unintentionally can break isolated builds.
 
