@@ -348,3 +348,58 @@ test('expired bounds leave six areas unranked rather than pretending full covera
   await page.getByLabel('Choose neighborhood').selectOption('7');
   await expect(page.locator('#neighborhood-evidence').getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
 });
+
+
+test('private dashboard saves and reopens after reload', async ({ page }) => {
+  await mockApi(page);
+  const rows: any[] = [];
+  await page.route('**/rest/v1/saved_reports*', async route => {
+    if (route.request().method() === 'POST') {
+      rows.push({ ...route.request().postDataJSON(), created_at: new Date().toISOString() });
+      return route.fulfill({ status: 201, json: null });
+    }
+    return route.fulfill({ json: rows, headers: { 'content-range': `0-${Math.max(0, rows.length - 1)}/${rows.length}` } });
+  });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByText('Saved to your dashboard.', { exact: true })).toBeVisible();
+  expect(rows).toHaveLength(1);
+  expect(rows[0].snapshot.payload.base.neighborhoods).toHaveLength(88);
+  await page.reload();
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await expect(page.locator('.sidebar-user')).not.toContainText('Priya');
+  await expect(page.locator('.sidebar-user')).toContainText('recruiter');
+  await page.getByRole('button', { name: 'Relocation report', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Saved priorities restored with current evidence.', { exact: false })).toBeVisible();
+});
+
+
+test('synthetic candidates, reports and insights stay linked without database writes', async ({ page }) => {
+  await mockApi(page);
+  let writes = 0;
+  await page.route('**/rest/v1/saved_reports*', async route => {
+    if (route.request().method() !== 'GET') writes++;
+    return route.fulfill({ json: [], headers: { 'content-range': '*/0' } });
+  });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await page.getByRole('button', { name: 'Explore synthetic demo', exact: true }).click();
+  await expect(page.getByText('Synthetic demo:', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Candidates', exact: true }).click();
+  await page.getByRole('button', { name: 'View 2 reports for Maya Chen', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Rent near work', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Explore buying', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Remote lifestyle', exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: 'Insights', exact: true }).click();
+  await expect(page.getByText('2 of 4 demo reports', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Inspect Jordan Brooks: Remote lifestyle', exact: true }).click();
+  await page.getByRole('button', { name: 'Calculate with live Houston evidence', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Synthetic candidate scenario calculated', { exact: false })).toBeVisible();
+  await expect(page.getByText('Commute is excluded in fully remote mode.', { exact: false })).toBeVisible();
+  expect(writes).toBe(0);
+  await page.getByRole('button', { name: 'My dashboard', exact: true }).click();
+  await page.getByRole('button', { name: 'Reports', exact: true }).click();
+  await expect(page.getByText('No saved reports yet.', { exact: false })).toBeVisible();
+});
