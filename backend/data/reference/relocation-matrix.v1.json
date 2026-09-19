@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "profile_id": "relocation-balanced-v1",
+  "label": "User-provided relocation starting matrix",
+  "recorded_on": "2026-09-19",
+  "status": "configuration_only_scoring_not_implemented",
+  "weight_total": 100,
+  "user_adjustable": true,
+  "submetric_weights": null,
+  "normalization_method": null,
+  "categories": [
+    {
+      "id": "housing_value_fit",
+      "label": "Housing Value & Fit",
+      "default_weight": 25,
+      "variables": ["equivalent_housing_cost", "housing_type", "bedrooms", "housing_age_newness"]
+    },
+    {
+      "id": "commute_time",
+      "label": "Commute & Time",
+      "default_weight": 20,
+      "variables": ["drive_time_to_employer", "in_office_frequency", "commute_reliability"]
+    },
+    {
+      "id": "mobility_accessibility",
+      "label": "Mobility & Accessibility",
+      "default_weight": 10,
+      "variables": ["transit", "rail", "bikeways", "car_dependence"]
+    },
+    {
+      "id": "infrastructure_resilience",
+      "label": "Infrastructure & Resilience",
+      "default_weight": 15,
+      "variables": ["flood_exposure", "infrastructure_311_issues", "resolution_times"]
+    },
+    {
+      "id": "lifestyle_urbanity",
+      "label": "Lifestyle & Urbanity",
+      "default_weight": 15,
+      "variables": ["parks", "land_use_mix", "commercial_residential_mix", "outdoor_access"]
+    },
+    {
+      "id": "development_optionality",
+      "label": "Development & Optionality",
+      "default_weight": 7,
+      "variables": ["permits", "new_housing", "development_momentum"]
+    },
+    {
+      "id": "environmental_friction",
+      "label": "Environmental Friction",
+      "default_weight": 5,
+      "variables": ["airport_noise", "roadway_high_injury_exposure"]
+    },
+    {
+      "id": "regional_connectivity",
+      "label": "Regional Connectivity",
+      "default_weight": 3,
+      "variables": ["iah_hou_access", "major_employment_hubs"]
+    }
+  ]
+}

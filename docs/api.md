@@ -110,6 +110,8 @@ Results provide context, not recommendation scores. Failed reads return MCP `isE
 
 Report endpoints, recruiter authentication, salary/tax calculations, saved-report schema/expiration, ranking, effective floodplain and crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Current gauge/alert context is not a substitute for an effective floodplain or parcel-level assessment. The data layers are ready for frontend integration independently of those decisions.
 
+The user has supplied a new configurable [100-point starting matrix](matrix-readiness.md), recorded in `backend/data/reference/relocation-matrix.v1.json`. It uses different category IDs from the frontend mock's current `weights` shape below. It is configuration only; the report types, controls and scoring API still need a coordinated migration. Do not silently reinterpret the old keys or present the proposed matrix as an implemented score.
+
 ## Proposed report API
 
 Status: **proposed by the frontend, not yet agreed or implemented.** The following

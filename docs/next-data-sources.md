@@ -2,6 +2,8 @@
 
 Checked 2026-09-19 after the map/context PR merged. These are recommendations, not imported data or implemented tools. Reuse the current Supabase project and add small tables; no new database instance is needed. Keep the existing annual profiles and amenities separate from current operational feeds.
 
+The user's newer [100-point matrix and readiness audit](matrix-readiness.md) refines these priorities: housing fit, commute and resilience carry 60 points and need the earliest scoring work. The sources below remain useful, but the new matrix is the starting profile for future scoring.
+
 ## Recommended next wave
 
 | Priority | Dataset and product use | Bounded import and refresh | Current readiness |

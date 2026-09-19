@@ -3,6 +3,7 @@
 ## Start here
 
 - Read `docs/api.md` before changing a request, response, or frontend data binding.
+- The user's 100-point starting matrix is recorded in `backend/data/reference/relocation-matrix.v1.json`; `docs/matrix-readiness.md` maps each category to available/missing data. It is configurable and not yet an executable scoring model. Current frontend weights use different category names and are not interchangeable with this matrix.
 - Live now: 88 neighborhood profiles/boundaries, eight facility inventories, NWS alerts and USGS gauges in Supabase. See `docs/neighborhood-context.md` and `docs/live-feeds.md`.
 - `frontend/report-web` currently uses mock reports. `/reports` endpoints, scoring, tax calculations, routing and lead delivery remain proposed. Do not describe mock figures as database results or silently substitute them after a failed read.
 - The Supabase project is `hknzivrgihnqzvsafkkr`. URL/publishable-key configuration is in `backend/.env.example` and `.mcp.json.example`; real local configuration is ignored by Git. Never print keys or put secret/service-role credentials in frontend code, public variables, prompts or committed files.
