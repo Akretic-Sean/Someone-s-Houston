@@ -424,3 +424,8 @@ enabled = true
 
 [functions.model-runtime-check]
 verify_jwt = false
+
+# Public signup verifies the project API key inside the handler.
+[functions.username-signup]
+verify_jwt = false
+import_map = "./functions/deno.json"

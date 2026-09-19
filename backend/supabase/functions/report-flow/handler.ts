@@ -236,6 +236,9 @@ export function createHandler(deps: Dependencies) {
         generatedAt: new Date(now()).toISOString(),
         narrative: {
           status: narration.status,
+          ...(narration.status === "degraded"
+            ? { reason: narration.reason, diagnostic: narration.diagnostic }
+            : {}),
           text,
           expiresAt: bundle.expiresAt,
           facts: narration.data

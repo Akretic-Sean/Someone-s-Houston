@@ -35,9 +35,9 @@ function scoringFixture() {
   };
 }
 
-async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean; sendStatus?: number; aiStatus?: number; degrade?: boolean } = {}) {
-  const state = { scoringReads: 0, failLogout: options.failLogout ?? false, otpRequests: [] as Record<string, unknown>[],
-    sendStatus: options.sendStatus ?? 200, aiRequests: [] as Record<string, any>[] };
+async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean; signupStatus?: number; aiStatus?: number; degrade?: boolean } = {}) {
+  const state = { scoringReads: 0, failLogout: options.failLogout ?? false, signupRequests: [] as Record<string, unknown>[],
+    signupStatus: options.signupStatus ?? 201, aiRequests: [] as Record<string, any>[] };
   // Every Supabase request is intercepted: these tests never create users or send mail.
   await page.route('https://hknzivrgihnqzvsafkkr.supabase.co/**', async route => {
     const url = new URL(route.request().url());
@@ -57,22 +57,14 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
         expiresAt: new Date(Date.now() + 3600000).toISOString(), facts: [{ id: 'match_1', label: 'Computed match', value: 'Neighborhood 1', source: 'Verified scoring evidence' }],
       } } });
     }
-    if (url.pathname.endsWith('/otp')) {
-      state.otpRequests.push(route.request().postDataJSON());
-      return route.fulfill({ status: state.sendStatus, json: state.sendStatus === 200 ? {} : { msg: 'Email unavailable', code: 'over_email_send_rate_limit' } });
+    if (url.pathname.endsWith('/username-signup')) {
+      state.signupRequests.push(route.request().postDataJSON());
+      return route.fulfill({ status: state.signupStatus, json: state.signupStatus === 201 ? { created: true } : { error: 'signup_rejected' } });
     }
-    if (url.pathname.endsWith('/verify')) {
-      const input = route.request().postDataJSON();
-      expect(input.type).toBe('email');
-      return input.token === '123456'
-        ? route.fulfill({ json: session(input.email) })
-        : route.fulfill({ status: 403, json: { code: 'otp_expired', msg: 'Invalid code' } });
-    }
-
     if (url.pathname.endsWith('/token')) {
       const input = route.request().postDataJSON();
 
-      if (options.expiredSession) {
+      if (options.expiredSession || input.password === 'wrongpass') {
         return route.fulfill({ status: 400, json: { code: 'invalid_credentials', msg: 'Invalid login credentials' } });
       }
       return route.fulfill({ json: session(input.email) });
@@ -90,16 +82,10 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
   return state;
 }
 
-async function requestCode(page: Page, email = 'recruiter@example.test') {
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByRole('button', { name: 'Continue with email', exact: true }).click();
-  await expect(page.getByLabel('Email code', { exact: true })).toBeVisible();
-}
-
-async function signIn(page: Page, email = 'recruiter@example.test') {
-  await requestCode(page, email);
-  await page.getByLabel('Email code', { exact: true }).fill('123456');
-  await page.getByRole('button', { name: 'Verify and continue', exact: true }).click();
+async function signIn(page: Page, username = 'recruiter') {
+  await page.getByLabel('Username', { exact: true }).fill(username);
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
 test('login gates scoring; logout clears generated reports before the next account', async ({ page }) => {
@@ -107,18 +93,17 @@ test('login gates scoring; logout clears generated reports before the next accou
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Continue with email', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: /Google/ })).toHaveCount(0);
-  await expect(page.getByLabel('Password', { exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveCount(0);
   expect(state.scoringReads).toBe(0);
-  await requestCode(page);
-  expect(state.otpRequests[0].create_user).toBe(true);
-  await page.getByLabel('Email code', { exact: true }).fill('000000');
-  await page.getByRole('button', { name: 'Verify and continue', exact: true }).click();
-  await expect(page.getByRole('alert')).toHaveText('That code is invalid or has expired. Try again or request a new code.');
+  await page.getByLabel('Username', { exact: true }).fill('recruiter');
+  await page.getByLabel('Password', { exact: true }).fill('wrongpass');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Incorrect username or password');
   expect(state.scoringReads).toBe(0);
-  await page.getByLabel('Email code', { exact: true }).fill('123456');
-  await page.getByRole('button', { name: 'Verify and continue', exact: true }).click();
+  await signIn(page);
   await expect(page.getByText('88 of 88 neighborhoods can be ranked.')).toBeVisible();
   await page.getByRole('button', { name: 'Fully remote', exact: true }).click();
   await page.getByRole('button', { name: 'Buy', exact: true }).click();
@@ -127,8 +112,8 @@ test('login gates scoring; logout clears generated reports before the next accou
   await expect(page.getByText('Commute is excluded in fully remote mode.', { exact: false })).toBeVisible();
   expect(state.scoringReads).toBe(1);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Continue with email', exact: true })).toBeVisible();
-  await signIn(page, 'second@example.test');
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+  await signIn(page, 'second');
   await expect(page.getByRole('heading', { name: 'Configure and generate' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Neighborhood report', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Rent', exact: true })).toHaveAttribute('aria-pressed', 'true');
@@ -145,12 +130,12 @@ test('stored session restores; failed remote logout still clears this device', a
   await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('alert')).toHaveText('Signed out on this device. Could not confirm sign-out on other devices.');
-  await expect(page.getByRole('button', { name: 'Continue with email', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
   expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
   state.failLogout = false;
   await signIn(page);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
-  await expect(page.getByRole('button', { name: 'Continue with email', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
   expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
 });
 
@@ -158,43 +143,36 @@ test('unrefreshable stored session returns to login without loading report data'
   const state = await mockApi(page, { expiredSession: true });
   await page.addInitScript(({ key, value }) => { localStorage.setItem(key, JSON.stringify(value)); }, { key: storageKey, value: session('expired@example.test', true) });
   await page.goto('/');
-  await expect(page.getByRole('button', { name: 'Continue with email', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
   expect(state.scoringReads).toBe(0);
 });
 
-test('new accounts require a verified code and resend respects the cooldown', async ({ page }) => {
+test('new users choose username and password and immediately enter the report flow', async ({ page }, testInfo) => {
   const state = await mockApi(page);
-  await page.clock.install();
   await page.goto('/');
-  await requestCode(page, 'new@example.test');
-  expect(state.otpRequests[0]).toMatchObject({ email: 'new@example.test', create_user: true });
-  await expect(page.getByRole('button', { name: /Resend email in/ })).toBeDisabled();
-  await expect(page.getByRole('button', { name: 'Verify and continue' })).toBeDisabled();
-  await page.clock.fastForward(61000);
-  await page.getByRole('button', { name: 'Resend email', exact: true }).click();
-  await expect.poll(() => state.otpRequests.length).toBe(2);
-  await page.getByRole('button', { name: 'Use another email' }).click();
-  await expect(page.getByRole('button', { name: /Send email in/ })).toBeDisabled();
-  expect(state.scoringReads).toBe(0);
+  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await page.getByLabel('Username', { exact: true }).fill('New_User');
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
+  await page.screenshot({ path: testInfo.outputPath('create-account.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Configure and generate' })).toBeVisible();
+  expect(state.signupRequests).toEqual([{ username: 'new_user', password: 'Demo-password-123!' }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('email rate limiting and delivery failures never pretend a code was sent', async ({ page }) => {
-  const state = await mockApi(page, { sendStatus: 429 });
-  await page.clock.install();
+test('duplicate usernames and signup limits leave visitors signed out', async ({ page }) => {
+  const state = await mockApi(page, { signupStatus: 409 });
   await page.goto('/');
-  await page.getByLabel('Email', { exact: true }).fill('new@example.test');
-  await page.getByRole('button', { name: 'Continue with email' }).click();
-  await expect(page.getByRole('alert')).toContainText('Please wait a minute');
-  await expect(page.getByLabel('Email code', { exact: true })).toHaveCount(0);
-  await page.clock.fastForward(61000);
-  state.sendStatus = 400;
-  await page.getByRole('button', { name: 'Continue with email' }).click();
-  await expect(page.getByRole('alert')).toContainText('We couldn’t send your sign-in email');
-  state.sendStatus = 200;
-  await page.getByRole('button', { name: 'Continue with email' }).click();
-  await expect(page.getByLabel('Email code', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await page.getByLabel('Username', { exact: true }).fill('new_user');
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('That username is taken');
+  state.signupStatus = 429;
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Signups are busy');
   expect(state.scoringReads).toBe(0);
+  expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
 });
 
 test('notes are reviewed before an authenticated AI report; changing priorities clears the report', async ({ page }, testInfo) => {
@@ -217,17 +195,6 @@ test('notes are reviewed before an authenticated AI report; changing priorities 
   await page.getByRole('button', { name: 'Buy', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Neighborhood report', exact: true })).toBeDisabled();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-});
-
-test('Supabase default email link establishes a session without a password', async ({ page }) => {
-  await mockApi(page);
-  const auth = session();
-  const fragment = new URLSearchParams({ access_token: auth.access_token, refresh_token: auth.refresh_token,
-    expires_in: '3600', token_type: 'bearer', type: 'magiclink' });
-  await page.goto('/#' + fragment.toString());
-  await expect(page.getByRole('heading', { name: 'Configure and generate' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign out', exact: true })).toBeVisible();
-  await expect(page).not.toHaveURL(/access_token=/);
 });
 
 test('an AI quota failure allows a factual report without another model request', async ({ page }) => {

@@ -399,7 +399,8 @@ Handler errors are 403 unauthorized, 405 method,
 503 missing configuration, or 502 model/runtime/validation failure. Responses do
 not include transcripts, provider credentials, or raw model errors.
 See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
-Production extraction/narration endpoints and stored reports remain unimplemented.
+The authenticated `report-flow` endpoint supplies extraction/narration (see above);
+stored reports remain unimplemented.
 
 
 ## Agent scenario comparison (implemented, local MCP)
@@ -418,3 +419,22 @@ The client coalesces reads, caches at most one hour or the earliest usable sourc
 Use `scoreNeighborhoodsWithEstimates(envelope, options, now?)` in `shared/scoring-estimates.mjs`. Returns the existing ScoringResult plus policyVersion, notice, estimateInputsUsed and per-row dataQuality/estimateInputsUsed. All selected weights remain; only the existing remote-mode commute rule disables a category. Validation failures throw INVALID_ESTIMATE_INPUT or existing scoring errors. Missing/expired receipts do not fabricate a result; affected rows remain unranked. Source-derived upper endpoints must be labeled in frontend cards/reports. See [the integration guide](all-88-frontend-guide.md).
 
 `publish_neighborhood_gap_inputs(p_rows)` is service-only, atomic, exactly six reviewed rows. Public table writes and publishing are denied. Refresh after evidence-version changes and within 31 days of actual retrieval.
+
+
+## Username account registration (implemented)
+
+`POST /functions/v1/username-signup` accepts a project publishable `apikey`, JSON
+`{ "username": "demo_user", "password": "<8–128 characters>" }`, and no other fields.
+Usernames are case-insensitive, 3–24 ASCII letters/numbers/underscores. Returns
+`201 { "created": true }`. Errors: 400 invalid/rejected input, 401 invalid project
+key, 409 unavailable username, 413 oversized body, 429 project signup limit,
+503 unavailable dependency. Responses never contain credentials or admin details.
+
+The handler verifies the project key itself; gateway JWT verification is disabled
+only for this public registration endpoint. An atomic server-only quota permits
+50 attempts per project per rolling hour. Supabase Auth Admin creates a confirmed
+internal identifier (`<username>@users.someones-houston.invalid`), never a supplied
+contact email. No email is sent. Passwords remain in Supabase Auth. After creation,
+use native `signInWithPassword` with the shared `usernameEmail` mapping to obtain
+the normal user session used by `report-flow`. No client-chosen role/user ID is
+accepted. No email-based password recovery is provided in this hackathon flow.

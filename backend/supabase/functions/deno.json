@@ -6,7 +6,7 @@
   },
   "compilerOptions": { "strict": true },
   "tasks": {
-    "check": "deno check _shared/report-models/mod.ts model-runtime-check/index.ts report-flow/index.ts",
-    "test": "deno test --allow-env --allow-sys=hostname _shared/report-models/ report-flow/"
+    "check": "deno check _shared/report-models/mod.ts model-runtime-check/index.ts report-flow/index.ts username-signup/index.ts",
+    "test": "deno test --allow-env --allow-sys=hostname _shared/report-models/ report-flow/ username-signup/"
   }
 }

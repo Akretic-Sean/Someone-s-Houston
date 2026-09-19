@@ -1,80 +1,43 @@
-# Email-code sign-in
+# Username and password authentication
 
-The frontend uses the existing Supabase project `hknzivrgihnqzvsafkkr`. One login
-screen handles new and returning users. There is no password or username field.
-Accounts and email addresses belong in Supabase Auth's private `auth` schema;
-no duplicate public users table or schema migration is needed for this flow.
-User verification and token issuance are handled by Supabase Auth. Do not grant
-browser roles access to `auth.users` or put an admin key in Vite configuration.
+Visitors choose **New here? Create account**, a username, and a password, then
+enter the report workspace immediately. Returning users select **Sign in**.
+There is no email, Google, code, SMTP, or email-template setup in this flow.
+The existing frontend theme and Supabase session restoration are preserved.
 
-## Hosted setup
+Usernames are case-insensitive, 3–24 ASCII letters/numbers/underscores. Passwords
+are 8–128 characters at signup. Supabase Auth hashes/stores passwords and manages
+sessions; application tables never store passwords.
 
-For this hackathon the built-in Supabase email service is intentionally retained.
-Only project-team email addresses can receive its test emails. The frontend also
-supports its default magic links, which return to the configured production Site
-URL; a link-only default template does not support typing a code. Do not disable
-email confirmation or add visitors as project administrators to work around the
-mail restriction. The custom SMTP/template steps below enable code-only login
-and delivery to non-team users when ready.
+Supabase password authentication requires an email or phone identifier. The shared
+`shared/username.mjs` maps the normalized username to an internal address under
+`users.someones-houston.invalid`. This is an identifier, **not a verified contact
+address**. The signup endpoint accepts only username/password and confirms only
+this synthetic address through the server-only Auth Admin API. Real-email
+confirmation settings are unchanged. User metadata is display-only, never access
+control; protected AI requests verify the actual Auth user ID.
 
-These are dashboard changes, not settings applied by deploying the frontend.
-Preserve unrelated project settings and existing redirect URLs. Do not push the
-entire local `backend/supabase/config.toml` to production to activate this feature.
+`username-signup` verifies a project API key against this project's Auth gateway.
+Its gateway JWT check is disabled because first-time visitors have no user token.
+A server-only atomic quota permits 50 signup attempts per rolling hour project-wide;
+invalid input is rejected before reservation. Native Supabase Auth rate limits
+apply to password login. Duplicate usernames never overwrite an existing account.
+The signup quota stores only timestamps/random IDs, pruned after a day on an
+accepted reservation. The protected `report-flow` JWT check stays enabled.
 
-1. In Authentication → Sign In / Providers, keep new-user signups allowed and
-   Email enabled. Keep email confirmation required. The app sends
-   `signInWithOtp({ email, options: { shouldCreateUser: true } })` and verifies
-   codes using `verifyOtp({ email, token, type: 'email' })`.
-2. In Authentication → Email Templates, use
-   [`auth/email-code.html`](auth/email-code.html) for both **Magic Link** and
-   **Confirm signup**, with subject `Your Someone's Houston sign-in code`.
-   Both templates must contain `{{ .Token }}` so new and existing accounts receive
-   a code they can enter in the app. Do not leave a link-only template active.
-   Retain the project's code expiry and rate limits; the frontend accepts 6–10
-   digits and enforces a 60-second resend cooldown. Server limits remain authoritative.
-3. Configure a production SMTP provider and verified sender domain in Supabase.
-   Store SMTP credentials only in the provider/Supabase settings. Supabase's
-   built-in email service is for testing and restricts delivery; it does not
-   support general public registration reliably. Verify sender-domain DNS and
-   delivery to an inbox outside the Supabase project team before launch.
-## Development and verification
+For this hackathon, no self-service password recovery is available because no
+contact email is collected. Existing email-only accounts are not converted or
+deleted: create a username account for the new interface. Existing valid sessions
+continue to work. Do not put service-role/OpenRouter secrets in browser config.
 
-Use the existing ignored `frontend/report-web/.env.local` with the public project
-URL and publishable key. From the repository root:
+## Deployment
 
-```sh
-npm --prefix frontend/report-web ci
-npm --prefix frontend/report-web test
-npm --prefix frontend/report-web run build
-npm --prefix frontend/report-web exec -- playwright install chromium
-npm --prefix frontend/report-web run test:e2e
-npm --prefix backend run test:frontend
-npm --prefix frontend/report-web run dev -- --host 127.0.0.1 --port 5180 --strictPort
-```
+Apply the username signup quota migration, then deploy `username-signup` with its
+handler, `functions/deno.json`, lockfile and `shared/username.mjs`/`.d.mts`, preserving
+repository paths. `backend/supabase/config.toml` records function settings.
+Deploy the latest frontend with the same Supabase URL and publishable key.
+No new Vercel environment variables or email service are required.
 
-The browser checks cover desktop/mobile email verification, invalid codes,
-new-user eligibility, cooldowns, rate limits, mail failures, restored/expired
-sessions, and report-state isolation on logout. They mock Auth responses; they do **not** certify hosted
-provider settings or actual email delivery. The API preflight reads live public
-neighborhood data and does not create users.
-
-After hosted setup, use accounts you control to verify:
-
-- A new email receives a numeric code; it cannot open the workspace before
-  verification. A wrong or expired code is rejected. The correct code opens it.
-- The verified user appears in Dashboard → Authentication → Users. Signing out
-  and returning with the same email restores the same account.
-- Reload restores the session. Logout clears the report, and the next account
-  cannot see the previous account's in-session report.
-- A verified account can generate a report from live Supabase neighborhood data.
-
-Status inspected on 2026-09-19: email and new-user signups were enabled. Browser roles had no direct SELECT privilege on `auth.users`;
-anonymous INSERT and authenticated UPDATE were also denied. Hosted custom SMTP
-was disabled and the dashboard required custom SMTP to edit default templates.
-Complete SMTP setup and real-provider verification before treating public
-onboarding as launch-ready. No production frontend deployment is performed by
-these commands.
-
-References: [Supabase email OTP](https://supabase.com/docs/guides/auth/auth-email-passwordless),
-[email templates](https://supabase.com/docs/guides/auth/auth-email-templates),
-[production SMTP](https://supabase.com/docs/guides/auth/auth-smtp).
+Check create account, sign out, case-insensitive sign-in, wrong password, duplicate
+username, and authenticated AI extraction/generation. Never log test passwords or
+session tokens. See [release instructions](hackathon-release.md).
