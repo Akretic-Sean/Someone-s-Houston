@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-import { prepareBoundaries } from '../dist/prepare-boundaries.js';
+import { prepareBoundaries, verifyBoundarySnapshot } from '../dist/prepare-boundaries.js';
 
 const reference = JSON.parse(await readFile(new URL('../data/super-neighborhoods.json', import.meta.url), 'utf8'));
 const ring = [[-95.5, 29.7], [-95.4, 29.7], [-95.4, 29.8], [-95.5, 29.7]];
@@ -50,6 +50,7 @@ test('stored snapshot hash, counts and geometry match its manifest and all curre
   const content = await readFile(new URL('../data/super-neighborhood-boundaries.geojson', import.meta.url), 'utf8');
   const manifest = JSON.parse(await readFile(new URL('../data/super-neighborhood-boundaries.manifest.json', import.meta.url), 'utf8'));
   const collection = JSON.parse(content);
+  assert.deepEqual(verifyBoundarySnapshot(content, manifest, reference), collection);
   assert.equal(createHash('sha256').update(content).digest('hex'), manifest.sha256);
   assert.equal(Buffer.byteLength(content), manifest.json_bytes);
   const arcgis = { type: 'FeatureCollection', features: collection.features.map(f => ({ ...f, properties: { POLYID: f.id, SNBNAME: f.properties.name } })) };
@@ -59,4 +60,20 @@ test('stored snapshot hash, counts and geometry match its manifest and all curre
   assert.equal(manifest.position_count, prepared.positionCount);
   assert.equal(manifest.boundary_version, prepared.boundaryVersion);
   assert.equal(manifest.source_boundary_effective_date, null);
+});
+
+test('spatial input refuses changed geometry even if IDs and declared versions were preserved', async () => {
+  const content = await readFile(new URL('../data/super-neighborhood-boundaries.geojson', import.meta.url), 'utf8');
+  const manifest = JSON.parse(await readFile(new URL('../data/super-neighborhood-boundaries.manifest.json', import.meta.url), 'utf8'));
+  const changed = JSON.parse(content);
+  const geometry = changed.features[0].geometry;
+  const ring = geometry.type === 'Polygon' ? geometry.coordinates[0] : geometry.coordinates[0][0];
+  ring[1][0] += 0.00001;
+  const altered = JSON.stringify(changed) + '\n';
+  assert.throws(() => verifyBoundarySnapshot(altered, manifest, reference), /checksum/);
+  const rehashed = { ...manifest, sha256: createHash('sha256').update(altered).digest('hex'), json_bytes: Buffer.byteLength(altered) };
+  assert.throws(() => verifyBoundarySnapshot(altered, rehashed, reference), /geometry version/);
+  for (const invalid of [{ ...manifest, position_count: 1 }, { ...manifest, coordinate_reference_system: 'EPSG:2278' }, { ...manifest, boundary_version: 'coh-sn-boundaries-0000000000000000' }]) {
+    assert.throws(() => verifyBoundarySnapshot(content, invalid, reference));
+  }
 });

@@ -141,15 +141,32 @@ def parse_pages(texts, source, names):
     return rows
 
 
+def cached_retrieval_time(metadata_path, source, now=None):
+    """Only an explicit retrieval receipt can establish when a PDF was checked."""
+    try:
+        receipt = json.loads(metadata_path.read_text(encoding="utf8"))
+        value = receipt["source_retrieved_at"]
+        if not isinstance(value, str) or not re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})", value):
+            raise ValueError("A timezone-aware retrieval timestamp is required")
+        checked = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        current = now or datetime.now(timezone.utc)
+        if checked.timestamp() > current.timestamp() + 300:
+            raise ValueError("Retrieval timestamp is in the future")
+        # Legacy receipts contain the date only; the pinned PDF hash is still
+        # checked below. New receipts also bind that date to the exact source.
+        if receipt.get("source_sha256", source["sha256"]) != source["sha256"] or receipt.get("source_url", BASE + source["filename"]) != BASE + source["filename"]:
+            raise ValueError("Retrieval receipt belongs to another source")
+        return checked.astimezone(timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+    except (OSError, ValueError, TypeError, KeyError) as error:
+        raise ValueError("Offline PDF has no valid retrieval receipt; rerun without --offline to check the source. File timestamps cannot establish freshness.") from error
+
+
 def read_pdf(source, cache_dir, offline):
     path = cache_dir / source["filename"]
     metadata_path = path.with_suffix(".retrieval.json")
     if offline:
         data = path.read_bytes()
-        if metadata_path.exists():
-            retrieved = json.loads(metadata_path.read_text(encoding="utf8"))["source_retrieved_at"]
-        else:
-            retrieved = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z")
+        retrieved = cached_retrieval_time(metadata_path, source)
     else:
         request = Request(BASE + source["filename"], headers={"User-Agent": "HouMatchReferenceImport/1.0", "Accept": "application/pdf"})
         with urlopen(request, timeout=30) as response:
@@ -164,7 +181,7 @@ def read_pdf(source, cache_dir, offline):
     if not offline:
         cache_dir.mkdir(parents=True, exist_ok=True)
         path.write_bytes(data)
-        metadata_path.write_text(json.dumps({"source_retrieved_at": retrieved}) + "\n", encoding="utf8")
+        metadata_path.write_text(json.dumps({"source_retrieved_at": retrieved, "source_url": BASE + source["filename"], "source_sha256": source["sha256"]}) + "\n", encoding="utf8")
     import pdfplumber
     with pdfplumber.open(io.BytesIO(data)) as document:
         texts = [page.extract_text(x_tolerance=3, y_tolerance=3) for page in document.pages]
@@ -241,6 +258,30 @@ def prepare(cache_dir, offline):
 
 
 class ValidationTests(unittest.TestCase):
+    def test_undated_offline_pdf_is_rejected_regardless_of_file_timestamp(self):
+        import os
+        with tempfile.TemporaryDirectory() as directory:
+            cache = Path(directory)
+            pdf = cache / SOURCES[0]["filename"]
+            pdf.write_bytes(b"%PDF-undated")
+            os.utime(pdf, (2_000_000_000, 2_000_000_000))
+            with self.assertRaisesRegex(ValueError, "retrieval receipt"):
+                read_pdf(SOURCES[0], cache, True)
+
+    def test_cached_receipt_keeps_old_date_and_rejects_invalid_or_foreign_dates(self):
+        now = datetime(2026, 9, 19, tzinfo=timezone.utc)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "receipt.json"
+            path.write_text(json.dumps({"source_retrieved_at": "2026-08-01T12:00:00-05:00"}))
+            self.assertEqual(cached_retrieval_time(path, SOURCES[0], now), "2026-08-01T17:00:00Z")
+            for receipt in [{}, None, {"source_retrieved_at": 1}, {"source_retrieved_at": "2026-09-01"},
+                            {"source_retrieved_at": "2026-09-01T00:00:00"}, {"source_retrieved_at": "2026-99-01T00:00:00Z"},
+                            {"source_retrieved_at": "2026-10-01T00:00:00Z"},
+                            {"source_retrieved_at": "2026-09-01T00:00:00Z", "source_sha256": "wrong"}]:
+                path.write_text(json.dumps(receipt))
+                with self.assertRaisesRegex(ValueError, "retrieval receipt"):
+                    cached_retrieval_time(path, SOURCES[0], now)
+
     def test_count_suppression_and_zero(self):
         self.assertEqual(count_value("0"), 0)
         self.assertEqual(count_value("12,345"), 12345)

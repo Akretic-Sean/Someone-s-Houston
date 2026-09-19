@@ -83,6 +83,8 @@ The checked-in function configuration sets `verify_jwt=false`; the handler's tok
 
 For maintenance, the SQL Editor can call `select hou_match_private.request_context_refresh();` and inspect that request ID in `net._http_response` for HTTP 200/207/502. Cron success means the request was queued, not that the upstream feeds refreshed: also inspect `live_context.source_checked_at`/`valid_until` and the HTTP response. To stop automatic refresh, run `select cron.unschedule('hou-match-current-context');`. Source failures retain previous snapshots, but consumers hide them after expiry.
 
+The GitHub `Backend data health` workflow checks actual public feed freshness and reference evidence deadlines every 15 minutes after merging to main and configuring its public API variables. It creates/updates a single issue assigned to **@Akretic-Sean** and resolves it when checks recover. See [data operations](data-operations.md) for activation, failure handling, reference ownership and monitoring limitations.
+
 ```sh
 npm run build
 node --test test/refresh-current-context.test.mjs

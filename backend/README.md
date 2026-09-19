@@ -33,7 +33,7 @@ npm run test:live
 
 This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual five-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
 
-`supabase/tests/` contains SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. Run them in the project's SQL Editor after seeding; every mutation is rolled back. These are plain SQL, not pgTAP suites. Local Docker/database reset testing has not been run.
+GitHub Actions runs the complete Node, Python and database verification set on every PR. `supabase/tests/` contains plain SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. From the repository root, run `python backend/scripts/test_database.py` with Docker running to apply all migrations and execute every SQL suite in a disposable local database. No hosted database credentials are used. See [data operations](../docs/data-operations.md) for the full local commands, refresh ownership and GitHub issue monitoring.
 
 ## Refresh data
 

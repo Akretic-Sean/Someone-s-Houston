@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFile, writeFile, rename } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
+import { isDeepStrictEqual } from 'node:util';
 import { SOURCE_URL, readBoundedJson, validateProfiles } from './neighborhoods.js';
 
 const positionSchema = z.tuple([z.number().finite().min(-96.5).max(-94.5), z.number().finite().min(29).max(31)]);
@@ -70,6 +71,34 @@ export function prepareBoundaries(input: unknown, referenceInput: unknown) {
     features: features.map(f => ({ ...f, properties: { ...f.properties, boundary_version: version } })),
   };
   return { collection, boundaryVersion: version, positionCount };
+}
+
+/** Verify the bytes and recompute geometry identity before any local spatial join. */
+export function verifyBoundarySnapshot(content: string, manifestInput: unknown, reference: unknown) {
+  const manifest = z.object({
+    sha256: z.string().regex(/^[a-f0-9]{64}$/), json_bytes: z.number().int().positive(),
+    boundary_version: z.string().regex(/^coh-sn-boundaries-[a-f0-9]{16}$/),
+    feature_count: z.literal(88), position_count: z.number().int().positive(),
+    coordinate_reference_system: z.literal('EPSG:4326'), coordinate_order: z.literal('longitude,latitude'),
+  }).parse(manifestInput);
+  if (Buffer.byteLength(content) !== manifest.json_bytes || createHash('sha256').update(content).digest('hex') !== manifest.sha256) {
+    throw new Error('Boundary geometry does not match its manifest checksum/byte count. Re-prepare and review the boundary snapshot.');
+  }
+  const collection = z.object({ type: z.literal('FeatureCollection'), features: z.array(z.object({
+    type: z.literal('Feature'), id: z.number().int().min(1).max(88), geometry: geometrySchema,
+    properties: z.object({ neighborhood_id: z.number().int().min(1).max(88), name: z.string(), boundary_version: z.string() }),
+  })).length(88) }).parse(JSON.parse(content));
+  if (collection.features.some(f => f.id !== f.properties.neighborhood_id || f.properties.boundary_version !== manifest.boundary_version)) {
+    throw new Error('Boundary identifiers or feature versions differ from the manifest.');
+  }
+  const checked = prepareBoundaries({ type: 'FeatureCollection', features: collection.features.map(f => ({
+    type: 'Feature', properties: { POLYID: f.id, SNBNAME: f.properties.name }, geometry: f.geometry,
+  })) }, reference);
+  if (checked.boundaryVersion !== manifest.boundary_version || checked.positionCount !== manifest.position_count ||
+      !isDeepStrictEqual(checked.collection, collection)) {
+    throw new Error('Boundary geometry version or canonical structure differs from its manifest.');
+  }
+  return checked.collection;
 }
 
 export async function fetchBoundarySource(fetcher = globalThis.fetch) {
