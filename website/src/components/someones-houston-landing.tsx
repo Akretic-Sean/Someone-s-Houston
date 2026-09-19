@@ -41,6 +41,13 @@ import mapAsset from "@/assets/houston-map.png.asset.json";
 const videoUrl =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260314_131748_f2ca2a28-fed7-44c8-b9a9-bd9acdd5ec31.mp4";
 
+/**
+ * Where "Create a Candidate Report" sends recruiters — the login screen of the
+ * report web app (frontend/report-web in the Someone-s-Houston repo).
+ * TODO: replace with the deployed app URL once the app is hosted.
+ */
+const REPORT_APP_URL = "http://localhost:5173";
+
 const navItems = [
   ["How It Works", "#how-it-works"],
   ["For Recruiters", "#recruiters"],
@@ -102,7 +109,7 @@ function Navigation() {
         </div>
         <div className="hidden lg:block">
           <Button asChild className="h-10 rounded-full bg-brand-orange px-5 text-brand-orange-foreground hover:bg-brand-orange/90">
-            <a href="#recruiters">Create a Candidate Report</a>
+            <a href={REPORT_APP_URL}>Create a Candidate Report</a>
           </Button>
         </div>
         <Sheet>
@@ -127,7 +134,7 @@ function Navigation() {
             </div>
             <SheetClose asChild>
               <Button asChild className="mt-8 h-12 w-full rounded-full bg-brand-orange text-brand-orange-foreground hover:bg-brand-orange/90">
-                <a href="#recruiters">Create a Candidate Report</a>
+                <a href={REPORT_APP_URL}>Create a Candidate Report</a>
               </Button>
             </SheetClose>
           </SheetContent>
@@ -406,7 +413,7 @@ function RotatingRole({ min = "11ch" }: { min?: string }) {
 
 function RecruiterCta() {
   return (
-    <section id="recruiters" className="bg-brand-orange py-20 text-brand-orange-foreground sm:py-28"><div className="mx-auto max-w-5xl px-5 text-center sm:px-8"><p className="text-xs font-semibold uppercase tracking-[0.2em] opacity-70">Built for the people making the introduction</p><h2 className="mt-5 font-display text-5xl leading-none sm:text-7xl">Make Houston easier to say yes to.</h2><p className="mx-auto mt-6 max-w-2xl text-base leading-7 opacity-80 sm:text-lg">Give candidates a personalized relocation story grounded in the things they actually care about—not a generic cost-of-living pitch.</p><Button className="mt-9 h-12 rounded-full bg-deep px-7 text-deep-foreground hover:bg-deep/90">Create a Candidate Report <ArrowRight /></Button><p className="mt-6 text-xs opacity-65">Built for Houston <RotatingRole />, hiring leaders, and economic-development partners.</p></div></section>
+    <section id="recruiters" className="bg-brand-orange py-20 text-brand-orange-foreground sm:py-28"><div className="mx-auto max-w-5xl px-5 text-center sm:px-8"><p className="text-xs font-semibold uppercase tracking-[0.2em] opacity-70">Built for the people making the introduction</p><h2 className="mt-5 font-display text-5xl leading-none sm:text-7xl">Make Houston easier to say yes to.</h2><p className="mx-auto mt-6 max-w-2xl text-base leading-7 opacity-80 sm:text-lg">Give candidates a personalized relocation story grounded in the things they actually care about—not a generic cost-of-living pitch.</p><Button asChild className="mt-9 h-12 rounded-full bg-deep px-7 text-deep-foreground hover:bg-deep/90"><a href={REPORT_APP_URL}>Create a Candidate Report <ArrowRight /></a></Button><p className="mt-6 text-xs opacity-65">Built for Houston <RotatingRole />, hiring leaders, and economic-development partners.</p></div></section>
   );
 }
 
