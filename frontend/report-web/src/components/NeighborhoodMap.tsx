@@ -34,7 +34,8 @@ export default function NeighborhoodMap({ rows, picks, office, hovered, onHover,
 
   useEffect(() => {
     if (!container.current) return;
-    const instance = L.map(container.current, { scrollWheelZoom: false, maxZoom: 18, minZoom: 8 });
+    const instance = L.map(container.current, { scrollWheelZoom: false, maxZoom: 18, minZoom: 8 })
+      .setView([29.76, -95.37], 10);
     map.current = instance;
     // Leaflet projects both WGS84 points and GeoJSON onto the tiles' Web Mercator grid.
     const layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
