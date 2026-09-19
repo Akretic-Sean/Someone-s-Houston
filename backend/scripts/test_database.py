@@ -100,7 +100,8 @@ def main():
             # Cron cannot see the scheduled job until commit. Disable it inside
             # that same transaction: tests must never call the hosted function.
             sql("begin;\n" + "\n".join(p.read_text(encoding="utf-8") for p in migrations) +
-                "\nupdate cron.job set active=false where jobname='hou-match-current-context';\ncommit;")
+                "\nselect cron.alter_job(jobid, active := false) from cron.job "
+                "where jobname='hou-match-current-context';\ncommit;")
             sql(fixture_sql())
             tests = sorted((BACKEND / "supabase/tests").glob("*.sql"))
             if not tests:
