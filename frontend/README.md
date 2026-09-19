@@ -31,11 +31,13 @@ Copy `report-web/.env.example` to ignored `report-web/.env.local`. Set the share
 Supabase URL and its `VITE_SUPABASE_PUBLISHABLE_KEY`. Never use an admin key.
 The same configuration powers login and public neighborhood reads.
 
-When configured, signed-out visitors see email/password sign-in or account
-creation. Enable email/password auth in the shared project's Auth settings and
-allow the deployed app origin as a confirmation redirect. Confirmation-required
-signup returns to sign-in until the user confirms their email. Existing sessions
-restore on reload. Sign-out and account changes clear in-session report state;
+When configured, signed-out visitors see **Continue with email** for both new
+and returning users. The screen verifies numeric codes and accepts Supabase's
+default sign-in links through the existing session client. Email verification
+remains required. The hackathon uses Supabase's built-in mail service for project
+team addresses; public signup/code-only templates require custom SMTP. See
+[auth setup](../docs/auth-setup.md). Existing sessions restore on reload.
+Sign-out and account changes clear in-session report state;
 remote sign-out failures explicitly distinguish local logout from unconfirmed
 logout on other devices.
 
@@ -75,6 +77,14 @@ The SPA rewrite sends unknown paths to `index.html`; static assets resolve ahead
 That is what will make `/r/:id` report links work once routing exists.
 
 ## Report flow
+
+Optional notes are extracted by the authenticated `report-flow` Edge Function,
+then reviewed and edited. The controls below the notes determine the ranking.
+**Generate report** loads evidence and computes the ranking on the server before
+requesting an AI explanation. **Continue with factual report** uses the same
+scoring model without a paid model call. Both paths preserve missing-data rules.
+See [the release checklist](../docs/hackathon-release.md) for backend deployment,
+email restrictions, quotas and the exact Vercel handoff.
 
 - **Configure priorities:** rent/buy, work arrangement, office hub, airport and
   eight priority weights. Fully remote mode removes commute from the comparison.

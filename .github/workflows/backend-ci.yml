@@ -28,9 +28,9 @@ jobs:
       - run: npm test
         working-directory: backend
       - name: Check Deno model boundary
-        run: npx --yes deno@2.7.5 check --frozen --config backend/supabase/functions/deno.json backend/supabase/functions/model-runtime-check/index.ts
+        run: npx --yes deno@2.7.5 check --frozen --config backend/supabase/functions/deno.json backend/supabase/functions/model-runtime-check/index.ts backend/supabase/functions/report-flow/index.ts
       - name: Test Deno model boundary without network access
-        run: npx --yes deno@2.7.5 test --frozen --allow-env --allow-sys=hostname --config backend/supabase/functions/deno.json backend/supabase/functions/_shared/report-models/
+        run: npx --yes deno@2.7.5 test --frozen --allow-env --allow-sys=hostname --config backend/supabase/functions/deno.json backend/supabase/functions/_shared/report-models/ backend/supabase/functions/report-flow/
   python:
     name: Python import safeguards
     runs-on: ubuntu-24.04

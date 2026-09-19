@@ -6,6 +6,42 @@ Neighborhood profiles, maps, facility context and current-condition reads are **
 
 The P0 comparison flow uses a compact public scoring-data RPC and the shared deterministic `houston-proximity-v1` model to generate an in-session ranked report. See [the scoring method](scoring-matrix.md). Its proposed stored-report endpoints and old mock payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented endpoints or the current scoring response.
 
+## Authenticated AI report flow
+
+`POST /functions/v1/report-flow` is implemented in this release. It uses a
+confirmed Supabase user session (`Authorization: Bearer <user JWT>`) and the
+project's publishable key in `apikey`. Gateway JWT checking and a live Auth user
+lookup both apply. Anonymous accounts and operator API keys are not user sessions.
+
+- Extraction body: `{ action: "extract", requestId: "<UUID>", input: {
+  transcript: "<up to 24,000 characters>", answers: { office: "Midtown" } } }`.
+  `answers` allows the existing twelve CandidateProfile keys, each at most 500
+  characters. Response: `{ status: "generated" | "degraded", data: {
+  fields: { office: { value, confidence, evidence }, ... }, unanswered: [...] } }`.
+  Existing answers override extraction. Quotes must match the notes. The user
+  reviews/edits these answers; no extracted text silently changes ranking weights.
+- Generation body: `{ action: "generate", requestId: "<UUID>", options: {
+  tenure: "rent", mode: "offer", office: "ion", airport: "nearest", weights: {
+  afford: 8, commute: 7, flood: 6, amen: 5, fit: 7, food: 8, air: 6, health: 7
+  } }, preferences: { office: "Midtown" } }`.
+  The server fetches scoring evidence itself and runs `shared/scoring.mjs`.
+  Browser-supplied scores/facts/user IDs are rejected. Response: `{ payload:
+  <ScoringPayload>, generatedAt, narrative: { status, text, expiresAt, facts } }`.
+  `text` is plain text with verified fact placeholders substituted server-side.
+  Facts contain `id`, `label`, `value`, `source`, and `refresh_due_at`.
+  `degraded` narration returns `text:null`; the real ranking remains usable.
+
+Successful results are 200 and `Cache-Control: no-store`. Error bodies contain
+only `{ error: "<bounded_code>" }`: 400 `invalid_input`, 401 `sign_in_required`,
+409 `request_already_started`/`evidence_expired`, 415 `json_required`, 422
+`no_comparable_neighborhoods`, 429 `usage_limit` (Retry-After 3600), 503
+`evidence_unavailable`/`temporarily_unavailable`. Gateway 401 errors may use
+Supabase's own response envelope. OPTIONS returns 204; other methods return 405.
+Requests are limited to 100,000 bytes. The quota is six combined operations per
+user and one hundred project-wide per rolling hour. Repeat IDs return 409 rather
+than rerunning paid work. Notes/profiles/reports are not stored. Usage metadata
+is private and accessible only by the server. See [release setup](hackathon-release.md).
+
 ## Neighborhood profiles
 
 - Base URL: `https://hknzivrgihnqzvsafkkr.supabase.co`.

@@ -1,109 +1,115 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
-type Mode = 'sign-in' | 'sign-up';
-
 export default function Login() {
-  const [mode, setMode] = useState<Mode>('sign-in');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [busy, setBusy] = useState(false);
+  const [sentTo, setSentTo] = useState('');
+  const [code, setCode] = useState('');
+  const [busy, setBusy] = useState<'send' | 'verify' | null>(null);
+  const pending = useRef(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [resendAt, setResendAt] = useState(0);
+  const [now, setNow] = useState(Date.now());
+  const remaining = Math.max(0, Math.ceil((resendAt - now) / 1000));
+  const codeInput = useRef<HTMLInputElement>(null);
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
-    if (!supabase || busy) return;
-    setBusy(true);
+  useEffect(() => {
+    if (!resendAt) return;
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, [resendAt]);
+
+  useEffect(() => { if (sentTo) codeInput.current?.focus(); }, [sentTo]);
+
+  async function sendCode(event?: React.FormEvent) {
+    event?.preventDefault();
+    if (!supabase || pending.current || Date.now() < resendAt) return;
+    const address = sentTo || email.trim();
+    if (!address) return;
+    pending.current = true;
+    setBusy('send');
     setError('');
     setNotice('');
-
     try {
-      if (mode === 'sign-in') {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) setError(signInError.message);
-        // On success the auth listener in App.tsx swaps in the app.
-      } else {
-        const { data, error: signUpError } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (signUpError) {
-          setError(signUpError.message);
-        } else if (!data.session) {
-          setNotice('Check your email to confirm your account, then sign in.');
-          setMode('sign-in');
-        }
+      const { error: sendError } = await supabase.auth.signInWithOtp({ email: address, options: { shouldCreateUser: true } });
+      if (sendError) {
+        if (sendError.status === 429) {
+          setResendAt(Date.now() + 60000);
+          setNow(Date.now());
+          setError('Please wait a minute before requesting another code.');
+        } else { setError('We couldn’t send your code. Please try again shortly.'); }
+        return;
       }
-    } catch {
-      setError('Could not connect to sign in. Please retry.');
-    } finally { setBusy(false); }
+      setSentTo(address);
+      setCode('');
+      setNow(Date.now());
+      setResendAt(Date.now() + 60000);
+      setNotice('Check your inbox for a sign-in code. If your email contains a sign-in link instead, open it to continue. It may take a moment to arrive.');
+      codeInput.current?.focus();
+    } catch { setError('Could not connect. Please check your connection and try again.'); }
+    finally { pending.current = false; setBusy(null); }
   }
 
-  return (
-    <div className="login-wrap">
-      <div className="login-card">
-        <span className="login-pin" aria-hidden="true">
-          📍
-        </span>
-        <h1 className="login-title">Someone&apos;s Houston</h1>
-        <p className="login-sub">
-          {mode === 'sign-in'
-            ? 'Sign in to your recruiter workspace.'
-            : 'Create a recruiter account.'}
-        </p>
+  async function verifyCode(event: React.FormEvent) {
+    event.preventDefault();
+    if (!supabase || pending.current || !/^\d{6,10}$/.test(code)) return;
+    pending.current = true;
+    setBusy('verify');
+    setError('');
+    try {
+      const { error: verifyError } = await supabase.auth.verifyOtp({ email: sentTo, token: code, type: 'email' });
+      if (verifyError) setError(verifyError.status === 429
+        ? 'Too many attempts. Please wait a minute and try again.'
+        : 'That code is invalid or has expired. Try again or request a new code.');
+    } catch { setError('Could not verify your code. Please try again.'); }
+    finally { pending.current = false; setBusy(null); }
+  }
 
-        <form onSubmit={handleSubmit} className="login-form">
-          <label className="login-label">
-            Email
-            <input
-              type="email"
-              required
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@company.com"
-            />
-          </label>
-          <label className="login-label">
-            Password
-            <input
-              type="password"
-              required
-              minLength={6}
-              autoComplete={mode === 'sign-in' ? 'current-password' : 'new-password'}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-            />
-          </label>
+  function changeEmail() {
+    if (pending.current) return;
+    setSentTo('');
+    setCode('');
+    setError('');
+    setNotice('');
+  }
 
-          {error ? (
-            <p className="login-error" role="alert">
-              {error}
-            </p>
-          ) : null}
-          {notice ? <p className="login-notice">{notice}</p> : null}
-
-          <button type="submit" className="btn btn-primary login-submit" disabled={busy}>
-            {busy ? 'One moment…' : mode === 'sign-in' ? 'Sign in' : 'Create account'}
-          </button>
-        </form>
-
-        <button
-          type="button"
-          className="login-switch"
-          disabled={busy}
-          onClick={() => {
-            setMode(mode === 'sign-in' ? 'sign-up' : 'sign-in');
-            setError('');
-            setNotice('');
-          }}
-        >
-          {mode === 'sign-in' ? 'New here? Create an account' : 'Already have an account? Sign in'}
+  return <div className="login-wrap"><div className="login-card">
+    <span className="login-pin" aria-hidden="true">📍</span>
+    <h1 className="login-title">Someone&apos;s Houston</h1>
+    <p className="login-sub">{sentTo ? 'Check your email to continue.' : 'Your Houston starts here.'}</p>
+    {!sentTo ? <>
+      <form onSubmit={sendCode} className="login-form">
+        <label className="login-label">Email
+          <input type="email" required autoComplete="email" autoCapitalize="none" spellCheck={false}
+            value={email} onChange={event => setEmail(event.target.value)} placeholder="you@company.com" disabled={Boolean(busy)} />
+        </label>
+        <button type="submit" className="btn btn-primary login-submit" disabled={Boolean(busy) || remaining > 0}>
+          {busy === 'send' ? 'Sending code…' : remaining > 0 ? 'Send code in ' + remaining + 's' : 'Continue with email'}
         </button>
+      </form>
+      <p className="login-help">New here? Verify your email to get started. No password needed.</p>
+    </> : <>
+      <p className="login-address">Code sent to <strong>{sentTo}</strong></p>
+      <form onSubmit={verifyCode} className="login-form">
+        <label className="login-label">Email code
+          <input ref={codeInput} className="login-code" type="text" inputMode="numeric" autoComplete="one-time-code"
+            pattern="[0-9]{6,10}" minLength={6} maxLength={10} required value={code}
+            onChange={event => setCode(event.target.value.replace(/\s/g, '').replace(/[^0-9]/g, '').slice(0, 10))}
+            placeholder="Enter your code" disabled={Boolean(busy)} />
+        </label>
+        <button type="submit" className="btn btn-primary login-submit" disabled={Boolean(busy) || !/^\d{6,10}$/.test(code)}>
+          {busy === 'verify' ? 'Verifying…' : 'Verify and continue'}
+        </button>
+      </form>
+      <div className="login-code-actions">
+        <button type="button" className="login-switch" disabled={Boolean(busy) || remaining > 0} onClick={() => { void sendCode(); }}>
+          {busy === 'send' ? 'Sending…' : remaining > 0 ? 'Resend code in ' + remaining + 's' : 'Resend code'}
+        </button>
+        <button type="button" className="login-switch" disabled={Boolean(busy)} onClick={changeEmail}>Use another email</button>
       </div>
-    </div>
-  );
+    </>}
+    {error && <p className="login-error" role="alert">{error}</p>}
+    {notice && <p className="login-notice" role="status">{notice}</p>}
+  </div></div>;
 }

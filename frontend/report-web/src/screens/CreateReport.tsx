@@ -2,16 +2,20 @@ import type { ScoringResult } from '../../../../shared/scoring.mjs';
 import type { ReportConfig } from '../App';
 import { Card, Segmented } from '../components/Bits';
 import { DEFAULT_WEIGHTS, OFFICES, WEIGHT_DEFS } from '../data/offices';
+import PreferenceNotes from '../components/PreferenceNotes';
 
-export default function CreateReport({ config, onChange, result, loading, generating, error, onRetry, onGenerate }: {
+export default function CreateReport({ config, onChange, result, loading, generating, extracting, onExtracting, error, onRetry, onGenerate, onFactual }: {
   config: ReportConfig;
   onChange: (next: ReportConfig) => void;
   result: ScoringResult | null;
   loading: boolean;
   generating: boolean;
+  extracting: boolean;
+  onExtracting: (busy: boolean) => void;
   error: string | null;
   onRetry: () => void;
   onGenerate: () => Promise<void>;
+  onFactual: () => Promise<void>;
 }) {
   const weights = { ...config.weights, commute: config.mode === 'remote' ? 0 : config.weights.commute };
   const totalWeight = Object.values(weights).reduce((a, b) => a + b, 0);
@@ -19,7 +23,8 @@ export default function CreateReport({ config, onChange, result, loading, genera
     <main className="create"><div className="shell">
       <h1 className="section-title">Configure and generate</h1>
       <p className="section-lede">Choose what matters to you. We compare Houston’s 88 Super Neighborhoods using published evidence and your weights. Scores are provisional relative comparisons. Safety is unavailable and is not scored.</p>
-      <fieldset className="scoring-form" disabled={generating}>
+      <fieldset className="scoring-form" disabled={generating || extracting}>
+        <PreferenceNotes profile={config.profile} onChange={profile => onChange({ ...config, profile })} onBusy={onExtracting} />
         <div className="config-grid">
           <Card>
             <div className="field-row">
@@ -76,9 +81,10 @@ export default function CreateReport({ config, onChange, result, loading, genera
         {error && <div role="alert"><p className="form-error">{error}</p><button type="button" className="btn" onClick={onRetry}>Retry data connection</button></div>}
         {result && !loading && totalWeight > 0 && <p className="source">Current leaders: {result.ranked.slice(0, 3).map(row => row.name).join(' · ') || 'None with complete selected evidence'}. Changing priorities recalculates locally.</p>}
       </div>
-      <button type="button" className="btn btn-primary" disabled={generating || loading || totalWeight === 0 || !result?.ranked.length || Boolean(error)} onClick={() => { void onGenerate(); }}>
-        {generating ? 'Checking evidence and calculating…' : 'Generate report'}
+      <button type="button" className="btn btn-primary" disabled={generating || extracting || loading || totalWeight === 0 || !result?.ranked.length || Boolean(error)} onClick={() => { void onGenerate(); }}>
+        {generating ? 'Generating your report…' : 'Generate report'}
       </button>
+      <button type="button" className="btn factual-report" disabled={generating || extracting || loading || totalWeight === 0 || !result?.ranked.length} onClick={() => { void onFactual(); }}>Continue with factual report</button>
       <p className="source" style={{ marginTop: 14 }}>Priorities, housing mode, workplace hub and airport choice determine this ranking. Reports stay in this browser session; no candidate record is saved.</p>
     </div></main>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { scoreNeighborhoods } from '../../../shared/scoring.mjs';
 import Login from './screens/Login';
@@ -9,6 +9,7 @@ import CandidateReport from './screens/CandidateReport';
 import { DEFAULT_CONNECTORS, type ConnectorId, type ConnectorStates } from './data/connectors';
 import { DEFAULT_WEIGHTS } from './data/offices';
 import { useScoringData } from './hooks/useScoringData';
+import { generateAiReport, type GeneratedReport } from './data/reportFlow';
 import type { CandidateProfile, OfficeId, ReportMode, Tenure, Weights } from './types';
 
 export type View = 'dashboard' | 'create' | 'report';
@@ -92,39 +93,54 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
   const [config, setConfig] = useState<ReportConfig>(INITIAL_CONFIG);
   const [connectors, setConnectors] = useState<ConnectorStates>(DEFAULT_CONNECTORS);
   const [dashboardNav, setDashboardNav] = useState('Reports');
-  const [generated, setGenerated] = useState(false);
+  const [generated, setGenerated] = useState<GeneratedReport | null>(null);
   const [generating, setGenerating] = useState(false);
+  const generationPending = useRef(false);
+  const [extracting, setExtracting] = useState(false);
+  const [clock, setClock] = useState(Date.now());
   const [generateError, setGenerateError] = useState<string | null>(null);
   const data = useScoringData();
+  useEffect(() => { const timer = window.setInterval(() => setClock(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
 
   const scoring = useMemo(() => {
     if (!data.payload) return { result: null, error: null };
     try { return { result: scoreNeighborhoods(data.payload, config), error: null }; }
     catch (error) { return { result: null, error: error instanceof Error ? error.message : 'Choose valid priorities.' }; }
-  }, [data.payload, data.loadedAt, config]);
+  }, [data.payload, data.loadedAt, config, clock]);
+  const reportScoring = useMemo(() => {
+    if (!generated) return { result: null, error: null };
+    try { return { result: scoreNeighborhoods(generated.payload, config), error: null }; }
+    catch { return { result: null, error: 'This report’s evidence has expired. Generate a fresh report.' }; }
+  }, [generated, config, clock]);
 
   function go(next: View) {
     setView(next);
     window.scrollTo(0, 0);
   }
 
-  async function generate() {
-    if (generating) return;
+  async function generate(withAi = true) {
+    if (generationPending.current || extracting) return;
+    generationPending.current = true;
     setGenerating(true);
     setGenerateError(null);
     try {
-      const payload = await data.refresh();
-      const result = scoreNeighborhoods(payload, config);
+      const { profile, ...options } = config;
+      const report: GeneratedReport = withAi ? await generateAiReport(options, profile) : {
+        payload: await data.refresh(), generatedAt: new Date().toISOString(),
+        narrative: { status: 'degraded', text: null, facts: [], expiresAt: new Date().toISOString() },
+      };
+      const result = scoreNeighborhoods(report.payload, config);
       if (!result.ranked.length) throw new Error('No neighborhoods have all of the evidence needed for these priorities. Review the missing-data details or retry after the data is refreshed.');
-      setGenerated(true);
+      setGenerated(report);
       go('report');
     } catch (error) {
       setGenerateError(error instanceof Error ? error.message : 'Could not generate the report. Please retry.');
-    } finally { setGenerating(false); }
+    } finally { generationPending.current = false; setGenerating(false); }
   }
 
   function changeConfig(next: ReportConfig) {
     setConfig(next);
+    setGenerated(null);
     setGenerateError(null);
   }
 
@@ -132,9 +148,9 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
     <div className="app">
       <div className="proto">
         <span className="proto-label">Someone’s Houston</span>
-        <button className="pill" aria-pressed={view === 'create'} onClick={() => go('create')}>Configure priorities</button>
-        <button className="pill" aria-pressed={view === 'report'} disabled={!generated} onClick={() => go('report')}>Neighborhood report</button>
-        <button className="pill" aria-pressed={view === 'dashboard'} onClick={() => go('dashboard')}>Sample dashboard</button>
+        <button className="pill" aria-pressed={view === 'create'} disabled={generating || extracting} onClick={() => go('create')}>Configure priorities</button>
+        <button className="pill" aria-pressed={view === 'report'} disabled={!generated || generating || extracting} onClick={() => go('report')}>Neighborhood report</button>
+        <button className="pill" aria-pressed={view === 'dashboard'} disabled={generating || extracting} onClick={() => go('dashboard')}>Sample dashboard</button>
         {session && <button type="button" className="pill" onClick={onSignOut} disabled={signingOut}>
           {signingOut ? 'Signing out…' : 'Sign out'}
         </button>}
@@ -147,12 +163,13 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
           onOpenReport={() => go('create')} onCreate={() => go('create')} />
       </>}
       {view === 'create' && <CreateReport config={config} onChange={changeConfig}
-        result={scoring.result} loading={data.loading} generating={generating}
+        result={scoring.result} loading={data.loading} generating={generating} extracting={extracting} onExtracting={setExtracting}
         error={generateError ?? data.error ?? scoring.error}
-        onRetry={() => { setGenerateError(null); void data.refresh(true).catch(() => {}); }} onGenerate={generate} />}
-      {view === 'report' && <CandidateReport config={config} result={scoring.result}
-        loading={data.loading} error={data.error ?? scoring.error} payload={data.payload}
-        onRetry={() => { void data.refresh(true).catch(() => {}); }} onConfigure={() => go('create')} />}
+        onRetry={() => { setGenerateError(null); void data.refresh(true).catch(() => {}); }} onGenerate={() => generate(true)} onFactual={() => generate(false)} />}
+      {view === 'report' && <CandidateReport config={config} result={reportScoring.result}
+        loading={false} error={reportScoring.error} payload={generated?.payload ?? null}
+        narrative={generated?.narrative ?? null} now={clock}
+        onRetry={() => { setGenerated(null); go('create'); }} onConfigure={() => go('create')} />}
     </div>
   );
 }

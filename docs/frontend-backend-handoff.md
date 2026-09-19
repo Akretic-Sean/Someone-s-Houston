@@ -12,7 +12,9 @@ Narrow the task by appending “Connect only [scoring / map / evidence cards / f
 
 **Implemented:** public profiles for 88 neighborhoods, boundaries, eight facility inventories, current weather/gauges, detailed eight-category evidence, a compact scoring-data RPC and a deterministic relative ranking model. The P0 frontend generates its ranked report in the current session and can recompute from cached data.
 
-**Not implemented:** stored/shared reports, private candidate tables and ownership rules, candidate extraction, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery, safety tiers or LLM-written recommendations. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
+**AI flow:** `report-flow` authenticates confirmed users, extracts optional notes for review, loads authoritative evidence and computes rankings server-side, then produces a validated explanation. Reuse `src/data/reportFlow.ts`. Notes never silently change the ranking controls. A factual report remains available when AI fails. See [hackathon release instructions](hackathon-release.md) and the [API contract](api.md#authenticated-ai-report-flow).
+
+**Not implemented:** stored/shared reports, private candidate tables and ownership rules, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery or safety tiers. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
 
 **Listing Watch:** its optional dialog is preserved and receives the actual ranked shortlist. The watch service is not configured in this build; submission is disabled and nothing is sent. Its `session-…` correlation ID is not a saved-report ID. The scoring RPC does not schedule watches or send email. See [the separate watch integration contract](api.md#optional-listing-watch-integration).
 
