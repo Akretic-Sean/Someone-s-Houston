@@ -349,3 +349,16 @@ Copy this section for each new endpoint and replace the placeholders:
 - Request example:
 - Success status and response example:
 - Error statuses and response examples:
+
+## Operator model runtime check
+
+`POST /functions/v1/model-runtime-check` runs fixed synthetic extraction/narration
+fixtures through the server-only OpenRouter module. The handler requires an exact server-only secret key in `apikey` or the legacy
+service-role bearer token; gateway JWT verification is deliberately disabled
+because modern API keys are not JWTs; this endpoint is not for browser users. Body content is ignored. Success
+is `200 { "ok": true, "extraction": "passed", "narration": "passed" }`.
+Handler errors are 403 unauthorized, 405 method,
+503 missing configuration, or 502 model/runtime/validation failure. Responses do
+not include transcripts, provider credentials, or raw model errors.
+See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
+Production extraction/narration endpoints and stored reports remain unimplemented.

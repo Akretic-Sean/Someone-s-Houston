@@ -108,3 +108,10 @@ python tools/houston_data.py search housing --limit 5
 ```
 
 See [source priorities](../docs/source-shortlist.md) and [bounded data policy](../docs/backend-data-policy.md) before adding another import.
+
+## Report model integration
+
+The server-only AI SDK/OpenRouter extraction and narration boundary is documented
+in [the model-layer guide](../docs/model-layer.md), including pinned versions,
+Deno checks, secret configuration and the protected synthetic runtime check.
+This does not yet connect AI generation to the report frontend or persist reports.
