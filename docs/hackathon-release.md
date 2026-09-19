@@ -45,7 +45,7 @@ flow and real email delivery still require the controlled-account release test.
 The steps below describe how to reproduce the deployment; they are already done
 for the shared project.
 
-1. Apply `backend/supabase/migrations/20260919223457_report_ai_quota.sql`.
+1. Apply `backend/supabase/migrations/20260919224312_report_ai_quota.sql`.
 2. Deploy the `report-flow` Edge Function with `verify_jwt=true`. Bundle the
    entire function folder, `_shared/report-models`, `functions/deno.json`,
    `functions/deno.lock`, and the repository's `shared/scoring.mjs` and
