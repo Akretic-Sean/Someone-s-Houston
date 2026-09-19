@@ -66,6 +66,8 @@ Current conditions use a separate deployed Edge Function and active database Cro
 
 ## Claude Code / Desktop
 
+The root `CLAUDE.md` supplies project data rules. Follow the [Claude handoff guide](../docs/claude-data-guide.md) to verify instruction loading, all four tools and correct interpretation in the partner's actual session.
+
 Run `npm run build` before connecting. From the repository root, copy `.mcp.json.example` to the ignored `.mcp.json` and replace the local `SUPABASE_PUBLISHABLE_KEY` placeholder, or export that environment variable before launching Claude Code. The example already has this project's URL and reference. Claude Code runs the relative server path from the repository root. Use `/mcp` to inspect/connect it.
 
 For Claude Desktop, add only the `hou-match-neighborhoods` entry to its MCP configuration, with an **absolute path** to `backend/dist/mcp.js` and literal URL/publishable-key environment values. Run Node directly; npm's stdout banner must not be used as the MCP transport.

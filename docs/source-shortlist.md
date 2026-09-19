@@ -2,7 +2,7 @@
 
 Researched 2026-09-19. Priorities reflect the relocation-report scope and the [bounded data policy](backend-data-policy.md). "Verified" means the specific metadata/sample check described below succeeded, not that a production importer or scoring method is complete. No bulk historical datasets were imported during this research.
 
-Implementation update: priority 1 is now [imported and available](neighborhood-layer.md), with all 88 economic profiles validated against the published 2024 tables. The remaining readiness notes below describe the earlier research checks.
+Implementation update: the 88 profiles/boundaries, eight facility inventories and NWS/USGS current feeds are now [imported and available](neighborhood-context.md). For the next imports, use the [updated source plan](next-data-sources.md): it includes a newly verified FEMA endpoint, METRO download and current Census/HUD access requirements. The original priorities/readiness notes below are retained as earlier research, not the current deployment inventory.
 
 ## Top priorities
 
