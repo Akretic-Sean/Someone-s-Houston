@@ -1,4 +1,4 @@
-import type { ScoringOptions, ScoringResult, ScoredNeighborhood } from './scoring.mjs';
+import type { ScoringOptions, ScoringResult, ScoredNeighborhood, ScoringPayload } from './scoring.d.mts';
 export interface EstimateInput {
   neighborhood_id: number; category_id: 'afford'|'flood'; metric: 'rent_usd'|'sfha_area_pct';
   lower_bound: number; upper_bound: number; ranking_value: number; method: 'conservative_upper_bound';
@@ -16,3 +16,8 @@ export interface BoundedScoringResult extends ScoringResult {
 }
 export const ESTIMATE_POLICY: 'source-bounded-v1';
 export function scoreNeighborhoodsWithEstimates(envelope: unknown, options: ScoringOptions, now?: number): BoundedScoringResult;
+
+export interface BoundedScoringPayload {
+  schema_version: 1; policy_version: 'source-bounded-v1'; base: ScoringPayload; estimates: EstimateInput[];
+}
+export function validateBoundedScoringPayload(envelope: unknown, now?: number): BoundedScoringPayload;

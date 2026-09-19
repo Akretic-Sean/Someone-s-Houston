@@ -1743,3 +1743,16 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
 .profile-review input { width: 100%; }
 .profile-review .source { font-weight: normal; overflow-wrap: anywhere; }
 .ai-narrative { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+
+/* Account mode is explicit without changing the existing colors or typography. */
+.login-brand { font-family: var(--serif); font-size: 22px; margin: 6px 0 20px; }
+.login-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; margin-bottom: 22px; background: var(--surface-dark); border: 1px solid var(--line-2); border-radius: var(--r-sm); }
+.login-modes button { padding: 10px 6px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text-3); font: inherit; font-size: 13px; }
+.login-modes button[aria-pressed="true"] { background: var(--accent); color: #fff; font-weight: 600; }
+.login-form .login-help { margin: 0; }
+.estimate-disclosure { margin: 14px 0; padding: 14px; border: 1px solid var(--line-2); border-left: 3px solid var(--accent); border-radius: var(--r-sm); font-size: 13px; line-height: 1.65; color: var(--text-2); }
+.estimate-disclosure strong, .estimate-badge { color: var(--accent-soft); }
+.estimate-disclosure ul { padding-left: 20px; margin: 8px 0; }
+.estimate-disclosure p { margin: 6px 0 0; }
+.estimate-disclosure a { text-decoration: underline; text-underline-offset: 3px; }
+.estimate-badge { display: block; font-size: 12px; line-height: 1.5; margin: 0 12px 10px; }

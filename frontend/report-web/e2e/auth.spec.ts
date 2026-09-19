@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { test, expect, type Page } from '@playwright/test';
 import { CATEGORY_IDS, DEFAULT_WEIGHTS, MODEL_VERSION } from '../../../shared/scoring.mjs';
 
@@ -10,7 +11,7 @@ function session(email = 'recruiter@example.test', expired = false) {
     refresh_token: 'test-refresh-token', expires_in: 3600, expires_at, token_type: 'bearer', user };
 }
 
-function scoringFixture() {
+function baseScoringFixture() {
   return {
     schema_version: 1, model_version: MODEL_VERSION, evaluated_at: new Date().toISOString(),
     category_definitions: CATEGORY_IDS.map(id => ({ id, label: id, default_weight: DEFAULT_WEIGHTS[id] })),
@@ -35,7 +36,18 @@ function scoringFixture() {
   };
 }
 
-async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean; signupStatus?: number; aiStatus?: number; degrade?: boolean } = {}) {
+function scoringFixture(expired = false) {
+  const base = baseScoringFixture();
+  (base.neighborhoods[6].categories.afford.metrics as any).rent_usd = null;
+  for (const id of [17, 25, 41, 43, 80]) (base.neighborhoods[id - 1].categories.flood.metrics as any).sfha_area_pct = null;
+  const estimates = JSON.parse(readFileSync(new URL('../../../backend/data/neighborhood-gap-inputs.json', import.meta.url), 'utf8')).rows.map((e: any) => ({
+    ...e, source_checked_at: new Date(Date.now() - 60000).toISOString(),
+    refresh_due_at: new Date(Date.now() + (expired ? -1000 : 3600000)).toISOString(), base_evidence_version: 'browser-test-v1',
+  }));
+  return { schema_version: 1, policy_version: 'source-bounded-v1', base, estimates };
+}
+
+async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean; signupStatus?: number; aiStatus?: number; degrade?: boolean; expiredBounds?: boolean } = {}) {
   await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, route => route.abort());
   if (process.env.LIVE_MAP_TILES !== '1') await page.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/svg+xml', body: tileFixture }));
   const state = { scoringReads: 0, failLogout: options.failLogout ?? false, signupRequests: [] as Record<string, unknown>[],
@@ -54,7 +66,7 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
         }]));
         return route.fulfill({ json: { status: 'generated', data: { fields, unanswered: [] } } });
       }
-      return route.fulfill({ json: { payload: scoringFixture(), generatedAt: new Date().toISOString(), narrative: {
+      return route.fulfill({ json: { payload: scoringFixture(options.expiredBounds), generatedAt: new Date().toISOString(), narrative: {
         status: options.degrade ? 'degraded' : 'generated', text: options.degrade ? null : 'Your selected priorities favor these relative matches.',
         expiresAt: new Date(Date.now() + 3600000).toISOString(), facts: [{ id: 'match_1', label: 'Computed match', value: 'Neighborhood 1', source: 'Verified scoring evidence' }],
       } } });
@@ -75,9 +87,9 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
       ? route.fulfill({ status: 500, json: { msg: 'Temporary failure' } })
       : route.fulfill({ status: 204 });
     if (url.pathname.endsWith('/user')) return route.fulfill({ json: session().user });
-    if (url.pathname.endsWith('/get_neighborhood_scoring_data')) {
+    if (url.pathname.endsWith('/get_neighborhood_scoring_data_with_estimates')) {
       state.scoringReads++;
-      return route.fulfill({ json: scoringFixture() });
+      return route.fulfill({ json: scoringFixture(options.expiredBounds) });
     }
     return route.fulfill({ status: 503, json: { message: 'Detailed evidence unavailable in auth fixture' } });
   });
@@ -152,7 +164,10 @@ test('unrefreshable stored session returns to login without loading report data'
 test('new users choose username and password and immediately enter the report flow', async ({ page }, testInfo) => {
   const state = await mockApi(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await page.getByRole('button', { name: 'Create a new account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Create your account', exact: true })).toBeVisible();
+  await expect(page.getByText('Choose a new username and password to get started. No email required.')).toBeVisible();
   await page.getByLabel('Username', { exact: true }).fill('New_User');
   await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
   await page.screenshot({ path: testInfo.outputPath('create-account.png'), fullPage: true });
@@ -165,7 +180,10 @@ test('new users choose username and password and immediately enter the report fl
 test('duplicate usernames and signup limits leave visitors signed out', async ({ page }) => {
   const state = await mockApi(page, { signupStatus: 409 });
   await page.goto('/');
-  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await expect(page.getByRole('heading', { name: 'Welcome back' })).toBeVisible();
+  await page.getByRole('button', { name: 'Create a new account', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Create your account', exact: true })).toBeVisible();
+  await expect(page.getByText('Choose a new username and password to get started. No email required.')).toBeVisible();
   await page.getByLabel('Username', { exact: true }).fill('new_user');
   await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
@@ -190,6 +208,7 @@ test('notes are reviewed before an authenticated AI report; changing priorities 
   expect(state.aiRequests.map(request => request.action)).toEqual(['extract', 'generate']);
   expect(state.aiRequests[1].preferences.office).toBe('Downtown');
   expect(state.aiRequests[1].options.office).toBe('ion');
+  expect(state.aiRequests[1].scoringPolicy).toBe('source-bounded-v1');
   expect(state.aiRequests[1].facts).toBeUndefined();
   expect(state.aiRequests[0].requestId).not.toBe(state.aiRequests[1].requestId);
   await page.screenshot({ path: testInfo.outputPath('ai-report.png'), fullPage: true });
@@ -219,7 +238,7 @@ test('a degraded AI response still renders a real ranked report', async ({ page 
 });
 
 function boundaryFixture() {
-  return { type: 'FeatureCollection', features: scoringFixture().neighborhoods.map(row => {
+  return { type: 'FeatureCollection', features: scoringFixture().base.neighborhoods.map(row => {
     const { latitude: lat, longitude: lon } = row.reference_point;
     return { type: 'Feature', properties: { neighborhood_id: row.neighborhood_id, name: row.name, boundary_version: 'fixture-v1' },
       geometry: { type: 'Polygon', coordinates: [[[lon - .003, lat - .003], [lon + .003, lat - .003],
@@ -289,4 +308,43 @@ test('map failures preserve usable points and can be retried without reloading s
   await expect(page.locator('.geo-map .leaflet-tile-loaded').first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Retry boundaries', exact: true })).toHaveCount(0);
   expect(state.scoringReads).toBe(1);
+});
+
+
+test('all 88 rank with every priority; rent bounds are disclosed and disappear in buy mode', async ({ page }, testInfo) => {
+  const state = await mockApi(page);
+  await page.goto('/'); await signIn(page);
+  await expect(page.getByText('88 of 88 neighborhoods can be ranked.')).toBeVisible();
+  await expect(page.getByText('6 neighborhoods include conservative source-derived estimates.', { exact: false })).toBeVisible();
+  for (const mode of ['Fully remote', 'Office / offer mode']) {
+    await page.getByRole('button', { name: mode, exact: true }).click();
+    for (const tenure of ['Buy', 'Rent']) {
+      await page.getByRole('button', { name: tenure, exact: true }).click();
+      await expect(page.getByText('88 of 88 neighborhoods can be ranked.')).toBeVisible();
+    }
+  }
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByText('88 / 88', { exact: true })).toBeVisible();
+  await page.getByLabel('Choose neighborhood').selectOption('7');
+  const detail = page.locator('#neighborhood-evidence');
+  await expect(detail.getByText('Exact median unavailable.', { exact: false })).toBeVisible();
+  await expect(detail.getByRole('link', { name: 'City / ACS source' })).toHaveAttribute('href', /6-Gross-Rent-2024.pdf/);
+  await page.screenshot({ path: testInfo.outputPath('all-88-report.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Adjust priorities', exact: true }).click();
+  await page.getByRole('button', { name: 'Buy', exact: true }).click();
+  await expect(page.getByText('5 neighborhoods include conservative source-derived estimates.', { exact: false })).toBeVisible();
+  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await page.getByLabel('Choose neighborhood').selectOption('7');
+  await expect(detail.getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
+  expect(state.aiRequests.length).toBe(1);
+});
+
+test('expired bounds leave six areas unranked rather than pretending full coverage', async ({ page }) => {
+  await mockApi(page, { expiredBounds: true });
+  await page.goto('/'); await signIn(page);
+  await expect(page.getByText('82 of 88 neighborhoods can be ranked.')).toBeVisible();
+  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await expect(page.getByText('82 / 88', { exact: true })).toBeVisible();
+  await page.getByLabel('Choose neighborhood').selectOption('7');
+  await expect(page.locator('#neighborhood-evidence').getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
 });

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { scoreNeighborhoods } from '../../../shared/scoring.mjs';
+import { scoreNeighborhoodsWithEstimates } from '../../../shared/scoring-estimates.mjs';
 import Login from './screens/Login';
 import { supabase } from './lib/supabase';
 import Dashboard from './screens/Dashboard';
@@ -100,16 +100,22 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
   const [clock, setClock] = useState(Date.now());
   const [generateError, setGenerateError] = useState<string | null>(null);
   const data = useScoringData();
-  useEffect(() => { const timer = window.setInterval(() => setClock(Date.now()), 30_000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => {
+    const tick = () => setClock(Date.now());
+    const timer = window.setInterval(tick, 30_000);
+    window.addEventListener('focus', tick);
+    document.addEventListener('visibilitychange', tick);
+    return () => { window.clearInterval(timer); window.removeEventListener('focus', tick); document.removeEventListener('visibilitychange', tick); };
+  }, []);
 
   const scoring = useMemo(() => {
     if (!data.payload) return { result: null, error: null };
-    try { return { result: scoreNeighborhoods(data.payload, config), error: null }; }
+    try { return { result: scoreNeighborhoodsWithEstimates(data.payload, config), error: null }; }
     catch (error) { return { result: null, error: error instanceof Error ? error.message : 'Choose valid priorities.' }; }
   }, [data.payload, data.loadedAt, config, clock]);
   const reportScoring = useMemo(() => {
     if (!generated) return { result: null, error: null };
-    try { return { result: scoreNeighborhoods(generated.payload, config), error: null }; }
+    try { return { result: scoreNeighborhoodsWithEstimates(generated.payload, config), error: null }; }
     catch { return { result: null, error: 'This report’s evidence has expired. Generate a fresh report.' }; }
   }, [generated, config, clock]);
 
@@ -126,7 +132,7 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
     try {
       const { profile, ...options } = config;
       const report = await generateAiReport(options, profile);
-      const result = scoreNeighborhoods(report.payload, config);
+      const result = scoreNeighborhoodsWithEstimates(report.payload, config);
       if (!result.ranked.length) throw new Error('No neighborhoods have all of the evidence needed for these priorities. Review the missing-data details or retry after the data is refreshed.');
       setGenerated(report);
       go('report');
@@ -164,7 +170,7 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
         error={generateError ?? data.error ?? scoring.error}
         onRetry={() => { setGenerateError(null); void data.refresh(true).catch(() => {}); }} onGenerate={generate} />}
       {view === 'report' && <CandidateReport config={config} result={reportScoring.result}
-        loading={false} error={reportScoring.error} payload={generated?.payload ?? null}
+        loading={false} error={reportScoring.error} payload={generated?.payload.base ?? null}
         narrative={generated?.narrative ?? null} now={clock}
         onRetry={() => { setGenerated(null); go('create'); }} onConfigure={() => go('create')} />}
     </div>

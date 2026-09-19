@@ -119,15 +119,12 @@ requesting an AI explanation. This is the only report-generation action. If the
 
 server returns a degraded narrative, the ranked report and evidence still render.
 
-Quota errors ask the user to retry later; missing-data rules remain unchanged.
+Quota errors ask the user to retry later. Preview and generated reports retain the
+complete estimates envelope; affected areas show source ranges and conservative-input
+badges. Original missing facts stay null.
 
-Facility counts in evidence cards count records inside the neighborhood boundary,
+Facility counts inside a boundary are distinct from proximity scores.
 
-not access scores. Amenities and healthcare scores compare nearest straight-line
-
-distances across neighborhoods, including facilities outside the boundary; there
-
-is no one-mile cutoff. Distances start at the neighborhood reference point.
 
 See [the release checklist](../docs/hackathon-release.md) for backend deployment,
 
