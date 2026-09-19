@@ -248,16 +248,36 @@ export function createHandler(deps: Dependencies) {
           return reply(422, { error: "no_comparable_neighborhoods" });
         }
       }
-      const reservation = await deps.reserve(userId, input.requestId);
+      // Already-open clients also receive a usable report when AI is unavailable.
+      // Authentication, validated preferences and evidence are still required.
+      const factualReport = () => {
+        if (input.action !== "generate") return reply(503, { error: "temporarily_unavailable" });
+        const current = envelope
+          ? scoreNeighborhoodsWithEstimates(envelope, input.options, now())
+          : scoreNeighborhoods(payload!, input.options, now());
+        if (!current.ranked.length) return reply(409, { error: "evidence_expired" });
+        return reply(200, {
+          payload: envelope ?? payload,
+          generatedAt: new Date(now()).toISOString(),
+          narrative: { status: "degraded", text: null, facts: [], expiresAt: new Date(now()).toISOString() },
+        });
+      };
+      let reservation;
+      try {
+        reservation = await deps.reserve(userId, input.requestId);
+      } catch {
+        // Never call a paid model if its quota cannot be checked.
+        return factualReport();
+      }
       if (reservation === "duplicate") {
         return reply(409, { error: "request_already_started" });
       }
       if (reservation !== "allowed") {
+        if (input.action === "generate") return factualReport();
         return reply(429, { error: "usage_limit" });
       }
-      const models = deps.models();
       if (input.action === "extract") {
-        return reply(200, await models.extract(input.input));
+        return reply(200, await deps.models().extract(input.input));
       }
       const bundle = reportFacts(
         payload!,
@@ -266,11 +286,16 @@ export function createHandler(deps: Dependencies) {
         now(),
         "estimateInputsUsed" in result! ? result!.estimateInputsUsed : [],
       );
-      const narration = await models.narrate({
-        section: bundle.section,
-        facts: bundle.facts,
-        preferences: input.preferences,
-      });
+      let narration;
+      try {
+        narration = await deps.models().narrate({
+          section: bundle.section,
+          facts: bundle.facts,
+          preferences: input.preferences,
+        });
+      } catch {
+        return factualReport();
+      }
       if (Date.parse(bundle.expiresAt) <= now()) {
         return reply(409, { error: "evidence_expired" });
       }
