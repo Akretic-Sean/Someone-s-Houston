@@ -386,6 +386,10 @@ inspector_port = 8083
 deno_version = 2
 
 # [edge_runtime.secrets]
+
+[functions.report-flow]
+verify_jwt = true
+import_map = "./functions/deno.json"
 # secret_key = "env(SECRET_VALUE)"
 
 [analytics]
@@ -420,3 +424,8 @@ enabled = true
 
 [functions.model-runtime-check]
 verify_jwt = false
+
+# Public signup verifies the project API key inside the handler.
+[functions.username-signup]
+verify_jwt = false
+import_map = "./functions/deno.json"

@@ -10,6 +10,7 @@ import { clearEvidenceCache } from '../evidence/api';
 import { evidenceMatchesScoring } from '../evidence/validity.mjs';
 import { buildCategoryViews, formatMeters, formatPct, formatUsd } from '../evidence/select';
 import ListingWatchDialog from '../watch/ListingWatchDialog';
+import type { Narrative } from '../data/reportFlow';
 
 const METRIC_LABELS: Record<string, string> = {
   rent_usd: 'Estimated monthly rent', home_value_usd: 'Estimated home value', sfha_area_pct: 'Area in mapped flood hazard zone',
@@ -68,9 +69,10 @@ function NeighborhoodCard({ neighborhood, hovered, onHover, onSelect }: {
   </Card>;
 }
 
-export default function CandidateReport({ config, result, payload, loading, error, onRetry, onConfigure }: {
+export default function CandidateReport({ config, result, payload, narrative, now, loading, error, onRetry, onConfigure }: {
   config: ReportConfig; result: ScoringResult | null; payload: ScoringPayload | null; loading: boolean;
   error: string | null; onRetry: () => void; onConfigure: () => void;
+  narrative: Narrative | null; now: number;
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -126,6 +128,17 @@ export default function CandidateReport({ config, result, payload, loading, erro
             </div>
             <div className="tags">{WEIGHT_DEFS.map(def => <span className="tag" key={def.id}>{def.label}: {Math.round(result.normalizedWeights[def.id] * 100)}%</span>)}</div>
             {config.mode === 'remote' && <p className="source">Commute is excluded in fully remote mode. Remaining priorities are renormalized.</p>}
+          </section>
+          <section aria-label="Report explanation">
+            <Card>
+              <h2 className="section-title">Your report at a glance</h2>
+              {narrative?.status === 'generated' && narrative.text && Date.parse(narrative.expiresAt) > now
+                ? <><p className="ai-narrative">{narrative.text}</p><p className="source">AI-assisted explanation of the computed ranking. Review the supporting facts below.</p>
+                  <details><summary>Supporting report facts</summary><ul className="score-reasons">{narrative.facts.map(fact => <li key={fact.id}>
+                    <strong>{fact.label}:</strong> {fact.value}<div className="source">{fact.source}</div>
+                  </li>)}</ul></details></>
+                : <p className="source">Showing the factual report without an AI explanation. The ranking, scores and evidence below remain available.</p>}
+            </Card>
           </section>
           <section>
             <h2 className="section-title">Top neighborhood matches</h2>

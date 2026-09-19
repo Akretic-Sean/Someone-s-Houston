@@ -6,6 +6,42 @@ Neighborhood profiles, maps, facility context and current-condition reads are **
 
 The P0 comparison flow uses a compact public scoring-data RPC and the shared deterministic `houston-proximity-v1` model to generate an in-session ranked report. See [the scoring method](scoring-matrix.md). Its proposed stored-report endpoints and old mock payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented endpoints or the current scoring response.
 
+## Authenticated AI report flow
+
+`POST /functions/v1/report-flow` is implemented in this release. It uses a
+confirmed Supabase user session (`Authorization: Bearer <user JWT>`) and the
+project's publishable key in `apikey`. Gateway JWT checking and a live Auth user
+lookup both apply. Anonymous accounts and operator API keys are not user sessions.
+
+- Extraction body: `{ action: "extract", requestId: "<UUID>", input: {
+  transcript: "<up to 24,000 characters>", answers: { office: "Midtown" } } }`.
+  `answers` allows the existing twelve CandidateProfile keys, each at most 500
+  characters. Response: `{ status: "generated" | "degraded", data: {
+  fields: { office: { value, confidence, evidence }, ... }, unanswered: [...] } }`.
+  Existing answers override extraction. Quotes must match the notes. The user
+  reviews/edits these answers; no extracted text silently changes ranking weights.
+- Generation body: `{ action: "generate", requestId: "<UUID>", options: {
+  tenure: "rent", mode: "offer", office: "ion", airport: "nearest", weights: {
+  afford: 8, commute: 7, flood: 6, amen: 5, fit: 7, food: 8, air: 6, health: 7
+  } }, preferences: { office: "Midtown" } }`.
+  The server fetches scoring evidence itself and runs `shared/scoring.mjs`.
+  Browser-supplied scores/facts/user IDs are rejected. Response: `{ payload:
+  <ScoringPayload>, generatedAt, narrative: { status, text, expiresAt, facts } }`.
+  `text` is plain text with verified fact placeholders substituted server-side.
+  Facts contain `id`, `label`, `value`, `source`, and `refresh_due_at`.
+  `degraded` narration returns `text:null`; the real ranking remains usable.
+
+Successful results are 200 and `Cache-Control: no-store`. Error bodies contain
+only `{ error: "<bounded_code>" }`: 400 `invalid_input`, 401 `sign_in_required`,
+409 `request_already_started`/`evidence_expired`, 415 `json_required`, 422
+`no_comparable_neighborhoods`, 429 `usage_limit` (Retry-After 3600), 503
+`evidence_unavailable`/`temporarily_unavailable`. Gateway 401 errors may use
+Supabase's own response envelope. OPTIONS returns 204; other methods return 405.
+Requests are limited to 100,000 bytes. The quota is six combined operations per
+user and one hundred project-wide per rolling hour. Repeat IDs return 409 rather
+than rerunning paid work. Notes/profiles/reports are not stored. Usage metadata
+is private and accessible only by the server. See [release setup](hackathon-release.md).
+
 ## Neighborhood profiles
 
 **Optional expanded context:** `POST /rest/v1/rpc/get_neighborhood_relocation_context` with `{"p_neighborhood_id":62}` returns housing detail, school locations, METRO scheduled transit and historical 2024 reported offense counts. It does not alter scoring. See [the additive contract](expanded-context.md) for availability, periods, expiry, limitations and the sixth local MCP tool.
@@ -363,7 +399,8 @@ Handler errors are 403 unauthorized, 405 method,
 503 missing configuration, or 502 model/runtime/validation failure. Responses do
 not include transcripts, provider credentials, or raw model errors.
 See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
-Production extraction/narration endpoints and stored reports remain unimplemented.
+The authenticated `report-flow` endpoint supplies extraction/narration (see above);
+stored reports remain unimplemented.
 
 
 ## Agent scenario comparison (implemented, local MCP)
@@ -382,3 +419,22 @@ The client coalesces reads, caches at most one hour or the earliest usable sourc
 Use `scoreNeighborhoodsWithEstimates(envelope, options, now?)` in `shared/scoring-estimates.mjs`. Returns the existing ScoringResult plus policyVersion, notice, estimateInputsUsed and per-row dataQuality/estimateInputsUsed. All selected weights remain; only the existing remote-mode commute rule disables a category. Validation failures throw INVALID_ESTIMATE_INPUT or existing scoring errors. Missing/expired receipts do not fabricate a result; affected rows remain unranked. Source-derived upper endpoints must be labeled in frontend cards/reports. See [the integration guide](all-88-frontend-guide.md).
 
 `publish_neighborhood_gap_inputs(p_rows)` is service-only, atomic, exactly six reviewed rows. Public table writes and publishing are denied. Refresh after evidence-version changes and within 31 days of actual retrieval.
+
+
+## Username account registration (implemented)
+
+`POST /functions/v1/username-signup` accepts a project publishable `apikey`, JSON
+`{ "username": "demo_user", "password": "<8–128 characters>" }`, and no other fields.
+Usernames are case-insensitive, 3–24 ASCII letters/numbers/underscores. Returns
+`201 { "created": true }`. Errors: 400 invalid/rejected input, 401 invalid project
+key, 409 unavailable username, 413 oversized body, 429 project signup limit,
+503 unavailable dependency. Responses never contain credentials or admin details.
+
+The handler verifies the project key itself; gateway JWT verification is disabled
+only for this public registration endpoint. An atomic server-only quota permits
+50 attempts per project per rolling hour. Supabase Auth Admin creates a confirmed
+internal identifier (`<username>@users.someones-houston.invalid`), never a supplied
+contact email. No email is sent. Passwords remain in Supabase Auth. After creation,
+use native `signInWithPassword` with the shared `usernameEmail` mapping to obtain
+the normal user session used by `report-flow`. No client-chosen role/user ID is
+accepted. No email-based password recovery is provided in this hackathon flow.

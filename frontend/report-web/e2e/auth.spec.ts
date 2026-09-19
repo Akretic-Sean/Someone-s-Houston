@@ -35,14 +35,36 @@ function scoringFixture() {
   };
 }
 
-async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean } = {}) {
-  const state = { scoringReads: 0, failLogout: options.failLogout ?? false };
+async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean; signupStatus?: number; aiStatus?: number; degrade?: boolean } = {}) {
+  const state = { scoringReads: 0, failLogout: options.failLogout ?? false, signupRequests: [] as Record<string, unknown>[],
+    signupStatus: options.signupStatus ?? 201, aiRequests: [] as Record<string, any>[] };
   // Every Supabase request is intercepted: these tests never create users or send mail.
   await page.route('https://hknzivrgihnqzvsafkkr.supabase.co/**', async route => {
     const url = new URL(route.request().url());
+    if (url.pathname.endsWith('/report-flow')) {
+      expect(route.request().headers().authorization).toMatch(/^Bearer /);
+      const input = route.request().postDataJSON();
+      state.aiRequests.push(input);
+      if (options.aiStatus) return route.fulfill({ status: options.aiStatus, json: { error: 'usage_limit' } });
+      if (input.action === 'extract') {
+        const fields = Object.fromEntries(Object.keys(input.input.answers).map(id => [id, {
+          value: input.input.answers[id] || (id === 'office' ? 'Midtown' : null), confidence: 'high', evidence: id === 'office' ? 'Midtown' : null,
+        }]));
+        return route.fulfill({ json: { status: 'generated', data: { fields, unanswered: [] } } });
+      }
+      return route.fulfill({ json: { payload: scoringFixture(), generatedAt: new Date().toISOString(), narrative: {
+        status: options.degrade ? 'degraded' : 'generated', text: options.degrade ? null : 'Your selected priorities favor these relative matches.',
+        expiresAt: new Date(Date.now() + 3600000).toISOString(), facts: [{ id: 'match_1', label: 'Computed match', value: 'Neighborhood 1', source: 'Verified scoring evidence' }],
+      } } });
+    }
+    if (url.pathname.endsWith('/username-signup')) {
+      state.signupRequests.push(route.request().postDataJSON());
+      return route.fulfill({ status: state.signupStatus, json: state.signupStatus === 201 ? { created: true } : { error: 'signup_rejected' } });
+    }
     if (url.pathname.endsWith('/token')) {
       const input = route.request().postDataJSON();
-      if (options.expiredSession || input.password === 'incorrect') {
+
+      if (options.expiredSession || input.password === 'wrongpass') {
         return route.fulfill({ status: 400, json: { code: 'invalid_credentials', msg: 'Invalid login credentials' } });
       }
       return route.fulfill({ json: session(input.email) });
@@ -50,7 +72,6 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
     if (url.pathname.endsWith('/logout')) return state.failLogout
       ? route.fulfill({ status: 500, json: { msg: 'Temporary failure' } })
       : route.fulfill({ status: 204 });
-    if (url.pathname.endsWith('/signup')) return route.fulfill({ json: { user: session().user, session: null } });
     if (url.pathname.endsWith('/user')) return route.fulfill({ json: session().user });
     if (url.pathname.endsWith('/get_neighborhood_scoring_data')) {
       state.scoringReads++;
@@ -61,9 +82,9 @@ async function mockApi(page: Page, options: { failLogout?: boolean; expiredSessi
   return state;
 }
 
-async function signIn(page: Page, email = 'recruiter@example.test', password = 'correct-password') {
-  await page.getByLabel('Email', { exact: true }).fill(email);
-  await page.getByLabel('Password', { exact: true }).fill(password);
+async function signIn(page: Page, username = 'recruiter') {
+  await page.getByLabel('Username', { exact: true }).fill(username);
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
   await page.getByRole('button', { name: 'Sign in', exact: true }).click();
 }
 
@@ -73,9 +94,14 @@ test('login gates scoring; logout clears generated reports before the next accou
   page.on('pageerror', error => errors.push(error.message));
   await page.goto('/');
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Google/ })).toHaveCount(0);
+  await expect(page.getByLabel('Password', { exact: true })).toBeVisible();
+  await expect(page.getByLabel('Email', { exact: true })).toHaveCount(0);
   expect(state.scoringReads).toBe(0);
-  await signIn(page, 'recruiter@example.test', 'incorrect');
-  await expect(page.getByRole('alert')).toHaveText('Invalid login credentials');
+  await page.getByLabel('Username', { exact: true }).fill('recruiter');
+  await page.getByLabel('Password', { exact: true }).fill('wrongpass');
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Incorrect username or password');
   expect(state.scoringReads).toBe(0);
   await signIn(page);
   await expect(page.getByText('88 of 88 neighborhoods can be ranked.')).toBeVisible();
@@ -87,7 +113,7 @@ test('login gates scoring; logout clears generated reports before the next accou
   expect(state.scoringReads).toBe(1);
   await page.getByRole('button', { name: 'Sign out', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
-  await signIn(page, 'second@example.test');
+  await signIn(page, 'second');
   await expect(page.getByRole('heading', { name: 'Configure and generate' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Neighborhood report', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Rent', exact: true })).toHaveAttribute('aria-pressed', 'true');
@@ -121,15 +147,71 @@ test('unrefreshable stored session returns to login without loading report data'
   expect(state.scoringReads).toBe(0);
 });
 
-test('signup confirmation keeps the workspace gated', async ({ page }) => {
+test('new users choose username and password and immediately enter the report flow', async ({ page }, testInfo) => {
   const state = await mockApi(page);
   await page.goto('/');
-  await page.getByRole('button', { name: 'New here? Create an account' }).click();
-  await page.getByLabel('Email', { exact: true }).fill('new@example.test');
-  await page.getByLabel('Password', { exact: true }).fill('correct-password');
+  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await page.getByLabel('Username', { exact: true }).fill('New_User');
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
+  await page.screenshot({ path: testInfo.outputPath('create-account.png'), fullPage: true });
   await page.getByRole('button', { name: 'Create account', exact: true }).click();
-  await expect(page.getByText('Check your email to confirm your account, then sign in.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible();
-  expect(state.scoringReads).toBe(0);
+  await expect(page.getByRole('heading', { name: 'Configure and generate' })).toBeVisible();
+  expect(state.signupRequests).toEqual([{ username: 'new_user', password: 'Demo-password-123!' }]);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('duplicate usernames and signup limits leave visitors signed out', async ({ page }) => {
+  const state = await mockApi(page, { signupStatus: 409 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'New here? Create account' }).click();
+  await page.getByLabel('Username', { exact: true }).fill('new_user');
+  await page.getByLabel('Password', { exact: true }).fill('Demo-password-123!');
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('That username is taken');
+  state.signupStatus = 429;
+  await page.getByRole('button', { name: 'Create account', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('Signups are busy');
+  expect(state.scoringReads).toBe(0);
+  expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
+});
+
+test('notes are reviewed before an authenticated AI report; changing priorities clears the report', async ({ page }, testInfo) => {
+  const state = await mockApi(page);
+  await page.goto('/'); await signIn(page);
+  await page.getByLabel('Relocation notes', { exact: true }).fill('Work in Midtown');
+  await page.getByRole('button', { name: 'Extract preferences', exact: true }).click();
+  await expect(page.getByLabel('Work location', { exact: true })).toHaveValue('Midtown');
+  await page.getByLabel('Work location', { exact: true }).fill('Downtown');
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Your report at a glance' })).toBeVisible();
+  await expect(page.getByText('Your selected priorities favor these relative matches.')).toBeVisible();
+  expect(state.aiRequests.map(request => request.action)).toEqual(['extract', 'generate']);
+  expect(state.aiRequests[1].preferences.office).toBe('Downtown');
+  expect(state.aiRequests[1].options.office).toBe('ion');
+  expect(state.aiRequests[1].facts).toBeUndefined();
+  expect(state.aiRequests[0].requestId).not.toBe(state.aiRequests[1].requestId);
+  await page.screenshot({ path: testInfo.outputPath('ai-report.png'), fullPage: true });
+  await page.getByRole('button', { name: 'Adjust priorities', exact: true }).click();
+  await page.getByRole('button', { name: 'Buy', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Neighborhood report', exact: true })).toBeDisabled();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
+test('an AI quota failure allows a factual report without another model request', async ({ page }) => {
+  const state = await mockApi(page, { aiStatus: 429 });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByRole('alert')).toContainText('AI usage limit');
+  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Showing the factual report without an AI explanation.', { exact: false })).toBeVisible();
+  expect(state.aiRequests.length).toBe(1);
+});
+
+test('a degraded AI response still renders a real ranked report', async ({ page }) => {
+  await mockApi(page, { degrade: true });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+  await expect(page.getByText('Showing the factual report without an AI explanation.', { exact: false })).toBeVisible();
 });

@@ -1711,3 +1711,19 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
   min-height: 100vh;
   color: var(--text-3);
 }
+.login-help, .login-address { font-size: 13px; line-height: 1.6; color: var(--text-3); margin-top: 18px; }
+.login-address { margin: 0 0 20px; overflow-wrap: anywhere; }
+.login-address strong { color: var(--text-2); }
+.login-code { font-family: var(--mono); text-align: center; letter-spacing: .12em; }
+.login-code-actions { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.login-card > .login-error, .login-card > .login-notice { margin-top: 18px; line-height: 1.5; }
+.login-card button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 4px; }
+.preference-notes { margin-bottom: 24px; }
+.preference-notes textarea { width: 100%; min-height: 110px; padding: 12px; border: 1px solid var(--line-2); border-radius: 8px; background: var(--bg); color: var(--text); font: inherit; resize: vertical; margin: 8px 0 12px; }
+.preference-notes details { margin-top: 18px; }
+.profile-review { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 16px; margin-top: 16px; }
+.profile-review input { width: 100%; }
+.profile-review .source { font-weight: normal; overflow-wrap: anywhere; }
+.factual-report { margin: 12px 0 0 12px; }
+.ai-narrative { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+@media (max-width: 600px) { .factual-report { margin-left: 0; display: block; } }
