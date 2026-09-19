@@ -2,17 +2,15 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReportConfig } from '../App';
 import { Card, Segmented } from '../components/Bits';
 import { DEFAULT_WEIGHTS, OFFICES, WEIGHT_DEFS } from '../data/offices';
+import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
 import {
-  CONNECTOR_NAMES,
   LIFESTYLE_FIELDS,
   OFFER_FIELDS,
   PROFILE_CONFIDENCE,
   TRANSCRIPT,
-  type ConnectorName,
 } from '../data/profile';
 import type { Confidence, ProfileField, WeightId } from '../types';
 
-type ConnectorState = 'idle' | 'connected';
 const STEPS: Array<[number, string]> = [
   [1, 'Conversation'],
   [2, 'Profile'],
@@ -25,13 +23,6 @@ const GENERATE_LABELS = [
   'Checking flood and city-service data…',
   'Writing the candidate narrative…',
 ];
-
-const CONNECTOR_MARK: Record<ConnectorName, string> = {
-  Granola: 'G',
-  Fireflies: 'Ff',
-  Fathom: 'Fa',
-  'Zoom Notes': 'Z',
-};
 
 function ConfidenceDots({ level }: { level: Confidence }) {
   return (
@@ -47,20 +38,18 @@ function ConfidenceDots({ level }: { level: Confidence }) {
 export default function CreateReport({
   config,
   onChange,
+  connectors,
+  onOpenConnectors,
   onGenerated,
 }: {
   config: ReportConfig;
   onChange: (next: ReportConfig) => void;
+  connectors: ConnectorStates;
+  onOpenConnectors: () => void;
   onGenerated: () => void;
 }) {
   const [step, setStep] = useState(1);
-  const [connectors, setConnectors] = useState<Record<ConnectorName, ConnectorState>>({
-    Granola: 'connected',
-    Fireflies: 'idle',
-    Fathom: 'idle',
-    'Zoom Notes': 'idle',
-  });
-  const [importing, setImporting] = useState<ConnectorName | null>(null);
+  const [importing, setImporting] = useState<ConnectorId | null>(null);
   const [transcript, setTranscript] = useState('');
   const [extracting, setExtracting] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -81,13 +70,10 @@ export default function CreateReport({
   const setWeight = (id: WeightId, value: number) =>
     onChange({ ...config, weights: { ...config.weights, [id]: value } });
 
-  function handleConnector(name: ConnectorName) {
+  /** Only connected sources reach this screen, so this is always an import. */
+  function importFrom(id: ConnectorId) {
     if (importing) return;
-    if (connectors[name] !== 'connected') {
-      setConnectors((c) => ({ ...c, [name]: 'connected' }));
-      return;
-    }
-    setImporting(name);
+    setImporting(id);
     track(
       window.setTimeout(() => {
         setImporting(null);
@@ -130,6 +116,8 @@ export default function CreateReport({
     );
   }
 
+  const connected = CONNECTORS.filter((c) => connectors[c.id] === 'connected');
+  const importingName = CONNECTORS.find((c) => c.id === importing)?.name ?? '';
   const totalWeight = Object.values(config.weights).reduce((a, b) => a + b, 0) || 1;
   const transcriptLines = transcript
     .split('\n')
@@ -173,32 +161,51 @@ export default function CreateReport({
               said, not from a form.
             </p>
 
-            <div className="connectors">
-              {CONNECTOR_NAMES.map((name) => {
-                const connected = connectors[name] === 'connected';
-                const busy = importing === name;
-                return (
-                  <Card key={name}>
-                    <button type="button" className="connector" onClick={() => handleConnector(name)}>
-                      <span className="connector-mark" aria-hidden="true">
-                        {CONNECTOR_MARK[name]}
-                      </span>
-                      <span>
-                        <span className="connector-name">{name}</span>
-                        <br />
-                        <span className="connector-state" data-connected={connected}>
-                          {busy
-                            ? 'Importing…'
-                            : connected
-                              ? 'Connected · import notes'
-                              : 'Not connected'}
+            {connected.length > 0 ? (
+              <div className="connectors">
+                {connected.map((c) => {
+                  const busy = importing === c.id;
+                  return (
+                    <Card key={c.id}>
+                      <button
+                        type="button"
+                        className="connector"
+                        onClick={() => importFrom(c.id)}
+                        disabled={Boolean(importing)}
+                      >
+                        <span className="connector-mark" aria-hidden="true">
+                          {c.mark}
                         </span>
-                      </span>
-                    </button>
-                  </Card>
-                );
-              })}
-            </div>
+                        <span>
+                          <span className="connector-name">{c.name}</span>
+                          <br />
+                          <span className="connector-state" data-connected="true">
+                            {busy ? 'Importing…' : 'Import notes'}
+                          </span>
+                        </span>
+                      </button>
+                    </Card>
+                  );
+                })}
+              </div>
+            ) : (
+              <Card>
+                <div className="empty" style={{ padding: '28px 18px' }}>
+                  No sources are connected yet.
+                  <br />
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    style={{ marginTop: 14 }}
+                    onClick={onOpenConnectors}
+                  >
+                    Go to Connectors
+                  </button>
+                </div>
+              </Card>
+            )}
+
+            <div style={{ height: 20 }} />
 
             <Card>
               <span className="eyebrow">Transcript</span>
@@ -206,7 +213,7 @@ export default function CreateReport({
               {importing ? (
                 <p className="line-text">
                   <span className="spinner" />
-                  Importing notes from {importing}…
+                  Importing notes from {importingName}…
                 </p>
               ) : transcript ? (
                 <>
@@ -243,8 +250,8 @@ export default function CreateReport({
                   </label>
                   <div style={{ height: 12 }} />
                   <p className="source">
-                    Nothing is stored until you generate. Import from Granola to load the sample
-                    conversation.
+                    Nothing is stored until you generate. Import from a connected source above
+                    to load the sample conversation.
                   </p>
                 </>
               )}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Dashboard from './screens/Dashboard';
 import CreateReport from './screens/CreateReport';
 import CandidateReport from './screens/CandidateReport';
+import { DEFAULT_CONNECTORS, type ConnectorId, type ConnectorStates } from './data/connectors';
 import { DEFAULT_WEIGHTS } from './data/offices';
 import { PROFILE_DEFAULTS } from './data/profile';
 import type { CandidateProfile, OfficeId, ReportMode, Tenure, Weights } from './types';
@@ -37,6 +38,10 @@ const TABS: Array<[View, string]> = [
 export default function App() {
   const [view, setView] = useState<View>('dashboard');
   const [config, setConfig] = useState<ReportConfig>(INITIAL_CONFIG);
+  // Connectors are shared: the Connectors screen owns connecting them, and the
+  // report builder only offers the ones already connected.
+  const [connectors, setConnectors] = useState<ConnectorStates>(DEFAULT_CONNECTORS);
+  const [dashboardNav, setDashboardNav] = useState('Reports');
   const [toast, setToast] = useState('');
 
   const go = useCallback((next: View) => {
@@ -45,6 +50,17 @@ export default function App() {
   }, []);
 
   const showToast = useCallback((message: string) => setToast(message), []);
+
+  const toggleConnector = useCallback((id: ConnectorId) => {
+    setConnectors((c) => ({ ...c, [id]: c[id] === 'connected' ? 'idle' : 'connected' }));
+  }, []);
+
+  /** From the builder's empty state: jump to the Connectors screen. */
+  const openConnectors = useCallback(() => {
+    setDashboardNav('Connectors');
+    setView('dashboard');
+    window.scrollTo(0, 0);
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -69,11 +85,22 @@ export default function App() {
         ))}
       </div>
 
-      {view === 'dashboard' && <Dashboard onOpenReport={() => go('report')} onCreate={() => go('create')} />}
+      {view === 'dashboard' && (
+        <Dashboard
+          nav={dashboardNav}
+          onNav={setDashboardNav}
+          connectors={connectors}
+          onToggleConnector={toggleConnector}
+          onOpenReport={() => go('report')}
+          onCreate={() => go('create')}
+        />
+      )}
       {view === 'create' && (
         <CreateReport
           config={config}
           onChange={setConfig}
+          connectors={connectors}
+          onOpenConnectors={openConnectors}
           onGenerated={() => go('report')}
         />
       )}
