@@ -38,7 +38,7 @@ export default function Login() {
           setResendAt(Date.now() + 60000);
           setNow(Date.now());
           setError('Please wait a minute before requesting another code.');
-        } else { setError('We couldn’t send your code. Please try again shortly.'); }
+        } else { setError('We couldn’t send your sign-in email. Please try again shortly.'); }
         return;
       }
       setSentTo(address);
@@ -85,12 +85,12 @@ export default function Login() {
             value={email} onChange={event => setEmail(event.target.value)} placeholder="you@company.com" disabled={Boolean(busy)} />
         </label>
         <button type="submit" className="btn btn-primary login-submit" disabled={Boolean(busy) || remaining > 0}>
-          {busy === 'send' ? 'Sending code…' : remaining > 0 ? 'Send code in ' + remaining + 's' : 'Continue with email'}
+          {busy === 'send' ? 'Sending email…' : remaining > 0 ? 'Send email in ' + remaining + 's' : 'Continue with email'}
         </button>
       </form>
       <p className="login-help">New here? Verify your email to get started. No password needed.</p>
     </> : <>
-      <p className="login-address">Code sent to <strong>{sentTo}</strong></p>
+      <p className="login-address">Sign-in email sent to <strong>{sentTo}</strong></p>
       <form onSubmit={verifyCode} className="login-form">
         <label className="login-label">Email code
           <input ref={codeInput} className="login-code" type="text" inputMode="numeric" autoComplete="one-time-code"
@@ -104,7 +104,7 @@ export default function Login() {
       </form>
       <div className="login-code-actions">
         <button type="button" className="login-switch" disabled={Boolean(busy) || remaining > 0} onClick={() => { void sendCode(); }}>
-          {busy === 'send' ? 'Sending…' : remaining > 0 ? 'Resend code in ' + remaining + 's' : 'Resend code'}
+          {busy === 'send' ? 'Sending…' : remaining > 0 ? 'Resend email in ' + remaining + 's' : 'Resend email'}
         </button>
         <button type="button" className="login-switch" disabled={Boolean(busy)} onClick={changeEmail}>Use another email</button>
       </div>

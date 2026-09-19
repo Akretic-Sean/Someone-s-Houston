@@ -168,13 +168,13 @@ test('new accounts require a verified code and resend respects the cooldown', as
   await page.goto('/');
   await requestCode(page, 'new@example.test');
   expect(state.otpRequests[0]).toMatchObject({ email: 'new@example.test', create_user: true });
-  await expect(page.getByRole('button', { name: /Resend code in/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: /Resend email in/ })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Verify and continue' })).toBeDisabled();
   await page.clock.fastForward(61000);
-  await page.getByRole('button', { name: 'Resend code', exact: true }).click();
+  await page.getByRole('button', { name: 'Resend email', exact: true }).click();
   await expect.poll(() => state.otpRequests.length).toBe(2);
   await page.getByRole('button', { name: 'Use another email' }).click();
-  await expect(page.getByRole('button', { name: /Send code in/ })).toBeDisabled();
+  await expect(page.getByRole('button', { name: /Send email in/ })).toBeDisabled();
   expect(state.scoringReads).toBe(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -190,7 +190,7 @@ test('email rate limiting and delivery failures never pretend a code was sent', 
   await page.clock.fastForward(61000);
   state.sendStatus = 400;
   await page.getByRole('button', { name: 'Continue with email' }).click();
-  await expect(page.getByRole('alert')).toContainText('We couldn’t send your code');
+  await expect(page.getByRole('alert')).toContainText('We couldn’t send your sign-in email');
   state.sendStatus = 200;
   await page.getByRole('button', { name: 'Continue with email' }).click();
   await expect(page.getByLabel('Email code', { exact: true })).toBeVisible();

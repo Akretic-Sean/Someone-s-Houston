@@ -52,7 +52,7 @@ npm --prefix backend run test:frontend
 npm --prefix frontend/report-web run dev -- --host 127.0.0.1 --port 5180 --strictPort
 ```
 
-The 10 browser checks cover desktop/mobile email verification, invalid codes,
+The browser checks cover desktop/mobile email verification, invalid codes,
 new-user eligibility, cooldowns, rate limits, mail failures, restored/expired
 sessions, and report-state isolation on logout. They mock Auth responses; they do **not** certify hosted
 provider settings or actual email delivery. The API preflight reads live public
