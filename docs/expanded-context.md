@@ -1,6 +1,6 @@
 # Optional neighborhood context: family, transit and reported crime
 
-This additive backend layer leaves the eight weighted categories, scoring/evidence RPCs and `shared/scoring.mjs` unchanged. No frontend files are changed. New facts do not enter the score.
+This additive backend layer leaves the eight weighted categories, scoring/evidence RPCs and `shared/scoring.mjs` unchanged. The report now shows a selected-neighborhood Public safety context panel with the five historical 2024 HPD counts and source link. It has no slider and does not enter the score. Failed, expired or mismatched reads withhold counts without blocking the report.
 
 ## Connect Claude/the frontend
 

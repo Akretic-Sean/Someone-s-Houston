@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CATEGORY_IDS, type ScoringPayload } from '../../../../shared/scoring.mjs';
 import type { BoundedNeighborhood, BoundedScoringResult } from '../../../../shared/scoring-estimates.mjs';
+import PublicSafetyPanel from '../components/PublicSafetyPanel';
 import EstimateDisclosure from '../components/EstimateDisclosure';
 import type { ReportConfig } from '../App';
 import { Card } from '../components/Bits';
@@ -177,6 +178,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
             {active && <EstimateDisclosure inputs={active.estimateInputsUsed} />}
             {active && <details className="score-details"><summary>Full score breakdown{active.rank === null ? ' — total withheld' : ` — ${active.totalScore?.toFixed(1)} / 100`}</summary><ScoreBreakdown neighborhood={active} /></details>}
             <p className="section-lede">Category measurements come from the source snapshots below. Model scores are calculated separately from those facts. Safety and driving times remain unavailable.</p>
+            {active && <PublicSafetyPanel key={active.neighborhoodId} neighborhoodId={active.neighborhoodId} name={active.name} now={now} />}
             {evidence.loading ? <Card><p role="status"><span className="spinner" /> Loading source evidence…</p></Card>
               : evidence.error ? <Card><p role="alert">Source details could not be read: {evidence.error.message}</p><button className="btn" onClick={evidence.retry}>Retry evidence</button></Card>
               : evidenceVersionMismatch ? <Card><p role="alert">The detailed evidence and ranking use different data versions. Details are withheld until both are refreshed.</p><button type="button" className="btn" onClick={refreshReportEvidence}>Refresh ranking and evidence</button></Card>

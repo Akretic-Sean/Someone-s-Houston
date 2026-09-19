@@ -382,6 +382,42 @@ test('amenities and healthcare display radius counts instead of boundary-only ze
   await page.screenshot({ path: testInfo.outputPath('nearby-access.png') });
 });
 
+test('public safety shows historical counts without changing scores; expired data stays unavailable', async ({ page }) => {
+  await mockApi(page);
+  let expired = false;
+  await page.route('**/rest/v1/rpc/get_neighborhood_relocation_context', route => {
+    const id = route.request().postDataJSON().p_neighborhood_id;
+    const due = new Date(Date.now() + (expired ? -1000 : 3600000)).toISOString();
+    return route.fulfill({ json: { neighborhood_id: id, scoring_effect: 'none', reported_crime: {
+      availability: 'historical_snapshot', refresh_due_at: due,
+      facts: { year: 2024, counts: { aggravated_assault: id * 100, robbery: id * 100 + 1,
+        burglary: 0, motor_vehicle_theft: 20, theft_from_motor_vehicle: null } },
+      source: { source_url: 'https://services.arcgis.com/NummVBqZSIJKUeVR/ArcGIS/rest/services/HPD_Crime_Summary/FeatureServer/0',
+        refresh_due_at: due, source_checked_at: new Date().toISOString(), source_period: 'Calendar year 2024.' },
+    } } });
+  });
+  await page.goto('/'); await signIn(page);
+  await expect(page.getByRole('slider')).toHaveCount(8);
+  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  const score = await page.locator('.hood-score').first().textContent();
+  const panel = page.getByRole('region', { name: 'Public safety context' });
+  await page.getByLabel('Choose neighborhood').selectOption('7');
+  await expect(panel.getByText('Reported crime in Neighborhood 7 · 2024', { exact: true })).toBeVisible();
+  await expect(panel.getByText('701', { exact: true })).toBeVisible();
+  await expect(panel.getByText('Unavailable', { exact: true })).toBeVisible();
+  await expect(panel.getByRole('link', { name: 'View official City / HPD crime source' })).toBeVisible();
+  expect(await page.locator('.hood-score').first().textContent()).toBe(score);
+  expired = true;
+  await page.getByLabel('Choose neighborhood').selectOption('8');
+  await expect(panel.getByRole('button', { name: 'Retry public safety data' })).toBeVisible();
+  await expect(panel.locator('dd')).toHaveCount(0);
+  await expect(page.getByText('88 / 88', { exact: true })).toBeVisible();
+  expired = false;
+  await panel.getByRole('button', { name: 'Retry public safety data' }).click();
+  await expect(panel.getByText('801', { exact: true })).toBeVisible();
+  expect(await page.locator('.hood-score').first().textContent()).toBe(score);
+});
+
 test('private dashboard saves and reopens after reload', async ({ page }) => {
   await mockApi(page);
   const rows: any[] = [];
