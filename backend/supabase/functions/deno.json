@@ -1,0 +1,12 @@
+{
+  "imports": {
+    "ai": "npm:ai@6.0.286",
+    "@openrouter/ai-sdk-provider": "npm:@openrouter/ai-sdk-provider@2.9.1",
+    "zod": "npm:zod@3.25.76"
+  },
+  "compilerOptions": { "strict": true },
+  "tasks": {
+    "check": "deno check _shared/report-models/mod.ts model-runtime-check/index.ts",
+    "test": "deno test --allow-env --allow-sys=hostname _shared/report-models/"
+  }
+}
