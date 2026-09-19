@@ -47,5 +47,50 @@ live, replace the mock with a fetch — no component should need to change.
 Every figure a candidate sees renders with a `source` line underneath. `source` is a
 required field on the types that carry figures so it cannot be dropped by accident.
 
+## Live neighborhood data
+
+The neighborhood section reads the **live** City of Houston layer documented in
+`../docs/api.md`: 88 Super Neighborhood profiles (median household income, median home
+value, median gross rent, centroids) from ACS 2020–2024.
+
+Copy `.env.example` to `.env.local` and fill in the publishable key:
+
+```sh
+cp .env.example .env.local
+# VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
+
+The key is a **publishable** application credential and is safe in browser code.
+`src/config.ts` refuses to start if an `sb_secret_` key is configured.
+
+Without the key the report still renders; the neighborhood section shows an explicit
+"data unavailable" state instead. Nothing is ever estimated in its place. That is
+deliberate: `null` renders as "Unavailable", dependent calculations are omitted, and
+values are never backfilled with zero.
+
+What is live vs. still mocked:
+
+| Live from the City layer | Still mocked |
+| --- | --- |
+| Neighborhood names, joined on `neighborhood_id` | Scores, commute times, flood tier, services, momentum |
+| `median_gross_rent`, `median_household_income`, `median_home_value` | The "why" prose and factor bars |
+| Map positions, from real centroids | Everything in the financial comparison |
+| The standing ratio (Houston pay ÷ median household income) | Lifestyle cards |
+
+`src/data/neighborhoodApi.ts` mirrors the backend client's contract: one request for all
+88 rows, shape validation, a 24-hour cache, coalesced concurrent requests, and no
+fallback to an expired cache after an error.
+
+### The map
+
+`src/components/NeighborhoodMap.tsx` plots all 88 neighborhoods from their real
+centroids, with the recommended three and the office picked out. Hovering or focusing a
+pin, a legend entry, or a neighborhood card raises all three together and shows that
+area's live figures.
+
+Equirectangular projection with a cosine correction for longitude. It is for relative
+placement only — not a navigational map, and centroids locate a neighborhood rather than
+a parcel.
+
 Coordinate contract changes through `../docs/api.md`. Keep server credentials out of
-browser code.
+browser code — the neighborhood layer uses a publishable key, never an admin key.

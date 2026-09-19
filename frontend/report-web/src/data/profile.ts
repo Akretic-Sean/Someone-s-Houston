@@ -63,6 +63,3 @@ Recruiter: Food-wise?
 Daniel: Vietnamese, Tex-Mex, and I'm picky about coffee. We go out for brunch on weekends.
 Recruiter: Travel?
 Daniel: I fly back to SF and to New York maybe twice a month. Nonstops matter. I also follow the NBA, and I'd try an Astros game.`;
-
-export const CONNECTOR_NAMES = ['Granola', 'Fireflies', 'Fathom', 'Zoom Notes'] as const;
-export type ConnectorName = (typeof CONNECTOR_NAMES)[number];
