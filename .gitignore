@@ -45,3 +45,7 @@ Thumbs.db
 
 # Agent-local settings
 .claude/settings.local.json
+
+# Machine-local connector configuration and downloaded source data
+/.mcp.json
+/backend/data/raw/
