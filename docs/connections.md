@@ -46,6 +46,8 @@ Copy `backend/.env.example` to `backend/.env` locally. Fill the project referenc
 
 Reference: [Supabase API keys](https://supabase.com/docs/guides/api/api-keys).
 
+When creating tables for the Data API, include explicit grants for the roles and operations the application needs, enable RLS, and add matching policies in the same migration. New projects no longer automatically grant access to new tables. Verify using the application's role/key as well as the privileged database connection. See [Supabase's updated table-access defaults](https://supabase.com/changelog/45329-breaking-change-tables-not-exposed-to-data-and-graphql-api-automatically).
+
 ## Agent connections
 
 Connect the Supabase integration in your coding environment using your own Supabase login. Once the project exists, confirm the project reference before database work.
