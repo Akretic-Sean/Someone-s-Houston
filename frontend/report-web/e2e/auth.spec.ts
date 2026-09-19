@@ -36,6 +36,7 @@ function scoringFixture() {
 }
 
 async function mockApi(page: Page, options: { failLogout?: boolean; expiredSession?: boolean } = {}) {
+  await page.route(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, route => route.abort());
   if (process.env.LIVE_MAP_TILES !== '1') await page.route('https://tile.openstreetmap.org/**', route => route.fulfill({ contentType: 'image/svg+xml', body: tileFixture }));
   const state = { scoringReads: 0, failLogout: options.failLogout ?? false };
   // Every Supabase request is intercepted: these tests never create users or send mail.
