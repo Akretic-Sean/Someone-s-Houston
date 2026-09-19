@@ -1,4 +1,4 @@
-import type { ScoringResult } from '../../../../shared/scoring.mjs';
+import type { BoundedScoringResult } from '../../../../shared/scoring-estimates.mjs';
 import type { ReportConfig } from '../App';
 import { Card, Segmented } from '../components/Bits';
 import { DEFAULT_WEIGHTS, OFFICES, WEIGHT_DEFS } from '../data/offices';
@@ -7,7 +7,7 @@ import PreferenceNotes from '../components/PreferenceNotes';
 export default function CreateReport({ config, onChange, result, loading, generating, extracting, onExtracting, error, onRetry, onGenerate, onFactual }: {
   config: ReportConfig;
   onChange: (next: ReportConfig) => void;
-  result: ScoringResult | null;
+  result: BoundedScoringResult | null;
   loading: boolean;
   generating: boolean;
   extracting: boolean;
@@ -37,7 +37,7 @@ export default function CreateReport({ config, onChange, result, loading, genera
               <span className="eyebrow">Housing</span>
               <Segmented label="Housing" value={config.tenure} onChange={tenure => onChange({ ...config, tenure })}
                 options={[{ id: 'rent', label: 'Rent' }, { id: 'buy', label: 'Buy' }]} />
-              <p className="source">Affordability compares ACS 2020–2024 {config.tenure === 'rent' ? 'median monthly gross rents' : 'median home values'}. It does not estimate your payment or budget.</p>
+              <p className="source">Affordability compares ACS 2020–2024 {config.tenure === 'rent' ? 'median monthly gross rents, with a labeled conservative input where the exact median is unavailable' : 'median home values'}. It does not estimate your payment or budget.</p>
             </div>
             <div className="field-row">
               <span className="eyebrow">Office hub</span>
@@ -77,7 +77,8 @@ export default function CreateReport({ config, onChange, result, loading, genera
       <div className="scoring-status" aria-live="polite">
         {totalWeight === 0 ? <p className="form-error" role="alert">Choose at least one priority above zero. Fully remote mode does not count commute.</p>
           : loading ? <p><span className="spinner" /> Loading current scoring evidence…</p>
-          : result ? <p><strong>{result.ranked.length} of {result.results.length} neighborhoods can be ranked.</strong> {result.unranked.length} have missing evidence for a selected priority and remain visible without a total score.</p> : null}
+          : result ? <p><strong>{result.ranked.length} of {result.results.length} neighborhoods can be ranked.</strong> {result.unranked.length > 0 ? `${result.unranked.length} have missing evidence for a selected priority and remain visible without a total score.` : 'All selected priorities are included.'}</p> : null}
+        {result && !loading && result.estimateInputsUsed.length > 0 && <p className="source">{result.estimateInputsUsed.length} neighborhoods include conservative source-derived estimates. Their ranges and sources appear in the report; original missing observations remain unknown.</p>}
         {error && <div role="alert"><p className="form-error">{error}</p><button type="button" className="btn" onClick={onRetry}>Retry data connection</button></div>}
         {result && !loading && totalWeight > 0 && <p className="source">Current leaders: {result.ranked.slice(0, 3).map(row => row.name).join(' · ') || 'None with complete selected evidence'}. Changing priorities recalculates locally.</p>}
       </div>

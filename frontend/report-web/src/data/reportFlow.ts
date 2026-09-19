@@ -1,4 +1,5 @@
-import { validateScoringPayload, type ScoringPayload, type ScoringOptions } from '../../../../shared/scoring.mjs';
+import type { ScoringOptions } from '../../../../shared/scoring.mjs';
+import { validateBoundedScoringPayload, type BoundedScoringPayload } from '../../../../shared/scoring-estimates.mjs';
 import { supabase } from '../lib/supabase';
 import type { CandidateProfile } from '../types';
 
@@ -8,7 +9,7 @@ export interface Narrative {
   status: 'generated' | 'degraded'; text: string | null; expiresAt: string;
   facts: Array<{ id: string; label: string; value: string; source: string }>;
 }
-export interface GeneratedReport { payload: ScoringPayload; generatedAt: string; narrative: Narrative }
+export interface GeneratedReport { payload: BoundedScoringPayload; generatedAt: string; narrative: Narrative }
 const messages: Record<string, string> = {
   sign_in_required: 'Please sign in again to continue.',
   invalid_input: 'Review your notes and priorities, then try again.',
@@ -41,8 +42,8 @@ export async function extractProfile(transcript: string, answers: CandidateProfi
   return result;
 }
 export async function generateAiReport(options: ScoringOptions, preferences: CandidateProfile): Promise<GeneratedReport> {
-  const result = await invoke({ action: 'generate', requestId: crypto.randomUUID(), options, preferences }) as GeneratedReport;
-  validateScoringPayload(result?.payload);
+  const result = await invoke({ action: 'generate', scoringPolicy: 'source-bounded-v1', requestId: crypto.randomUUID(), options, preferences }) as GeneratedReport;
+  validateBoundedScoringPayload(result?.payload);
   if (!result.narrative || !['generated', 'degraded'].includes(result.narrative.status)
     || !Number.isFinite(Date.parse(result.narrative.expiresAt))
     || (result.narrative.text !== null && typeof result.narrative.text !== 'string')

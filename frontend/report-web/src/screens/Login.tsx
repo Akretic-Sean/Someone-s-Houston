@@ -47,10 +47,20 @@ export default function Login() {
     } finally { pending.current = false; setBusy(false); }
   }
 
+  function switchMode(next: boolean) {
+    if (pending.current) return;
+    setCreating(next); setError(''); setPassword('');
+  }
+
   return <div className="login-wrap"><div className="login-card">
     <span className="login-pin" aria-hidden="true">📍</span>
-    <h1 className="login-title">Someone&apos;s Houston</h1>
-    <p className="login-sub">{creating ? 'Create your account. Find your Houston.' : 'Your Houston starts here.'}</p>
+    <p className="login-brand">Someone&apos;s Houston</p>
+    <div className="login-modes" role="group" aria-label="Account access">
+      <button type="button" aria-label="Use existing account" aria-pressed={!creating} disabled={busy} onClick={() => switchMode(false)}>Sign in</button>
+      <button type="button" aria-label="Create a new account" aria-pressed={creating} disabled={busy} onClick={() => switchMode(true)}>Create account</button>
+    </div>
+    <h1 className="login-title">{creating ? 'Create your account' : 'Welcome back'}</h1>
+    <p className="login-sub">{creating ? 'Choose a new username and password to get started. No email required.' : 'Sign in with the username and password you already created.'}</p>
     <form onSubmit={submit} className="login-form">
       <label className="login-label">Username
         <input type="text" required autoComplete="username" autoCapitalize="none" spellCheck={false}
@@ -67,9 +77,7 @@ export default function Login() {
         {busy ? (creating ? 'Creating account…' : 'Signing in…') : creating ? 'Create account' : 'Sign in'}
       </button>
     </form>
-    <button type="button" className="login-switch" disabled={busy} onClick={() => {
-      setCreating(!creating); setError(''); setPassword('');
-    }}>{creating ? 'Already have an account? Sign in' : 'New here? Create account'}</button>
+    <button type="button" className="login-switch" disabled={busy} onClick={() => switchMode(!creating)}>{creating ? 'Already have an account? Sign in' : 'New here? Create account'}</button>
     {error && <p className="login-error" role="alert">{error}</p>}
   </div></div>;
 }

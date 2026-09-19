@@ -13,6 +13,14 @@ confirmed Supabase user session (`Authorization: Bearer <user JWT>`) and the
 project's publishable key in `apikey`. Gateway JWT checking and a live Auth user
 lookup both apply. Anonymous accounts and operator API keys are not user sessions.
 
+- New frontend generation requests include `scoringPolicy: "source-bounded-v1"`.
+  The server reads `get_neighborhood_scoring_data_with_estimates` and uses
+  `scoreNeighborhoodsWithEstimates`, matching the frontend preview. In this mode,
+  response `payload` is the complete `{schema_version, policy_version, base,
+  estimates}` envelope. Original missing observations remain null. Narration
+  validity is bounded by every used estimate deadline, not just base evidence.
+  Generation requests omitting the policy retain the existing strict payload
+  and scorer for compatibility; extraction is unchanged.
 - Extraction body: `{ action: "extract", requestId: "<UUID>", input: {
   transcript: "<up to 24,000 characters>", answers: { office: "Midtown" } } }`.
   `answers` allows the existing twelve CandidateProfile keys, each at most 500

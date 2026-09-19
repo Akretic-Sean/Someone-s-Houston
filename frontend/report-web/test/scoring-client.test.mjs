@@ -6,7 +6,7 @@ import { CATEGORY_IDS, DEFAULT_WEIGHTS } from '../../../shared/scoring.mjs';
 const URL = 'https://hknzivrgihnqzvsafkkr.supabase.co';
 const KEY = 'sb_publishable_test_key_not_a_real_key';
 const START = Date.parse('2026-09-19T20:00:00Z');
-function snapshot(due = START + 86_400_000) {
+function baseSnapshot(due = START + 86_400_000) {
   const metrics = {
     afford: { rent_usd: 1300, home_value_usd: 200000 },
     commute: { ion: 1000, downtown: 2000, energy: 3000, tmc: 4000, nasa: 5000 },
@@ -29,11 +29,13 @@ function snapshot(due = START + 86_400_000) {
   };
 }
 
+function snapshot(due) { return { schema_version: 1, policy_version: 'source-bounded-v1', base: baseSnapshot(due), estimates: [] }; }
+
 test('coalesces concurrent reads, caches for one hour from fetch, and isolates callers', async () => {
   let calls = 0, time = START;
   const client = createScoringClient({ url: URL, key: KEY, now: () => time, fetchImpl: async (url, options) => {
     calls++;
-    assert.equal(url, `${URL}/rest/v1/rpc/get_neighborhood_scoring_data`);
+    assert.equal(url, `${URL}/rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`);
     assert.equal(options.method, 'POST');
     assert.equal(options.body, '{}');
     assert.equal(options.redirect, 'error');
@@ -43,10 +45,10 @@ test('coalesces concurrent reads, caches for one hour from fetch, and isolates c
   } });
   const [first, second] = await Promise.all([client.load(), client.load()]);
   assert.equal(calls, 1);
-  first.neighborhoods[0].name = 'mutated';
-  assert.equal(second.neighborhoods[0].name, 'Neighborhood 1');
+  first.base.neighborhoods[0].name = 'mutated';
+  assert.equal(second.base.neighborhoods[0].name, 'Neighborhood 1');
   time += 3_599_000;
-  assert.equal((await client.load()).neighborhoods[0].name, 'Neighborhood 1');
+  assert.equal((await client.load()).base.neighborhoods[0].name, 'Neighborhood 1');
   assert.equal(client.nextRefreshAt(), START + 3_600_000);
   assert.equal(calls, 1);
   time += 1000;
@@ -58,7 +60,7 @@ test('an earlier source deadline expires the cache and an outage never falls bac
   let time = START, fail = false, calls = 0;
   const client = createScoringClient({ url: URL, key: KEY, now: () => time, fetchImpl: async () => {
     calls++;
-    return fail ? new Response('', { status: 503 }) : Response.json(snapshot(START + 1000));
+    return fail ? new Response('', { status: 503 }) : Response.json(snapshot(time + 1000));
   } });
   await client.load();
   assert.equal(client.nextRefreshAt(), START + 1000);
@@ -77,7 +79,7 @@ test('rejects secret keys, wrong projects, and partial cohorts before caching', 
   await assert.rejects(createScoringClient({ url: URL, key: 'sb_secret_not_for_browsers', fetchImpl }).load(), /publishable/);
   await assert.rejects(createScoringClient({ url: 'https://other.example', key: KEY, fetchImpl }).load(), /project URL/);
   assert.equal(calls, 0);
-  const partial = snapshot(); partial.neighborhoods.pop();
+  const partial = snapshot(); partial.base.neighborhoods.pop();
   const client = createScoringClient({ url: URL, key: KEY, fetchImpl: async () => Response.json(partial) });
   await assert.rejects(client.load(), /88-neighborhood/);
   assert.equal(client.nextRefreshAt(), null);
@@ -96,6 +98,30 @@ test('bounded reads measure bytes, cancel streaming overflow and reject invalid 
 test('expiry selection ignores already expired rows to avoid a retry loop', () => {
   const payload = snapshot(START - 1);
   assert.equal(nextScoringDeadline(payload, START), null);
-  payload.neighborhoods[0].categories.afford.refresh_due_at = new Date(START + 5000).toISOString();
+  payload.base.neighborhoods[0].categories.afford.refresh_due_at = new Date(START + 5000).toISOString();
   assert.equal(nextScoringDeadline(payload, START), START + 5000);
+});
+
+test('estimate expiry bounds the cache; malformed envelopes and failed refreshes fail closed', async () => {
+  const body = snapshot();
+  body.base.neighborhoods[6].categories.afford.metrics.rent_usd = null;
+  body.estimates = [{ neighborhood_id: 7, category_id: 'afford', metric: 'rent_usd',
+    lower_bound: 1500, upper_bound: 1999, ranking_value: 1999, method: 'conservative_upper_bound',
+    source_url: 'https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/6-Gross-Rent-2024.pdf',
+    source_period: 'ACS 2020-2024', source_checked_at: new Date(START - 1000).toISOString(),
+    refresh_due_at: new Date(START + 1000).toISOString(), source_sha256: 'a'.repeat(64),
+    boundary_version: 'coh-sn-boundaries-' + 'a'.repeat(16), base_evidence_version: 'test-evidence-1',
+    audit: {}, limitation: 'Exact median suppressed; upper band endpoint only.' }];
+  let time = START, fail = false;
+  const client = createScoringClient({ url: URL, key: KEY, now: () => time,
+    fetchImpl: async () => fail ? new Response('', { status: 503 }) : Response.json(body) });
+  const loaded = await client.load();
+  assert.equal(loaded.base.neighborhoods[6].categories.afford.metrics.rent_usd, null);
+  assert.equal(loaded.estimates.length, 1);
+  assert.equal(client.nextRefreshAt(), START + 1000);
+  time += 1000; fail = true;
+  await assert.rejects(client.load(), /503/);
+  assert.equal(client.nextRefreshAt(), null);
+  fail = false; body.estimates[0].ranking_value = 1700;
+  await assert.rejects(client.load(), /malformed estimate/);
 });

@@ -22,12 +22,12 @@ The current production Site URL/redirect in Supabase is
 `https://someones-houston.vercel.app/`. Update Authentication → URL Configuration
 if that primary address changes. The project API URL and key stay the same.
 
-This release keeps the frontend and AI endpoint on the same existing strict
-scoring RPC/model. PR #14's additional source-bounded, all-88 ranking is a
-separate integration: when adopting it, update both the frontend and
-`report-flow` to carry the complete estimates envelope and disclose its bounds.
-Do not combine an estimated frontend ranking with an explanation of the strict
-server ranking. See [the all-88 integration guide](all-88-frontend-guide.md).
+The frontend and AI endpoint now use the same source-bounded all-88 model.
+Preview, factual reports and AI generation retain every selected priority,
+carry the complete estimates envelope, and disclose conservative bounds.
+The AI request opts in with `scoringPolicy: source-bounded-v1`; existing clients
+without that field keep the strict response. Expired or superseded inputs
+remain unranked. See [the all-88 integration guide](all-88-frontend-guide.md).
 
 ## Username login for the hackathon
 
@@ -49,7 +49,7 @@ results are recorded in the release PR.
 3. Deploy the `report-flow` Edge Function with `verify_jwt=true`. Bundle the
    entire function folder, `_shared/report-models`, `functions/deno.json`,
    `functions/deno.lock`, and the repository's `shared/scoring.mjs` and
-   `shared/scoring.d.mts`, preserving their repository-relative paths. Deploy
+   `shared/scoring.d.mts`, plus `shared/scoring-estimates.mjs` and its `.d.mts`, preserving their repository-relative paths. Deploy
    before the frontend; the endpoint does not alter existing report reads.
 4. Keep existing Edge secrets `OPENROUTER_API_KEY`,
    `OPENROUTER_EXTRACTION_MODELS`, and `OPENROUTER_NARRATION_MODELS`.

@@ -1,5 +1,10 @@
 # Claude walkthrough: all 88 with all priorities retained
 
+The report frontend now uses this envelope for previews and factual reports.
+AI generation opts into the same policy through `report-flow` using
+`scoringPolicy: "source-bounded-v1"`; old requests remain strict for compatibility.
+Both paths display the source bounds separately from original evidence.
+
 This replaces the rejected category-exclusion approach. The `scoring-coverage` wrapper has been removed from PR #14. **Do not exclude affordability or flood from everyone.**
 
 ## What fills the six ranking gaps

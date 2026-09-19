@@ -6,6 +6,9 @@ import {
   DEFAULT_WEIGHTS,
   MODEL_VERSION,
 } from "../../../../shared/scoring.mjs";
+// @deno-types="../../../../shared/scoring-estimates.d.mts"
+import { scoreNeighborhoodsWithEstimates } from "../../../../shared/scoring-estimates.mjs";
+import type { ScoringOptions } from "../../../../shared/scoring.d.mts";
 function assert(value: unknown, message = "Assertion failed"): asserts value {
   if (!value) throw new Error(message);
 }
@@ -240,4 +243,100 @@ Deno.test("extraction authenticates and reserves usage without reading public sc
   assert(response.status === 200);
   assert((await response.json()).data.fields.office.value === "Midtown");
   assert(calls.reserved === 1 && calls.model === 1 && calls.loaded === 0);
+});
+
+function boundedFixture() {
+  const base = fixture();
+  const estimates = [7, 17, 25, 41, 43, 80].map((id) => {
+    const rent = id === 7;
+    const category = rent ? "afford" : "flood";
+    const metric = rent ? "rent_usd" : "sfha_area_pct";
+    (base.neighborhoods[id - 1].categories[category].metrics as Record<string, number | null>)[metric] = null;
+    return {
+      neighborhood_id: id,
+      category_id: category,
+      metric,
+      lower_bound: rent ? 1500 : 10,
+      upper_bound: rent ? 1999 : 11,
+      ranking_value: rent ? 1999 : 11,
+      method: "conservative_upper_bound",
+      source_url: rent
+        ? "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/6-Gross-Rent-2024.pdf"
+        : "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      source_period: "Synthetic test",
+      source_checked_at: new Date(time - 1000).toISOString(),
+      refresh_due_at: new Date(time + 1000).toISOString(),
+      source_sha256: "a".repeat(64),
+      boundary_version: "coh-sn-boundaries-" + "a".repeat(16),
+      base_evidence_version: "test",
+      audit: {},
+      limitation:
+        "Synthetic conservative upper bound, not an exact observation.",
+    };
+  });
+  return {
+    schema_version: 1,
+    policy_version: "source-bounded-v1",
+    base,
+    estimates,
+  };
+}
+Deno.test("bounded-policy reports preserve all 88, original nulls, client parity and estimate deadlines", async () => {
+  const envelope = boundedFixture();
+  let boundedRead = false;
+  const { send } = setup({
+    loadScoring: async (_token, bounded) => {
+      boundedRead = bounded;
+      return envelope;
+    },
+  });
+  for (const tenure of ["rent", "buy"] as const) {
+    for (const mode of ["offer", "remote"] as const) {
+      const options = { ...generate.options, tenure, mode } as ScoringOptions;
+      const response = await send({
+        ...generate,
+        scoringPolicy: "source-bounded-v1",
+        options,
+      });
+      assert(response.status === 200 && boundedRead);
+      const body = await response.json();
+      const browserResult = scoreNeighborhoodsWithEstimates(
+        body.payload,
+        options,
+        time,
+      );
+      assert(browserResult.ranked.length === 88);
+      assert(
+        browserResult.estimateInputsUsed.length === (tenure === "rent" ? 6 : 5),
+      );
+      assert(
+        body.payload.base.neighborhoods[6].categories.afford.metrics
+          .rent_usd === null,
+      );
+      assert(body.narrative.text.includes(browserResult.ranked[0].name));
+      assert(
+        body.narrative.facts[0].source.includes("conservative source-derived"),
+      );
+      assert(Date.parse(body.narrative.expiresAt) === time + 1000);
+    }
+  }
+});
+Deno.test("invalid bounded data fails before quota/model; expiry during narration withholds the report", async () => {
+  const bad = boundedFixture();
+  bad.estimates[0].ranking_value = 1700;
+  const failed = setup({ loadScoring: async () => bad });
+  assert(
+    (await failed.send({ ...generate, scoringPolicy: "source-bounded-v1" }))
+      .status === 503,
+  );
+  assert(failed.calls.model === 0 && failed.calls.reserved === 0);
+  let reads = 0;
+  const expired = setup({
+    loadScoring: async () => boundedFixture(),
+    now: () => ++reads > 3 ? time + 1001 : time,
+  });
+  assert(
+    (await expired.send({ ...generate, scoringPolicy: "source-bounded-v1" }))
+      .status === 409,
+  );
 });

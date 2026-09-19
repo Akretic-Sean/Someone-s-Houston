@@ -14,6 +14,14 @@ Narrow the task by appending “Connect only [scoring / map / evidence cards / f
 
 **Implemented:** public profiles for 88 neighborhoods, boundaries, eight facility inventories, current weather/gauges, detailed eight-category evidence, a compact scoring-data RPC and a deterministic relative ranking model. The P0 frontend generates its ranked report in the current session and can recompute from cached data.
 
+**All-88 report UI:** preview, factual generation and AI generation use the complete
+`get_neighborhood_scoring_data_with_estimates` envelope and shared
+`scoreNeighborhoodsWithEstimates`. The six affected areas show conservative-input
+badges, source ranges and links; missing observations remain null. Cached results
+expire on base or estimate deadlines. The AI request includes
+`scoringPolicy: "source-bounded-v1"`; do not feed its bounded payload into the old
+strict scorer. See [all-88 integration](all-88-frontend-guide.md).
+
 **AI flow:** `report-flow` authenticates confirmed users, extracts optional notes for review, loads authoritative evidence and computes rankings server-side, then produces a validated explanation. Reuse `src/data/reportFlow.ts`. Notes never silently change the ranking controls. A factual report remains available when AI fails. See [hackathon release instructions](hackathon-release.md) and the [API contract](api.md#authenticated-ai-report-flow).
 
 **Not implemented:** stored/shared reports, private candidate tables and ownership rules, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery or safety tiers. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
