@@ -1,118 +1,109 @@
 # Connect frontend features to the live backend
 
-This is the entry point for a teammate's Claude/agent. PR #6 supplies the backend contract, clients and instructions; its Supabase migration and data are already deployed. Work from a checkout containing this document. After the PR merges, pull current main into the teammate's normal feature branch without discarding their changes. Before it merges, integrate the PR's backend/docs changes locally according to the team's branch workflow. Do not merge unrelated remote PRs automatically.
+Start here for teammate/Claude integration. Read `CLAUDE.md`, [the API contract](api.md) and [the scoring method](scoring-matrix.md). Pull the current shared branch into your normal feature branch without discarding changes. Reuse the existing frontend data and authentication layers; do not merge unrelated PRs automatically.
 
 ## Copy-paste task
 
-> Connect the frontend features I request to the existing Supabase backend. Read CLAUDE.md and docs/frontend-backend-handoff.md first, then follow docs/api.md. Inspect the current branch and reuse its data loaders, map and authentication. Implement the connections for the screens present in this checkout; preserve the UI and teammate changes. Use the configured publishable key, canonical neighborhood IDs and documented read APIs. Add the eight-category evidence layer, source labels, loading/error/partial/expired states and caching. Keep unsupported scores, safety tiers, financial calculations and route minutes unavailable; never fill them from mocks. Run the connection preflight and frontend build, verify the acceptance cases in the handoff, and report what is connected and what remains unsupported. Ask for configuration only if the publishable key is missing; do not create a new project, require MCP for browser reads, or use admin credentials.
+> Connect the frontend features I request to the existing Supabase backend. Read CLAUDE.md, docs/frontend-backend-handoff.md and docs/api.md first. Preserve teammate changes and the existing login flow. For neighborhood ranking, load get_neighborhood_scoring_data once and use the shared scoreNeighborhoods implementation in shared/scoring.mjs; do not invent another formula or use mock scores. Bind rent/buy, office, airport, weights and remote mode to that function. Load detailed evidence only for selected IDs, and retain source dates, missing values and expiry handling. Keep route minutes, safety tiers, taxes and unsupported personal financial claims unavailable. Reports are in-session only; do not claim they were saved, shared or delivered. Run the connection preflight, scoring tests and frontend build, verify the acceptance cases in this handoff, and report what actually passed. Ask for configuration only if the publishable key is missing; do not create a new project or use admin credentials.
 
-To scope it narrowly, append: “For this change, connect only [map / housing / neighborhood evidence cards / facilities / current alerts].” These are independently usable reads; there is no requirement to build every section together.
+Narrow the task by appending “Connect only [scoring / map / evidence cards / facilities / current alerts].” These reads do not require a custom API server or an agent MCP installation.
 
-## Ready now versus remaining backend work
+## Ready now versus remaining work
 
-**Ready:** public neighborhood profiles, canonical map boundaries, eight facility inventories, operational weather/gauges, and evidence for the eight screenshot categories. The browser calls Supabase directly. No custom API server, edge-function deployment, ingestion run, database migration or MCP installation is needed to consume these reads.
+**Implemented:** public profiles for 88 neighborhoods, boundaries, eight facility inventories, current weather/gauges, detailed eight-category evidence, a compact scoring-data RPC and a deterministic relative ranking model. The P0 frontend generates its ranked report in the current session and can recompute from cached data.
 
-**Not implemented:** the proposed `/reports` service, candidate extraction, persistence/sharing of generated reports, scoring/ranking, actual travel-time routing, taxes/take-home comparison, lead delivery and safety tiers. Public data access does not grant permission to store candidate details in public tables. Preserve the frontend's existing login flow and keep private-data work separate.
+**Not implemented:** stored/shared reports, private candidate tables and ownership rules, candidate extraction, driving/transit times, tax/take-home calculations, personal salary standing, lead delivery, safety tiers or LLM-written recommendations. Existing public-read policies must never be reused for candidate data. An app login does not by itself authorize private report access.
 
 ## Configuration and first check
 
-Use the existing project's values in the **ignored** `frontend/report-web/.env.local` (or reuse that app's existing env setup):
+Use ignored `frontend/report-web/.env.local` (or the app's existing env setup):
 
 ```dotenv
 VITE_SUPABASE_URL=https://hknzivrgihnqzvsafkkr.supabase.co
 VITE_SUPABASE_PUBLISHABLE_KEY=<the project's sb_publishable_ key>
 ```
 
-The key is a browser application credential. Obtain it from existing local configuration, the project owner, or Supabase Dashboard → Project Settings → API Keys. Use a literal value and never substitute `sb_secret_`/service-role credentials. Do not put the real env file or keys in Git, prompts or logs. If the teammate has no key yet, this is the only required access handoff; Supabase organization membership and developer MCP OAuth are not required for these public reads.
+Obtain the publishable key from existing local configuration, the project owner, or Dashboard → Project Settings → API Keys. It is a browser credential, not an admin key. Never use `sb_secret_`/service-role credentials or commit/log real env files and keys. Supabase organization membership and developer MCP OAuth are unnecessary for these reads.
 
-From repository root:
-
-Use Node.js **22.12+**, or the tested **24.14.1**. This covers both the backend check and the frontend build requirements.
+Use Node.js **22.12+** (tested environment: 24.14.1). From repository root:
 
 ```sh
 npm --prefix backend ci --ignore-scripts
+npm --prefix backend test
 npm --prefix backend run test:frontend
 npm --prefix frontend/report-web ci
+npm --prefix frontend/report-web test
+npm --prefix frontend/report-web run build
 npm --prefix frontend/report-web run dev
 ```
 
-The preflight reads Vite's development env files in order (`.env`, `.env.local`, `.env.development`, `.env.development.local`) then process variables; it does not silently borrow backend configuration. Literal values are required; variable expansion is not simulated. It validates five data surfaces, map/profile IDs, browser CORS preflight, source-backed evidence and important null values without printing keys or writing to the database.
+The preflight reads the frontend's development env files in Vite order, then process variables; it does not silently borrow backend configuration. Use literal env values; variable expansion is not simulated. It checks public responses, canonical IDs, CORS and important unknowns without writes or key logging. For production-mode local configuration, append `-- --mode production` to `test:frontend`.
 
-For a local production-mode check: `npm --prefix backend run test:frontend -- --mode production`. Configure the same two variables in the deployment's **frontend build environment**, then rebuild/redeploy. Vite captures them at build time; changing an env file requires restarting the dev server. A local check does not verify the deployed host's settings.
+Set the same two variables in the deployment's **frontend build environment**, then rebuild/redeploy; Vite captures them at build time. A local preflight/build is not proof of deployed configuration or rendered UI behavior. Backend maintainers may run `npm run test:frontend -- --env-file .env` from `backend/`, but that explicitly tests backend env credentials rather than the frontend/deployment configuration.
 
-Backend maintainers can explicitly test an existing backend env file with `npm run test:frontend -- --env-file .env` from `backend/`. That tests the API using that file and explicitly does **not** certify the frontend/deployment configuration.
+## Reads and caching
 
-## Read APIs to choose from
+All requests use the base URL above and `apikey: <publishable key>`; POST also needs `Content-Type: application/json`. Do not put a publishable key in a user bearer-token header. An existing Supabase JS client can call the same RPCs with its normal session handling. Anonymous and authenticated public reads are supported.
 
-Base URL is above. Raw fetch needs `apikey: <publishable key>`; POST also needs `Content-Type: application/json`. Do not use a publishable key as a user bearer JWT. An existing Supabase JS client may call the same RPCs and manage the signed-in user's token normally. Public reference reads support both anonymous and authenticated users.
-
-| UI need | Request | Returned shape / caching |
+| UI need | Request | Cache / interpretation |
 | --- | --- | --- |
-| Neighborhood selector, rent/value facts | `GET /rest/v1/neighborhood_profiles?select=*&order=neighborhood_id.asc&limit=88` | Array of all 88 profiles. Cache 24 hours; filter/select locally. |
-| Real boundary map | `POST /rest/v1/rpc/get_neighborhood_map`, `{}` | GeoJSON FeatureCollection with 88 polygons; join by `properties.neighborhood_id`. Cache 24 hours. |
-| Selected-neighborhood evidence/cards | `POST /rest/v1/rpc/get_neighborhood_evidence`, `{"p_neighborhood_id":62}` | Object with `category_definitions`, `safety`, and one item in `neighborhoods`. Cache ≤1 hour per ID. |
-| Facilities/markers | `POST /rest/v1/rpc/get_neighborhood_places`, `{"p_neighborhood_id":62,"p_category":null}` | GeoJSON points plus source manifests. Cache ≤1 hour. Optional category uses the eight **facility** IDs in docs/api.md. |
-| Current weather/gauges | `POST /rest/v1/rpc/get_current_context`, `{"p_neighborhood_id":62}` or `{}` | Object with `feeds`. Fetch only when needed, no more often than every five minutes while visible; recheck all expiry times. |
+| Whole-cohort ranking | `POST /rest/v1/rpc/get_neighborhood_scoring_data`, `{}` | All 88 rows, approximately 152 kB. Cache ≤1 hour and respect expiry; recalculate locally. |
+| Profiles / housing facts | `GET /rest/v1/neighborhood_profiles?select=*&order=neighborhood_id.asc&limit=88` | Array of 88 profiles; cache 24 hours. |
+| Boundary map | `POST /rest/v1/rpc/get_neighborhood_map`, `{}` | GeoJSON with 88 boundaries; cache 24 hours and join by `properties.neighborhood_id`. |
+| Detailed selected evidence | `POST /rest/v1/rpc/get_neighborhood_evidence`, `{"p_neighborhood_id":62}` | Object; read `neighborhoods[0]`, verify its ID. Cache ≤1 hour per ID. |
+| Facility markers | `POST /rest/v1/rpc/get_neighborhood_places`, `{"p_neighborhood_id":62,"p_category":null}` | GeoJSON plus source manifests; cache ≤1 hour. |
+| Weather/gauges | `POST /rest/v1/rpc/get_current_context`, `{"p_neighborhood_id":62}` or `{}` | Check feed and feature expiry. Fetch only while needed, no more often than every five minutes. |
 
-All RPCs are reads despite using POST. Inputs are named `p_neighborhood_id`; MCP tools use `neighborhood_id` instead. Evidence is **not** a profile array and is **not** the proposed `Report` object. Use `payload.neighborhoods[0]` for a single ID and check that its ID matches the request. The [captured evidence example](examples/neighborhood-evidence.example.json) shows the actual complete shape; it is documentation, never a runtime fallback.
+All RPCs are reads. REST uses `p_neighborhood_id`; local MCP tools use `neighborhood_id`. Integer IDs 1–88 are canonical. Evidence is not a profile array or a stored `Report` object. The [captured Midtown evidence](examples/neighborhood-evidence.example.json) is documentation, never a runtime fallback. Do not load the roughly 4 MB all-neighborhood detailed evidence response on every visitor or slider change.
 
-Load profiles/map once, then evidence only for unique selected IDs. Three current example picks use IDs 62, 15, 24; these are a demo shortlist, not algorithmic recommendations. Keep canonical integer IDs alongside any UI string/slugs. API support for all 88 evidence records exists, but its roughly 4 MB response should not be fetched on every slider change. Input priority changes operate locally on cached data; they do not make a scoring engine exist.
+## Ranking and screen mapping
 
-## Field-to-screen mapping
+Use `shared/scoring.mjs` and `shared/scoring.d.mts` as the single implementation/contract. The compact RPC's numeric fields are listed in [the API contract](api.md#scoring-data-and-local-ranking). `scoreNeighborhoods` accepts all eight weights, `tenure`, `mode`, `office` and `airport`, and returns `ranked`, `unranked`, effective weights and each category's score/contribution/measurements/reason.
 
-Let `neighborhood = payload.neighborhoods[0]`, `category = neighborhood.categories[id]`, and `facts = category.facts`. Before using facts, require `availability` to be `partial` or `reference_snapshot`, non-null facts and a future `refresh_due_at`. A partial category can still contain null individual measurements. Preserve its `sources`, `missing_inputs` and `limitations` next to the displayed values.
+- Bind **Generate report** to that computation and use its real `ranked` shortlist, not IDs from `MOCK_REPORT`. Explanations come from measured factors and selected priorities.
+- Input weights are 0–10 with defaults 8/7/6/5/7/8/6/7. Reject all-zero effective weights. Remote mode disables commute and renormalizes globally; show the effective weights.
+- Rent/buy selects the matching housing estimate. Office IDs are `ion`, `downtown`, `energy`, `tmc`, `nasa`. Airport is `iah`, `hou` or `nearest`.
+- A positive-weight category with missing/expired data makes that neighborhood unranked. Preserve its status; never change weights per neighborhood or replace missing with zero.
+- Labels must describe the measurements: employment-hub/airport **proximity**, **grocery access** (dining not covered), and mapped flood **area share**. Do not display route minutes, flood/safety tiers or probability claims.
+- Affordability is relative estimated housing cost. It is not a candidate budget, mortgage payment, personal salary standing or take-home calculation.
+- Retain full precision during ranking. Scores are provisional 0–100 comparisons within this cohort, not independent ratings or guarantees.
 
-| Category ID / UI | Exact facts to use | Correct display / what stays unavailable |
-| --- | --- | --- |
-| `afford` / housing | `median_gross_rent_monthly_usd`, `median_home_value_usd`, `housing_stock.structure_counts`, `housing_stock.bedroom_counts`, `housing_stock.year_built_counts`, `housing_stock.shares_pct` | “Estimated median monthly gross rent / home value · ACS 2020–2024.” Format USD. Do not turn home value into a mortgage payment or multiply separate housing shares into combined listing counts. |
-| `commute` / selected office | `destinations.find(d => d.id === selectedOfficeId)`; its `straight_line_meters`, `drive_time_minutes`, `label`, `address`, `coordinates`, `note` | Match `ion`, `downtown`, `energy`, `tmc`, `nasa`. Label distance “straight-line from neighborhood reference point.” Minutes remain null; never divide distance by an assumed speed. |
-| `flood` / mapped context | `availability` inside facts, `sfha_area_pct`, `annual_0_2_pct_area_pct`, `floodway_area_pct`, coverage fields, panel dates, `flags`, `definitions` | Require inner `availability === 'reference_summary'` and non-null values to display exposure shares. The 0.2% band excludes SFHA; floodway is already inside SFHA. No conversion to Clear/Caution/Avoid or a home-specific probability. |
-| `amen` / nearby facilities | `inventories.libraries`, `.museums`, `.community_centers`, `.multi_service_centers` | Per-category counts and named nearby records, with source. Do not add overlapping categories into a claimed unique-site total. |
-| `fit` / recreation | `inventories.parks`, `.community_centers` | Parks/centers only. Gym/trail coverage, entrances and walkability remain unavailable. |
-| `food` / grocery | `inventories.grocery_stores` | Label “SNAP-authorized grocery inventory.” Dining is missing; do not invent restaurants or dietary suitability. |
-| `air` / airport access | `destinations.find(d => d.id === selectedAirportId)`, where the ID is `iah` or `hou` | Airport proxy and straight-line distance. No drive minutes, current flights or noise score. |
-| `health` / healthcare | `inventories.hospitals`, `.health_facilities`, `.multi_service_centers` | Facility locations, not insurance acceptance, available appointments or quality. |
+The detailed evidence API intentionally retains null scores: it is a facts/provenance endpoint without user preferences. Separately calculated shared-model scores are now supported. Never cast the evidence object to an old mock report type to conceal a schema mismatch.
 
-Each inventory has `record_count_in_neighborhood` and `nearest_to_reference_point` (up to three records). Nearest records include `place_id`, `name`, `address`, `latitude`, `longitude`, `straight_line_meters`, `inside_neighborhood`, `source_id`, `location_method`. They may lie outside the selected neighborhood. Distances reference its center, not the candidate's address. Keep zero inventory records distinct from missing/null coverage.
+For selected cards, use `neighborhood.categories[id]` only when availability is `partial` or `reference_snapshot`, facts are non-null and `refresh_due_at` is future. Display `sources`, `limitations` and missing inputs alongside facts. Housing facts use `median_gross_rent_monthly_usd` and `median_home_value_usd`. Inventories provide counts and up to three `nearest_to_reference_point` records. Grocery details are in `food.inventories.grocery_stores`, not the old facility RPC's supported categories. Offices/airports are in `destinations`; map their actual evidence coordinates when showing their distances.
 
-When an office/airport marker accompanies an evidence distance, use that evidence destination's `coordinates`, not an old frontend constant. PR #7's hardcoded office points differ from the sourced proxies (including Ion and Energy Corridor). Preserve the existing office IDs/labels while aligning markers with the point actually used for the displayed distance.
+GeoJSON is longitude,latitude; Leaflet markers are latitude,longitude. Facility category overlap means summed records are not unique-site totals. Nearest records can lie outside the selected neighborhood. Distances use reference points rather than the candidate's address. Flood IDs 17,25,41,43,80 have withheld shares; Hidden Valley (7) has no rent estimate. Safety remains unavailable and outside the weighted model.
 
-Use `payload.category_definitions` for labels/default weights or the existing matching frontend definitions. Default raw weights are 8/7/6/5/7/8/6/7 (total 54), matching displayed 15/13/11/9/13/15/11/13%. Normalize nonnegative weights only when their sum is positive; if all sliders are zero, ask the user to choose a priority. This is a preference display, not a scoring formula. Category scores and `payload.safety.tier` are null.
+## Integration boundaries
 
-## Extend the current frontend instead of rebuilding it
+Extend `frontend/report-web` rather than replacing the app. Reuse its env configuration, loading/retry conventions, map selection behavior and any existing auth client/session lifecycle. Do not overwrite another branch's auth work while merging the scoring change. Public reference reads do not require removal of an existing login gate.
 
-Checked on 2026-09-19: PR #7 `feat/live-neighborhood-data` and PR #9 `feat/report-web-login` are open and not yet in main. Inspect the current checkout because paths may change after merging. The items below describe integration points, not permission to merge those PRs remotely.
+Current P0 integration points:
 
-| Existing area | Integration action |
+| File within `frontend/report-web` | Responsibility |
 | --- | --- |
-| PR #7 `src/config.ts`, `src/data/neighborhoodApi.ts`, `src/hooks/useNeighborhoods.ts` | Reuse the URL/key configuration, profile loader, hook and retry conventions. Add a separate typed evidence loader/hook with request coalescing, bounded response validation and per-ID cache. Validate a modern publishable key before network requests. |
-| PR #7 `src/data/resolve.ts` and `src/types.ts` | Join by official integer `neighborhoodId`; deduplicate selected IDs. Do not keep all fields from `...pick` and label the resulting mock scores/claims live. Use a separate evidence-card model, or nullable/status-bearing fields in a coordinated type change. |
-| PR #7 `src/screens/CandidateReport.tsx` | Its `useReport` still spreads `MOCK_REPORT`. Bind live facts explicitly; hide or label unsupported financial, ranking, commute, safety, services/momentum and narrative claims. No mock fallback after missing config or failed reads. Don't infer “standing” by comparing personal salary with neighborhood household income; they measure different things. |
-| PR #7 `src/components/NeighborhoodMap.tsx` | Currently plots profile centers. Preserve its selection/hover behavior; wire `get_neighborhood_map` separately if polygons are wanted. Facility/current overlays are separate optional reads. GeoJSON is longitude,latitude; Leaflet marker arrays are latitude,longitude. `grocery_stores` is not a supported category of the old facility RPC: use food evidence for its nearest-store points. |
-| PR #9 `src/lib/supabase.ts`, `src/screens/Login.tsx`, `src/App.tsx` | Preserve the singleton auth client, session restoration, auth subscription/cleanup, login gate, confirmation handling and sign-out. Preserve PR #7 connector state/expanded props too. Public data reads do not require removing a workspace login gate. |
-| Main before those frontend PRs | Add equivalent small loaders/hooks within `frontend/report-web`; retain the design and scope requested by the teammate. Do not assume PR #7/PR #9 files already exist. |
+| `src/data/scoringClient.mjs` and `.d.mts` | Bounded compact RPC read, schema validation, one-hour cache and in-flight coalescing. |
+| `src/hooks/useScoringData.ts` | Loading/retry and refresh on visibility, focus or expiry. |
+| `src/App.tsx` | Shared-model computation, input state and Generate validation. |
+| `src/screens/CreateReport.tsx` | Direct preference configuration; no fake transcript extraction. |
+| `src/screens/CandidateReport.tsx` | Ranked shortlist, all-neighborhood statuses, evidence and score breakdowns. |
+| `src/components/NeighborhoodMap.tsx` | Selectable reference points for all 88 neighborhoods. Boundary polygons remain a separate available RPC. |
 
-The existing mock `Neighborhood`/`ResolvedNeighborhood` types require non-null scores, flood/safety tiers, commute text and ranked-card fields. The evidence RPC intentionally cannot satisfy them. Avoid unsafe casts (`as Report`, `as ResolvedNeighborhood`) to conceal the mismatch. Start with a small evidence view model holding official ID, category availability, typed facts, sources and missing inputs. Use a clearly labeled unranked shortlist until a tested scoring service is implemented. `why` text should be limited to supported facts plus the candidate's explicitly stated preferences.
+The dashboard's sample content is labeled as such and must not open a fabricated report. Auth was not present in the frontend branch used for this P0 integration; retain the separate auth implementation when that work merges.
 
-Backend modules `src/neighborhoods.ts`, `src/context.ts`, `src/evidence.ts` show reusable validation/cache behavior. They depend on the backend's pinned zod version; don't create an accidental cross-package import that fails when only the frontend is installed/deployed. Raw fetch needs no new SDK. Adapt or package these deliberately, or extend the existing frontend client. Never import ingestion scripts, Node-only modules, `.env` files or service credentials into the browser bundle.
+The shared scoring module is browser-safe and dependency-free. Backend ingestion modules, Node-only helpers, env files and service credentials do not belong in the browser bundle. Backend validators/clients can be adapted deliberately, but importing their pinned `zod` dependency into another package unintentionally can break isolated builds.
 
-## States, sources and acceptance
+## Acceptance and failure states
 
-- Render a loading state, then usable/partial data or a clear unavailable/error state with retry. A failed read must clear/withhold expired data. Ignore superseded requests after a selection change; deduplicate in-flight reads.
-- `needs_refresh` evidence and `needs_rejoin` facilities are unavailable. Do not display old facts just because a previous request succeeded. Recheck deadlines on render/tab resume and set an expiry timer if the screen remains open. Current feeds also need per-feature expiry checks.
-- Show source observation/effective periods separately from check timestamps. Unknown observation dates stay “unknown,” not today's date. Use text rendering for source strings; validate any rendered link protocol. Keep required map/data attribution.
-- Keep browser auth and public reference reads separate from any future private report/candidate authorization. Never call staging/publishing/refresh functions from the browser.
-
-Before declaring the integration complete:
-
-1. Run `npm --prefix backend run test:frontend` using frontend configuration and `npm --prefix frontend/report-web run build`. The first command doesn't test rendered React UI.
-2. Verify profiles and map join all 88 IDs; Midtown 62, Greater Heights 15 and Neartown–Montrose 24 resolve correctly. Hidden Valley 7 rent stays unavailable.
-3. Show Midtown's evidence with source labels. IDs 17, 25, 41, 43, 80 must not show a flood-exposure percentage. Safety tier, score and drive minutes remain unavailable; changing the office selects the matching destination, not another hub.
-4. In the browser, test missing/invalid key, API/network failure, expired evidence, an empty but current feed, unavailable/stale feeds, rapid neighborhood switching and hidden/resumed tabs. Do not use mock data to make these tests appear successful.
-5. Confirm map pan/zoom and slider changes do not refetch large datasets; selected-ID reads coalesce/cache. Test both rent/buy labels and preserve candidate-selected weights/mode.
-6. If login is present, verify signed-out gate, sign-in, session restoration and sign-out still work. Verify the deployed build's configuration and actual network requests separately; report any browser checks that could not be performed.
-7. Summarize connected screens, source-backed fields, remaining unsupported outputs, files changed and checks actually run. Do not claim a complete recommendation engine or report persistence.
+1. Run backend tests (including `backend/test/scoring.test.mjs`), frontend client tests, the connection preflight with frontend configuration and the frontend build. None substitutes for browser verification.
+2. Confirm all 88 canonical IDs appear exactly once. With current data/defaults/offer mode, rent ranks 82 and buy ranks 83; counts depend on selected criteria and refreshed coverage.
+3. Change weights, housing mode, office and airport; verify scores are recomputed from the same cached cohort and the report displays matching inputs. Remote mode removes commute; all-zero effective weights block generation.
+4. Check Hidden Valley rent and the five flood gaps. Missing positive-weight criteria produce an unranked explanation; disabling that criterion may allow ranking. Safety and route minutes stay unavailable.
+5. Test missing/invalid key, network failure, malformed/incomplete payload, expired evidence, empty current feeds, rapid selection changes and hidden/resumed tabs. Never fall back to mocks. Clear/withhold expired results; rerun scoring when validity changes.
+6. Verify map pan/zoom and input changes do not refetch large datasets. Coalesce in-flight reads, cache selected-ID evidence, and keep basemap attribution. All 88 areas can remain visible with their ranking status.
+7. Preserve sign-in, session restoration and sign-out if present. Verify deployed build variables/network calls separately. Do not claim that reports persist across reload, have a shareable URL, or deliver a lead.
+8. Report connected screens, limitations, files changed and checks actually run; explicitly identify browser/deployment checks that could not be performed.
 
 ## Optional agent MCP
 
-Claude can inspect real facts through the five local read-only tools in [the Claude setup guide](claude-data-guide.md). MCP is a development/agent convenience; the browser still uses REST/RPC. A teammate can implement the integration with fetch and the preflight alone. Root CLAUDE.md points here so a short request such as “Connect the neighborhood cards to the backend” discovers the correct contract.
+The [Claude setup guide](claude-data-guide.md) describes five local read-only fact tools. MCP is optional for frontend work, and no scoring MCP tool is added by this change. The browser uses REST/RPC and the shared model; Claude should explain their returned facts/results rather than invent formulas.

@@ -1,6 +1,6 @@
 # Supabase backend and relevant-data policy
 
-Decision recorded 2026-09-19: use Supabase for normalized source data, prepared neighborhood metrics, and future saved reports. The project now has 88 profiles/boundaries, facility inventories, and scheduled weather/gauge context. See [implemented API](api.md), [facility provenance](neighborhood-context.md), and [live-feed freshness/retention](live-feeds.md). Report storage, scoring and Cloudflare Workers MCP/API services below remain proposed; Supabase replaces KV in that plan.
+Decision recorded 2026-09-19: use Supabase for normalized source data, prepared neighborhood metrics, and future saved reports. The project now has 88 profiles/boundaries, facility inventories, scheduled weather/gauge context and [provisional shared-model ranking](scoring-matrix.md). See [implemented API](api.md), [facility provenance](neighborhood-context.md), and [live-feed freshness/retention](live-feeds.md). Report storage and Cloudflare Workers MCP/API services below remain proposed; Supabase replaces KV in that plan.
 
 ## Import only what a relocation decision needs
 
@@ -35,6 +35,8 @@ Store `period_start`, `period_end`, `source_published_at` when provided, `fetche
 
 ## Keep source work outside report requests
 
+The diagram and persistence steps below describe the broader target architecture. P0 implements the public compact metrics read and dependency-free shared JavaScript scoring in browser/Node, generating an in-session report. Salary/budget calculations, a scoring MCP service and saved-report JSON/expiration are future work, not part of P0.
+
 ```mermaid
 flowchart LR
   A[Selected API resources] --> B[Bounded import and validation]
@@ -59,7 +61,7 @@ Start with a prepared metrics table and an active-version pointer; a materialize
 - Keep only active-window normalized event data and current reference inputs. Keep the current and previous validated metrics versions for rollback; additionally retain minimal derived inputs referenced by unexpired reports until seven days after the final referencing report expires. Old versions are never selected for new reports merely because they remain stored.
 - Keep raw download staging private. Implemented geodata staging is removed on successful publication; failed batches expire after one day. Current-condition rows replace the previous snapshot, with no historical observation archive; our scheduler history is pruned after seven days. Future event imports may retain staging for up to seven days if needed. Store selected fields only; do not ingest requester names, contact details, or free-text complaint narratives. Retain compact import manifests, checksums, counts, and source dates for reproducibility.
 - Reports contain no required candidate contact details. Store them privately, enforce token-specific access and expiration through the backend, and prevent public enumeration of the reports table. Explicit grants and RLS accompany any exposed tables; privileged keys stay on the server. Schedule expired-report cleanup separately from access checks.
-- Reference/context tables, 704 precomputed category-evidence rows, bounded staging retention and the current-feed scheduler are implemented. Scoring/report generation, private report storage/expiration and report retention jobs remain unimplemented. See `matrix-readiness.md` and `category-evidence.md` for current facts, gaps and refresh policy.
+- Reference/context tables, 704 precomputed category-evidence rows, compact scoring RPC, shared provisional ranking, bounded staging retention and the current-feed scheduler are implemented. Private report storage/expiration and report retention jobs remain unimplemented. See `scoring-matrix.md`, `matrix-readiness.md` and `category-evidence.md` for the current method, gaps and refresh policy.
 
 ## Implementation checks
 

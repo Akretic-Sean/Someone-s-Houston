@@ -7,7 +7,7 @@ export const SUPABASE_URL: string = import.meta.env.VITE_SUPABASE_URL ?? '';
 export const SUPABASE_PUBLISHABLE_KEY: string =
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? '';
 
-/** False until the key is supplied; the report then renders its mocked figures. */
+/** False until configured; live report generation is blocked without it. */
 export const hasLiveData = Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 
 if (SUPABASE_PUBLISHABLE_KEY.startsWith('sb_secret_')) {

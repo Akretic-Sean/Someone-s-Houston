@@ -7,6 +7,8 @@ import {
   type EvidencePayload,
   type WithheldReason,
 } from './types';
+import { categoryWithheldReason } from './validity.mjs';
+export { categoryWithheldReason } from './validity.mjs';
 
 /**
  * The display gate.
@@ -16,23 +18,6 @@ import {
  * future `refresh_due_at`. Anything else is withheld with a stated reason —
  * never silently replaced, and never backfilled from the mock.
  */
-
-const DISPLAYABLE = new Set(['partial', 'reference_snapshot']);
-
-export function categoryWithheldReason(
-  category: Category | null | undefined,
-  now = Date.now(),
-): WithheldReason | null {
-  if (!category) return 'unavailable';
-  if (category.availability === 'needs_refresh') return 'needs_refresh';
-  if (!DISPLAYABLE.has(category.availability)) return 'unavailable';
-  if (!category.facts) return 'no_facts';
-  if (category.refresh_due_at) {
-    const due = Date.parse(category.refresh_due_at);
-    if (Number.isFinite(due) && due <= now) return 'expired';
-  }
-  return null;
-}
 
 export function buildCategoryViews(
   payload: EvidencePayload,

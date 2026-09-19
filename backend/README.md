@@ -2,7 +2,7 @@
 
 Frontend teammates: use [the frontend/backend handoff](../docs/frontend-backend-handoff.md) for a ready-to-use agent prompt, environment setup, field mappings and connection checks. From the repository root, `npm --prefix backend run test:frontend` verifies the existing frontend configuration against the public data endpoints; it does not modify the database.
 
-Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase provides the hosted database and REST API; the neighborhood MCP runs locally over stdio. Cloudflare hosting, report generation and scoring are still proposed.
+Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1; use 22.12+ for the frontend). Supabase provides the hosted database and REST API; the neighborhood MCP runs locally over stdio. A shared deterministic model generates in-session neighborhood rankings. Cloudflare hosting and stored/shared reports remain proposed.
 
 ## Ready now
 
@@ -12,6 +12,7 @@ Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1). Supabase 
 - 88 PostGIS boundaries plus eight facility sources, joined once during import. Three read-only RPCs serve the map, neighborhood facilities and current conditions.
 - NWS alerts and USGS water gauges refresh centrally every 15 minutes; expired data is withheld from current-condition reads.
 - Eight report-priority categories and 704 precomputed evidence records, exposed through `get_neighborhood_evidence`.
+- Compact `get_neighborhood_scoring_data()` read RPC for all 88 neighborhoods (approximately 162 kB), plus dependency-free `../shared/scoring.mjs` for browser/Node ranking. No per-slider API request or external provider call is needed. See [the scoring model](../docs/scoring-matrix.md).
 - Shared cached clients: `src/neighborhoods.ts`, `src/context.ts` and `src/evidence.ts`. Five read-only Claude tools in `src/mcp.ts`.
 - [Frontend/API contract](../docs/api.md), [facility provenance](../docs/neighborhood-context.md), [map integration/demo](../docs/map-integration.md), [live-feed operations](../docs/live-feeds.md).
 
@@ -31,7 +32,7 @@ Copy `.env.example` to `.env`. Fill `SUPABASE_PUBLISHABLE_KEY` with this project
 npm run test:live
 ```
 
-This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual five-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization and MCP discovery/calls.
+This tests all 88 profiles, context and category-evidence APIs through the real public API, checks that an anonymous insert is denied, and starts the actual five-tool stdio MCP process. It requires network access and the publishable key. Offline tests cover source validation, missing values, caching/expiry, publication behavior, refresh authorization, scoring and MCP discovery/calls. To run only the shared model tests from repository root: `node --test backend/test/scoring.test.mjs`.
 
 `supabase/tests/` contains SQL checks for anonymous/authenticated access, RPC expiry, malformed imports and atomic publication rollback. Run them in the project's SQL Editor after seeding; every mutation is rolled back. These are plain SQL, not pgTAP suites. Local Docker/database reset testing has not been run.
 
@@ -83,7 +84,7 @@ Example prompts:
 - "Use get_current_conditions for regional weather alerts and gauges; explain any unavailable or expired data."
 - "Use get_neighborhood_evidence for Midtown (62). Explain the eight priorities, source dates and missing inputs; preserve null route minutes and safety tier."
 
-The tools return estimates and source context; they do not rank families, calculate driving times, or produce relocation reports. They have no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all five tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
+The five MCP tools return facts and source context. The separate shared model ranks neighborhoods using explicit preferences; no scoring MCP tool is added. Neither supplies driving times, safety tiers, tax calculations or saved reports. MCP has no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all five tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
 
 The optional `supabase` entry is the separate **developer** MCP: project-scoped, read-only and OAuth-authenticated with each developer's own Supabase account. It is not needed to consume neighborhood data.
 

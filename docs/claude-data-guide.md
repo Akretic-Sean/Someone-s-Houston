@@ -34,7 +34,7 @@ Expected behavior with the current reference edition:
 | Category evidence | Uses the screenshot's eight IDs, identifies grocery coverage as a SNAP subset and preserves source limitations |
 | Flood gaps | ID17 has withheld exposure percentages; no invented zero or low-risk label |
 | Distances and safety | Drive minutes and safety tier stay null; source-backed locations are not travel-time or safety evidence |
-| Report status | Says taxes, routing, stored reports and recommendation scores are not produced by the current five tools |
+| Report status | Says taxes, routing and stored reports are unavailable; the five MCP tools supply facts, while the separately implemented shared model produces provisional neighborhood scores |
 | Access | Uses product read tools; never asks for a service-role key just to read public data |
 
 Source values and counts can change. Test interpretation rules, not an indefinitely fixed gauge count. The existing automated tests cover invalid inputs, missing estimates, cached/expired feeds, bounded results and denied public writes. These verify the software path; the conversational smoke check verifies Oleg's actual agent is connected and following the instructions. That remote Claude session has not been tested by this setup.
@@ -49,6 +49,10 @@ The source contract should specify the source URL, geography, units, observation
 
 Use narrow operations such as `get_city_comparison`, `get_rent_benchmark` or `get_flood_context` once their datasets and methods are implemented. These are **proposed names**, not available tools. Their input schemas should restrict geography/year/bedroom counts instead of giving the product agent arbitrary SQL. Keep returned records bounded and leave large raw geometries out of ordinary language-model responses.
 
-Financial math and ranking belong in tested deterministic backend code. Claude gathers candidate preferences, calls those functions, and explains their returned assumptions and limitations. It should not invent weights, aggregate medians, flood categories or tax formulas from free text.
+Ranking belongs in tested deterministic code. The implemented `houston-proximity-v1` model in `shared/scoring.mjs` runs in both browser and Node against `get_neighborhood_scoring_data`; see [the scoring contract](scoring-matrix.md). Claude gathers explicit preferences and explains returned scores, assumptions and limitations. It must not invent another formula, fill missing positive-weight categories, infer driving minutes or create safety/tax claims from free text. Financial calculations remain unimplemented.
+
+For the frontend scoring handoff, ask:
+
+> Load the compact scoring-data RPC using the existing publishable-key configuration. Use scoreNeighborhoods from shared/scoring.mjs with the selected weights, rent/buy mode, office and airport. Verify remote mode excludes commute, all-zero effective weights are rejected, and neighborhoods missing a positive-weight criterion remain unranked. Fetch detailed evidence only for selected neighborhoods. Run backend scoring tests, the frontend connection preflight and frontend build; distinguish actual browser/deployment checks from automated API checks. Do not claim report persistence, sharing, lead delivery or a new scoring MCP tool.
 
 Keep recruiter transcripts, salary profiles and saved reports in separately authorized tables if those features are implemented. The public read policies for City/FEMA/Census reference data are not appropriate for candidate records.

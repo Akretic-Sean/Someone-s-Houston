@@ -1,5 +1,6 @@
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../config';
 import { NeighborhoodDataError } from '../data/neighborhoodApi';
+import { readBoundedJson } from '../data/scoringClient.mjs';
 import { CATEGORY_IDS, type CategoryId, type EvidencePayload } from './types';
 
 /**
@@ -13,7 +14,7 @@ import { CATEGORY_IDS, type CategoryId, type EvidencePayload } from './types';
 
 const CACHE_MS = 60 * 60 * 1000;
 const TIMEOUT_MS = 15_000;
-const MAX_BYTES = 6_000_000;
+const MAX_BYTES = 1_000_000;
 
 /** Rejects secret keys and placeholders before any network request. */
 export function publishableKeyLooksValid(key: string): boolean {
@@ -99,6 +100,7 @@ async function load(id: number): Promise<EvidencePayload> {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ p_neighborhood_id: id }),
+      redirect: 'error',
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
   } catch {
@@ -120,16 +122,11 @@ async function load(id: number): Promise<EvidencePayload> {
     );
   }
 
-  const body = await response.text();
-  if (body.length > MAX_BYTES) {
-    throw new NeighborhoodDataError('Evidence response exceeds the size limit.', 'invalid');
-  }
-
   let parsed: unknown;
   try {
-    parsed = JSON.parse(body);
+    parsed = await readBoundedJson(response, MAX_BYTES);
   } catch {
-    throw new NeighborhoodDataError('Evidence response was not valid JSON.', 'invalid');
+    throw new NeighborhoodDataError('Evidence response was invalid or exceeded the size limit.', 'invalid');
   }
 
   return validateEvidence(parsed, id);
@@ -137,7 +134,8 @@ async function load(id: number): Promise<EvidencePayload> {
 
 export function fetchEvidence(id: number): Promise<EvidencePayload> {
   const hit = cache.get(id);
-  if (hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.payload);
+  const deadline = hit ? nextExpiry(hit.payload) : null;
+  if (hit && Date.now() - hit.at < CACHE_MS && (deadline === null || Date.now() < deadline)) return Promise.resolve(hit.payload);
 
   const pending = inFlight.get(id);
   if (pending) return pending;

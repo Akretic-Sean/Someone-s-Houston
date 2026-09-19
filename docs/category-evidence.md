@@ -1,6 +1,6 @@
 # Report category evidence
 
-The current contract follows the user's screenshot: affordability, commute, flood context, amenities, fitness, dining/groceries, airports and healthcare. See [coverage and remaining gaps](matrix-readiness.md). This layer supplies facts for future report generation; it does not implement ranking, taxes, private candidate storage or safety tiers.
+The current contract follows the user's screenshot: affordability, commute, flood context, amenities, fitness, dining/groceries, airports and healthcare. See [coverage and remaining gaps](matrix-readiness.md). This layer supplies facts and retains null scores. The separate [shared comparison model](scoring-matrix.md) now derives provisional rankings from a compact projection of these facts. Taxes, private candidate storage and safety tiers remain unimplemented.
 
 ## Read from the frontend or Claude
 
@@ -17,7 +17,7 @@ const affordability = data.neighborhoods[0].categories.afford;
 
 In Claude Code's local product MCP, use `get_neighborhood_evidence({"neighborhood_id":62})`. Rebuild/reconnect to discover this fifth tool. The same facts and source restrictions apply to both paths. [API details](api.md#category-evidence) and [Claude setup](claude-data-guide.md) explain the rest.
 
-Use the existing small profile list to choose a shortlist, then fetch evidence for those neighborhoods. One neighborhood is roughly 45kB before compression; all 88 are about 4MB. The all-neighborhood call is available for batch analysis, but avoid downloading it on every page or slider movement. Cache evidence for up to an hour and recheck each row's deadline. No upstream provider requests occur during these reads.
+Use `get_neighborhood_scoring_data` and the shared model to calculate a shortlist, then fetch detailed evidence for those neighborhoods. One neighborhood is roughly 45kB before compression; all 88 are about 4MB. The compact scoring cohort is approximately 162kB. The all-neighborhood evidence call is available for batch analysis, but avoid downloading it on every page or slider movement. Cache evidence for up to an hour and recheck each row's deadline. No upstream provider requests occur during these reads.
 
 ## Sources and what they mean
 

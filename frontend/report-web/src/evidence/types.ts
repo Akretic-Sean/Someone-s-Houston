@@ -102,6 +102,8 @@ export interface Category {
   missing_inputs?: string[] | null;
   limitations?: string[] | null;
   prepared_at?: string | null;
+  /** Must match the compact scoring publication before joining detail facts. */
+  evidence_version?: string | null;
   /** Past this, the category is stale and must not be displayed. */
   refresh_due_at?: string | null;
   /** Always null today; `score_status` is `not_implemented`. */

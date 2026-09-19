@@ -6,6 +6,7 @@ import { parseEnv } from 'node:util';
 import { createNeighborhoodClient, readBoundedJson } from '../dist/neighborhoods.js';
 import { createContextClient } from '../dist/context.js';
 import { createEvidenceClient } from '../dist/evidence.js';
+import { CATEGORY_IDS, DEFAULT_WEIGHTS, scoreNeighborhoods } from '../../shared/scoring.mjs';
 
 const PROJECT_URL = 'https://hknzivrgihnqzvsafkkr.supabase.co';
 const frontend = new URL('../../frontend/report-web/', import.meta.url);
@@ -50,7 +51,7 @@ export async function checkConnection(config, fetcher = fetch) {
     return response;
   };
   const options = { url: config.url, publishableKey: config.publishableKey, fetch: browserFetch };
-  const preflight = await fetcher(`${config.url}/rest/v1/rpc/get_neighborhood_evidence`, {
+  const preflight = await fetcher(`${config.url}/rest/v1/rpc/get_neighborhood_scoring_data`, {
     method: 'OPTIONS', headers: { Origin: origin, 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'apikey,content-type' },
     signal: AbortSignal.timeout(15_000), redirect: 'error',
   });
@@ -65,10 +66,14 @@ export async function checkConnection(config, fetcher = fetch) {
     method: 'POST', headers: { apikey: config.publishableKey, 'Content-Type': 'application/json', Origin: origin }, body: '{}',
     signal: AbortSignal.timeout(15_000), redirect: 'error',
   }), 1_000_000);
-  const [profiles, map, facilities, current, midtown, hiddenValley, floodGap] = await Promise.all([
+  const scoringRequest = async () => readBoundedJson(await browserFetch(`${config.url}/rest/v1/rpc/get_neighborhood_scoring_data`, {
+    method: 'POST', headers: { apikey: config.publishableKey, 'Content-Type': 'application/json' }, body: '{}',
+    signal: AbortSignal.timeout(15_000), redirect: 'error',
+  }), 250_000);
+  const [profiles, map, facilities, current, midtown, hiddenValley, floodGap, scoring] = await Promise.all([
     profilesClient.list(), mapRequest(), context.getAmenities({ neighborhood_id: 62, limit: 3 }),
     context.getCurrentConditions({ neighborhood_id: 62, limit: 2 }), evidence.getEvidence({ neighborhood_id: 62 }),
-    evidence.getEvidence({ neighborhood_id: 7 }), evidence.getEvidence({ neighborhood_id: 17 }),
+    evidence.getEvidence({ neighborhood_id: 7 }), evidence.getEvidence({ neighborhood_id: 17 }), scoringRequest(),
   ]);
   assert.equal(profiles.length, 88);
   assert.equal(map.type, 'FeatureCollection'); assert.equal(map.features.length, 88);
@@ -81,13 +86,29 @@ export async function checkConnection(config, fetcher = fetch) {
   assert.equal(midtown.safety.tier, null);
   assert.ok(Object.values(categories).every(c => c.score === null));
   assert.ok(categories.commute.facts.destinations.every(d => d.drive_time_minutes === null));
-  const names = ['profiles', 'map', 'facilities', 'current context', 'eight-category evidence'];
+  const preferences = { weights: { ...DEFAULT_WEIGHTS }, tenure: 'rent', mode: 'offer', office: 'ion', airport: 'nearest' };
+  const rent = scoreNeighborhoods(scoring, preferences);
+  const buy = scoreNeighborhoods(scoring, { ...preferences, tenure: 'buy' });
+  const remote = scoreNeighborhoods(scoring, { ...preferences, mode: 'remote' });
+  assert.equal(rent.ranked.length, 82, 'Rent comparison coverage changed; inspect missing inputs.');
+  assert.equal(buy.ranked.length, 83, 'Buy comparison coverage changed; inspect missing inputs.');
+  assert.equal(remote.effectiveWeights.commute, 0);
+  assert.deepEqual(rent.unranked.map(row => row.neighborhoodId), [7, 17, 25, 41, 43, 80]);
+  const only = id => Object.fromEntries(CATEGORY_IDS.map(key => [key, key === id ? 10 : 0]));
+  const officeRanks = ['ion', 'nasa'].map(office => scoreNeighborhoods(scoring, { ...preferences, office, weights: only('commute') }));
+  assert.notEqual(officeRanks[0].ranked[0].neighborhoodId, officeRanks[1].ranked[0].neighborhoodId, 'Office selection did not change the live commute-only winner.');
+  assert.ok(rent.ranked.every(row => Number.isFinite(row.totalScore) && row.totalScore >= 0 && row.totalScore <= 100));
+  assert.throws(() => scoreNeighborhoods(scoring, { ...preferences, weights: Object.fromEntries(CATEGORY_IDS.map(id => [id, 0])) }));
+  const names = ['profiles', 'map', 'facilities', 'current context', 'eight-category evidence', 'compact scoring inputs'];
   return {
     status: 'passed', configuration_source: config.source, endpoints: names,
     neighborhoods: 88, joined_map_features: 88, evidence_categories: Object.keys(categories),
     current_feed_statuses: current.feeds.map(f => ({ source_id: f.source_id, availability: f.availability })),
     facility_status: facilities.availability, browser_preflight: 'passed',
-    unknown_values: 'Missing rent, withheld flood exposure, route minutes, category scores and safety tier preserved.',
+    scoring: { model_version: rent.modelVersion, bytes: Buffer.byteLength(JSON.stringify(scoring)), rent_ranked: rent.ranked.length, buy_ranked: buy.ranked.length,
+      default_top_three: rent.ranked.slice(0, 3).map(row => ({ id: row.neighborhoodId, name: row.name, score: Number(row.totalScore.toFixed(1)) })),
+      office_change: officeRanks.map(result => result.ranked[0].name), remote_commute_weight: remote.effectiveWeights.commute },
+    unknown_values: 'Missing rent, withheld flood exposure, route minutes and safety tier preserved. Scores derive from the documented provisional model.',
     scope: 'API/configuration check only; still verify UI rendering, build-time deployment variables and browser network behavior.',
   };
 }

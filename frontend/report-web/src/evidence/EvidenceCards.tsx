@@ -140,7 +140,7 @@ function Body({
       const stock = f.housing_stock;
       return (
         <>
-          <Fact label="Median gross rent" value={`${formatUsd(f.median_gross_rent_monthly_usd)} / mo`} />
+          <Fact label="Median gross rent" value={typeof f.median_gross_rent_monthly_usd === 'number' ? `${formatUsd(f.median_gross_rent_monthly_usd)} / mo` : 'Unavailable'} />
           <Fact label="Median home value" value={formatUsd(f.median_home_value_usd)} />
           <Fact
             label="Total housing units"
@@ -243,14 +243,13 @@ function Body({
       );
 
     case 'air': {
-      const dest = findDestination(category, airportId);
-      if (!dest) return <Fact label="Airport" value="Unavailable" />;
+      const airports = ['iah', 'hou'].map(id => findDestination(category, id));
       return (
         <>
-          <Fact label={dest.label} value={formatMeters(dest.straight_line_meters)} />
+          {airports.map((destination, index) => <Fact key={index} label={destination?.label ?? ['IAH', 'Hobby / HOU'][index]} value={formatMeters(destination?.straight_line_meters)} />)}
           <Fact label="Drive time" value="Unavailable" />
           <p className="ev-note">
-            Straight-line to an airport reference point. Flights, schedules and noise are
+            Scoring uses {airportId === 'nearest' ? 'the nearer airport' : airportId.toUpperCase()}. Straight-line to an airport reference point. Flights, schedules and noise are
             not published.
           </p>
         </>

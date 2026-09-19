@@ -1,524 +1,175 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { CATEGORY_IDS, type ScoredNeighborhood, type ScoringPayload, type ScoringResult } from '../../../../shared/scoring.mjs';
 import type { ReportConfig } from '../App';
-import { Card, Source } from '../components/Bits';
+import { Card } from '../components/Bits';
 import NeighborhoodMap from '../components/NeighborhoodMap';
 import { OFFICES, WEIGHT_DEFS } from '../data/offices';
-import { MOCK_REPORT } from '../data/report';
-import { sourceLabel } from '../data/neighborhoodApi';
-import { formatRent, resolveNeighborhoods } from '../data/resolve';
-import { useNeighborhoods } from '../hooks/useNeighborhoods';
 import EvidenceCards from '../evidence/EvidenceCards';
 import { useEvidence } from '../evidence/useEvidence';
-import { buildCategoryViews, findDestination } from '../evidence/select';
-import type { Report, ResolvedNeighborhood } from '../types';
+import { clearEvidenceCache } from '../evidence/api';
+import { evidenceMatchesScoring } from '../evidence/validity.mjs';
+import { buildCategoryViews, formatMeters, formatPct, formatUsd } from '../evidence/select';
 
-/**
- * Renders a `Report`. The only thing it takes from the recruiter's config is
- * the office hub, the weight summary and the mode, because those are the parts
- * the prototype can honestly recompute without a backend. Everything else is
- * served from the mock until `GET /reports/:id` exists.
- */
-function useReport(config: ReportConfig): Report {
-  return useMemo(() => {
-    const officeName = OFFICES.find((o) => o.id === config.office)?.label ?? MOCK_REPORT.officeName;
-    const offerFact = config.mode === 'remote'
-      ? `${config.profile.salary} (remote scenario)`
-      : config.profile.offer;
+const METRIC_LABELS: Record<string, string> = {
+  rent_usd: 'Estimated monthly rent', home_value_usd: 'Estimated home value', sfha_area_pct: 'Area in mapped flood hazard zone',
+  ion: 'Ion / Midtown', downtown: 'Downtown', energy: 'Energy Corridor', tmc: 'Texas Medical Center', nasa: 'NASA / Clear Lake',
+  iah: 'IAH', hou: 'Hobby / HOU', nearest_airport_meters: 'Nearest airport',
+  libraries: 'Library', museums: 'Museum', community_centers: 'Community center', multi_service_centers: 'Multiservice center',
+  parks: 'Park', grocery_stores: 'Covered grocery', hospitals: 'Hospital', health_facilities: 'Health facility',
+};
 
-    return {
-      ...MOCK_REPORT,
-      officeName,
-      mode: config.mode,
-      tenure: config.tenure,
-      weights: config.weights,
-      hero: {
-        ...MOCK_REPORT.hero,
-        facts: [
-          { label: 'Role', value: config.profile.role },
-          { label: 'Moving from', value: config.profile.city },
-          { label: 'Houston offer', value: offerFact },
-          { label: 'Office hub', value: officeName },
-        ],
-      },
-    };
-  }, [config]);
+function measurementValue(category: string, key: string, value: number | null) {
+  if (value === null) return 'Unavailable';
+  if (category === 'afford') return `${formatUsd(value)}${key === 'rent_usd' ? ' / mo' : ''}`;
+  if (category === 'flood') return formatPct(value);
+  return `${formatMeters(value)} straight-line`;
 }
 
-function NeighborhoodCard({
-  hood,
-  rank,
-  hovered,
-  onHover,
-}: {
-  hood: ResolvedNeighborhood;
-  rank: number;
-  hovered: string | null;
-  onHover: (id: string | null) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <Card
-      className={hovered === hood.id ? 'hood-card hood-card-active' : 'hood-card'}
-      onMouseEnter={() => onHover(hood.id)}
-      onMouseLeave={() => onHover(null)}
-    >
-      <div className="hood-head">
-        <div>
-          <div className="hood-rank">#{rank} match</div>
-          <h3 className="hood-name">{hood.name}</h3>
-        </div>
-        <div className="hood-score">
-          {hood.score}
-          <span> / 100</span>
-        </div>
-      </div>
-
-      <div className="tags">
-        <span className="tag">
-          {hood.commute} · {hood.commuteMode}
-        </span>
-        <span className="tag" data-afford={hood.affordLevel}>
-          {hood.afford}
-        </span>
-        <span className="tag">{formatRent(hood.medianGrossRent)}</span>
-        <span className="tag" data-flood={hood.flood}>
-          Flood: {hood.flood}
-        </span>
-        <span className="tag">City services: {hood.services}</span>
-        <span className="tag">{hood.momentum}</span>
-      </div>
-
-      <p className="hood-why">{hood.why}</p>
-
-      <p className="source" style={{ marginTop: 10 }}>
-        Reported crime is {hood.safety} the city median per 1,000 residents. Tiers only, from the
-        HPD NIBRS summary — not a ranking, and not a judgement about the people who live there.
-      </p>
-
-      <button type="button" className="disclosure" onClick={() => setOpen(!open)} aria-expanded={open}>
-        {open ? '−' : '+'} Why this ranked here
-      </button>
-
-      {open ? (
-        <div className="factors">
-          {hood.factors.map((f) => (
-            <div key={f.label}>
-              <div className="factor-head">
-                <span>{f.label}</span>
-                <span className="factor-note">{f.note}</span>
-              </div>
-              <div className="factor-track">
-                <div className="factor-fill" style={{ width: `${f.weight}%` }} />
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : null}
-    </Card>
-  );
+function ScoreBreakdown({ neighborhood }: { neighborhood: ScoredNeighborhood }) {
+  return <div className="scoring-table-wrap"><table className="scoring-table">
+    <caption>Category scores and contributions for {neighborhood.name}</caption>
+    <thead><tr><th scope="col">Category / evidence used</th><th scope="col">Weight</th><th scope="col">Score</th><th scope="col">Points</th></tr></thead>
+    <tbody>{CATEGORY_IDS.map(id => {
+      const category = neighborhood.categories[id];
+      return <tr key={id}><th scope="row"><div>{category.label}</div>
+        <div className="source">{category.measurement}</div>
+        <div className="score-measurements">{Object.entries(category.metrics).map(([key, value]) =>
+          <span key={key}>{METRIC_LABELS[key] ?? key}: {measurementValue(id, key, value)}</span>)}</div>
+        {category.reason && <div className="source">{category.reason}</div>}
+      </th>
+        <td>{Math.round(category.normalizedWeight * 100)}%</td>
+        <td>{category.score === null ? 'Unavailable' : category.score.toFixed(1)}</td>
+        <td>{category.weight === 0 ? 'Not weighted' : category.contribution === null ? 'Unavailable' : category.contribution.toFixed(1)}</td>
+      </tr>;
+    })}</tbody>
+  </table></div>;
 }
 
-export default function CandidateReport({
-  config,
-  onToast,
-}: {
-  config: ReportConfig;
-  onToast: (message: string) => void;
+function NeighborhoodCard({ neighborhood, hovered, onHover, onSelect }: {
+  neighborhood: ScoredNeighborhood; hovered: number | null;
+  onHover: (id: number | null) => void; onSelect: (id: number) => void;
 }) {
-  const report = useReport(config);
-  const { rows, loading, error, retry } = useNeighborhoods();
-  const [hovered, setHovered] = useState<string | null>(null);
+  const rent = neighborhood.categories.afford.metrics.rent_usd;
+  const home = neighborhood.categories.afford.metrics.home_value_usd;
+  return <Card className={hovered === neighborhood.neighborhoodId ? 'hood-card hood-card-active' : 'hood-card'}
+    onMouseEnter={() => onHover(neighborhood.neighborhoodId)} onMouseLeave={() => onHover(null)}>
+    <div className="hood-head"><div><div className="hood-rank">#{neighborhood.rank} relative match</div><h3 className="hood-name">{neighborhood.name}</h3></div>
+      <div className="hood-score">{neighborhood.totalScore?.toFixed(1)}<span> / 100</span></div>
+    </div>
+    <div className="tags">
+      {typeof rent === 'number' && <span className="tag">{formatUsd(rent)} / mo estimated median rent</span>}
+      {typeof home === 'number' && <span className="tag">{formatUsd(home)} estimated median home value</span>}
+      <span className="tag">Provisional comparison</span>
+    </div>
+    <ul className="score-reasons">{neighborhood.explanations.map(reason => <li key={reason}>{reason}</li>)}</ul>
+    <details className="score-details"><summary>Why this ranked here</summary><ScoreBreakdown neighborhood={neighborhood} /></details>
+    <button type="button" className="btn" style={{ marginTop: 14 }} onClick={() => onSelect(neighborhood.neighborhoodId)}>View sources and local facilities</button>
+  </Card>;
+}
+
+export default function CandidateReport({ config, result, payload, loading, error, onRetry, onConfigure }: {
+  config: ReportConfig; result: ScoringResult | null; payload: ScoringPayload | null; loading: boolean;
+  error: string | null; onRetry: () => void; onConfigure: () => void;
+}) {
+  const [hovered, setHovered] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [showAssumptions, setShowAssumptions] = useState(false);
-  const [email, setEmail] = useState('');
-  const [consent, setConsent] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [leadError, setLeadError] = useState(false);
-
-  const weightSummary = [...WEIGHT_DEFS]
-    .sort((a, b) => report.weights[b.id] - report.weights[a.id])
-    .slice(0, 3)
-    .map((w) => w.label.toLowerCase())
-    .join(', ');
-
-  const office = OFFICES.find((o) => o.id === config.office) ?? OFFICES[0];
-  const resolved = rows ? resolveNeighborhoods(report.neighborhoods, rows) : [];
-  const activeId = selectedId ?? resolved[0]?.neighborhoodId ?? null;
+  const activeId = selectedId ?? result?.ranked[0]?.neighborhoodId ?? null;
   const evidence = useEvidence(activeId);
-  const activeName = resolved.find((n) => n.neighborhoodId === activeId)?.name ?? '';
-  const categoryViews = evidence.payload ? buildCategoryViews(evidence.payload) : [];
+  const active = result?.results.find(row => row.neighborhoodId === activeId);
+  const office = OFFICES.find(item => item.id === config.office) ?? OFFICES[0];
+  const scoringNeighborhood = payload?.neighborhoods.find(row => row.neighborhood_id === activeId);
+  const detailNeighborhood = evidence.payload?.neighborhoods[0];
+  const matchingEvidence = detailNeighborhood?.neighborhood_id === activeId && evidenceMatchesScoring(detailNeighborhood, scoringNeighborhood);
+  const evidenceVersionMismatch = detailNeighborhood?.neighborhood_id === activeId && !matchingEvidence;
+  const views = matchingEvidence && evidence.payload ? buildCategoryViews(evidence.payload).map(view => ({ ...view, label: WEIGHT_DEFS.find(def => def.id === view.id)?.label ?? view.label })) : [];
+  const top = result?.ranked.slice(0, 5) ?? [];
 
-  // The office marker must sit on the point the displayed distance was measured
-  // from, which is the evidence destination, not the frontend's own constant.
-  const evidenceOffice = findDestination(
-    evidence.payload?.neighborhoods[0]?.categories?.commute ?? null,
-    config.office,
-  );
-  const officeForMap =
-    evidenceOffice?.coordinates
-      ? { ...office, lon: evidenceOffice.coordinates[0], lat: evidenceOffice.coordinates[1] }
-      : office;
-
-  function submitLead(e: React.FormEvent) {
-    e.preventDefault();
-    if (!email.trim() || !consent) {
-      setLeadError(true);
-      return;
-    }
-    setLeadError(false);
-    setSubmitted(true);
+  function select(id: number) {
+    setSelectedId(id);
+    document.getElementById('neighborhood-evidence')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  return (
-    <>
-      <div className="report-bar">
-        <span className="wordmark">
-          Someone&rsquo;s <em>Houston</em>
-        </span>
-        <span className="source">Data as of {report.dataAsOf}</span>
-        <button type="button" className="btn" onClick={() => onToast('Link copied to clipboard')}>
-          Share
-        </button>
-        <button type="button" className="btn" onClick={() => window.print()}>
-          Print / PDF
-        </button>
-      </div>
+  function refreshReportEvidence() {
+    clearEvidenceCache();
+    onRetry();
+    evidence.retry();
+  }
 
-      <main className="report-body">
-        <section className="hero">
-          <span className="eyebrow">Your Someone&rsquo;s Houston</span>
-          <h1>
-            {report.hero.headline} <em>{report.hero.headlineEmphasis}</em> in Houston.
-          </h1>
-          <p>{report.hero.intro}</p>
-
-          <div className="facts">
-            {report.hero.facts.map((f) => (
-              <Card key={f.label}>
-                <div className="fact-label">{f.label}</div>
-                <div className="fact-value">{f.value}</div>
-              </Card>
-            ))}
-          </div>
-
-          <div className="notes">
-            <Card>
-              <div className="note-title">{report.hero.careerTitle}</div>
-              <p className="note-text">{report.hero.careerText}</p>
-            </Card>
-            <Card>
-              <div className="note-title">{report.hero.howToReadTitle}</div>
-              <p className="note-text">{report.hero.howToReadText}</p>
-            </Card>
-          </div>
-        </section>
-
-        <section>
-          <div className="sec-head">
-            <h2 className="section-title">Financial comparison</h2>
-            <button
-              type="button"
-              className="pill"
-              onClick={() => setShowAssumptions(!showAssumptions)}
-              aria-expanded={showAssumptions}
-            >
-              {showAssumptions ? 'Hide assumptions' : 'See assumptions'}
-            </button>
-          </div>
-          <p className="section-lede">{report.financial.summary}</p>
-
-          {showAssumptions ? (
-            <Card>
-              <span className="eyebrow">Assumptions</span>
-              <p className="note-text" style={{ marginTop: 8 }}>
-                {report.financial.assumptions}
-              </p>
-            </Card>
-          ) : null}
-
-          <div className="fin-rows">
-            {report.financial.rows.map((row) => (
-              <Card key={row.label}>
-                <div className="fin-head">
-                  <span className="fin-label">{row.label}</span>
-                  <span className="fin-delta" data-dir={row.direction}>
-                    {row.delta}
-                  </span>
-                </div>
-
-                <div className="bar-row">
-                  <span className="bar-city">{report.originCity}</span>
-                  <span className="bar-track">
-                    <span className="bar-fill" style={{ width: `${row.originWidth}%` }} />
-                  </span>
-                  <span className="bar-value">{row.origin}</span>
-                </div>
-                <div className="bar-row">
-                  <span className="bar-city">Houston</span>
-                  <span className="bar-track">
-                    <span
-                      className="bar-fill"
-                      data-houston="true"
-                      style={{ width: `${row.houstonWidth}%` }}
-                    />
-                  </span>
-                  <span className="bar-value">{row.houston}</span>
-                </div>
-
-                <p className="fin-note">{row.note}</p>
-                <Source>{row.source}</Source>
-              </Card>
-            ))}
-          </div>
-
-          <div className="callout">
-            <strong>Property-tax note.</strong> {report.financial.propertyTaxNote}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="section-title">Top neighborhood matches</h2>
-          <p className="section-lede">
-            Ranked with your weights: {weightSummary}. Commutes are to {report.officeName}. Scores
-            compare these areas against each other, not against a fixed standard.
-          </p>
-
-          {loading ? (
-            <Card>
-              <p className="line-text">
-                <span className="spinner" />
-                Loading City of Houston neighborhood data…
-              </p>
-            </Card>
-          ) : error ? (
-            <Card>
-              <span className="eyebrow">Neighborhood data unavailable</span>
-              <p className="note-text" style={{ margin: '8px 0 12px' }}>
-                {error.kind === 'auth'
-                  ? 'The neighborhood data layer is not configured for this build, so the map and the figures that depend on it are not shown. Nothing here has been estimated in its place.'
-                  : 'The City of Houston neighborhood data could not be read just now. Nothing has been estimated in its place.'}
-              </p>
-              {error.kind === 'unavailable' ? (
-                <button type="button" className="btn" onClick={retry}>
-                  Try again
-                </button>
-              ) : null}
-            </Card>
-          ) : (
-            <>
-              <NeighborhoodMap
-                rows={rows ?? []}
-                picks={resolved}
-                office={officeForMap}
-                hovered={hovered}
-                onHover={setHovered}
-                sourceLabel={sourceLabel(rows ?? [])}
-              />
-
-              <div className="hoods">
-                {resolved.map((hood, i) => (
-                  <NeighborhoodCard
-                    key={hood.id}
-                    hood={hood}
-                    rank={i + 1}
-                    hovered={hovered}
-                    onHover={setHovered}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </section>
-
-        <section>
-          <div className="sec-head">
-            <h2 className="section-title">The evidence</h2>
-            {resolved.length > 0 ? (
-              <div className="seg" role="group" aria-label="Neighborhood">
-                {resolved.map((n) => (
-                  <button
-                    key={n.id}
-                    type="button"
-                    aria-pressed={n.neighborhoodId === activeId}
-                    onClick={() => setSelectedId(n.neighborhoodId)}
-                  >
-                    {n.name}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
-          <p className="section-lede">
-            What the published data actually supports for {activeName || 'this area'}, category
-            by category, with the source under each figure. Anything not published is marked
-            unavailable rather than estimated. There are no category scores and no safety tier:
-            the backend returns neither.
-          </p>
-
-          {evidence.loading ? (
-            <Card>
-              <p className="line-text">
-                <span className="spinner" />
-                Loading evidence…
-              </p>
-            </Card>
-          ) : evidence.error ? (
-            <Card>
-              <span className="eyebrow">Evidence unavailable</span>
-              <p className="note-text" style={{ margin: '8px 0 12px' }}>
-                {evidence.error.kind === 'auth'
-                  ? 'The evidence layer is not configured for this build. Nothing has been estimated in its place.'
-                  : 'The evidence could not be read just now. Nothing has been estimated in its place.'}
-              </p>
-              {evidence.error.kind === 'unavailable' ? (
-                <button type="button" className="btn" onClick={evidence.retry}>
-                  Try again
-                </button>
-              ) : null}
-            </Card>
-          ) : categoryViews.length > 0 ? (
-            <>
-              <EvidenceCards
-                views={categoryViews}
-                officeId={config.office}
-                airportId="iah"
-                weights={config.weights}
-              />
-              {evidence.payload?.interpretation ? (
-                <p className="source" style={{ marginTop: 16 }}>
-                  {evidence.payload.interpretation}
-                </p>
-              ) : null}
-              <p className="source" style={{ marginTop: 8 }}>
-                Safety tier: unavailable
-                {evidence.payload?.safety?.reason ? ` — ${evidence.payload.safety.reason}` : ''}
-              </p>
-            </>
-          ) : null}
-        </section>
-
-        <section>
-          <h2 className="section-title">How the week actually works</h2>
-          <p className="section-lede">
-            Built from what you told your recruiter, not from a generic city profile.
-          </p>
-          <div className="life">
-            {report.lifestyle.map((card) => (
-              <Card key={card.eyebrow} className={card.feature ? 'life-card life-card-feature' : 'life-card'}>
-                <div className="life-top">
-                  <span className="eyebrow">{card.eyebrow}</span>
-                  <span className="life-tag">{card.tag}</span>
-                </div>
-                <h3 className="life-title">{card.title}</h3>
-                <p className="life-text">{card.text}</p>
-                <div className="chips">
-                  {card.chips.map((c) => (
-                    <span className="chip" key={c}>
-                      {c}
-                    </span>
-                  ))}
-                </div>
-                <Source>{card.source}</Source>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="section-title">What to consider</h2>
-          <p className="section-lede">
-            None of these are deal-breakers on their own. They are the things worth pricing in
-            before deciding.
-          </p>
-          <div className="considerations">
-            {report.considerations.map((c) => (
-              <div className="consideration" key={c.title}>
-                <span className="consideration-dot" aria-hidden="true" />
-                <div>
-                  <div className="note-title">{c.title}</div>
-                  <div className="note-text">{c.text}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <section>
-          <div className="cta">
-            <div>
-              <span className="eyebrow">Optional next step</span>
-              <h2 className="section-title" style={{ marginTop: 8 }}>
-                Talk to a Houston relocation expert
-              </h2>
-              <p className="section-lede" style={{ marginBottom: 0 }}>
-                A local expert can walk through neighborhoods, flood maps, and housing with you and
-                your partner. This is opt-in. Your contact details are shared only after you consent
-                below, and you can decline without affecting your offer.
-              </p>
+  return <>
+    <div className="report-bar">
+      <span className="wordmark">Someone’s <em>Houston</em></span>
+      <span className="source">Provisional neighborhood comparison</span>
+      <button type="button" className="btn" onClick={onConfigure}>Adjust priorities</button>
+      <button type="button" className="btn" onClick={() => window.print()}>Print / PDF</button>
+    </div>
+    <main className="report-body">
+      {loading ? <Card><p role="status"><span className="spinner" /> Checking current scoring evidence…</p></Card>
+        : error || !result || !payload ? <Card><p role="alert">{error ?? 'Scoring evidence is unavailable.'}</p><button className="btn" onClick={onRetry}>Retry data connection</button></Card>
+        : <>
+          <section className="hero">
+            <span className="eyebrow">Your neighborhood comparison</span>
+            <h1>Find your <em>Houston.</em></h1>
+            <p>Ranked from published neighborhood evidence using your chosen priorities. These relative scores help build a shortlist; they do not predict your personal experience.</p>
+            <div className="facts">
+              <Card><div className="fact-label">Housing comparison</div><div className="fact-value">{config.tenure === 'rent' ? 'Rent' : 'Buy'}</div></Card>
+              <Card><div className="fact-label">Work arrangement</div><div className="fact-value">{config.mode === 'remote' ? 'Fully remote' : office.label}</div></Card>
+              <Card><div className="fact-label">Airport preference</div><div className="fact-value">{config.airport === 'nearest' ? 'Nearest of IAH / HOU' : config.airport.toUpperCase()}</div></Card>
+              <Card><div className="fact-label">Comparable neighborhoods</div><div className="fact-value">{result.ranked.length} / {result.results.length}</div></Card>
             </div>
-
-            <Card>
-              {submitted ? (
-                <>
-                  <div className="confirm-mark" aria-hidden="true">
-                    ✓
-                  </div>
-                  <div className="note-title">Request sent</div>
-                  <p className="note-text">
-                    An expert will reach out to {email} within two business days. You can withdraw
-                    consent at any time from the link in that email.
-                  </p>
-                </>
-              ) : (
-                <form onSubmit={submitLead} noValidate>
-                  <div className="field">
-                    <label htmlFor="lead-email">Preferred email</label>
-                    <input
-                      id="lead-email"
-                      type="email"
-                      value={email}
-                      placeholder="you@example.com"
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                  <label className="consent">
-                    <input
-                      type="checkbox"
-                      checked={consent}
-                      onChange={(e) => setConsent(e.target.checked)}
-                    />
-                    I consent to Someone&rsquo;s Houston sharing my name, this report, and my email
-                    with one vetted Houston relocation expert.
-                  </label>
-                  {leadError ? (
-                    <div className="form-error">
-                      Add an email and tick the consent box to continue.
-                    </div>
-                  ) : null}
-                  <button type="submit" className="btn btn-primary">
-                    Request an introduction
-                  </button>
-                </form>
-              )}
-            </Card>
-          </div>
-
-          <div className="report-actions">
-            <button type="button" className="btn" onClick={() => onToast('Link copied to clipboard')}>
-              Share this report
-            </button>
-            <button type="button" className="btn" onClick={() => window.print()}>
-              Print / PDF
-            </button>
-          </div>
-        </section>
-
-        <footer className="report-footer">
-          <span className="eyebrow">Sources and transparency</span>
-          {report.sources.join(' · ')}
-          <p style={{ marginTop: 10 }}>{report.disclaimer}</p>
-        </footer>
-      </main>
-    </>
-  );
+            <div className="tags">{WEIGHT_DEFS.map(def => <span className="tag" key={def.id}>{def.label}: {Math.round(result.normalizedWeights[def.id] * 100)}%</span>)}</div>
+            {config.mode === 'remote' && <p className="source">Commute is excluded in fully remote mode. Remaining priorities are renormalized.</p>}
+          </section>
+          <section>
+            <h2 className="section-title">Top neighborhood matches</h2>
+            <p className="section-lede">Showing the highest {top.length} scores among neighborhoods with every positively weighted measurement available. Missing measurements are never treated as zero or rewarded.</p>
+            <NeighborhoodMap rows={payload.neighborhoods} picks={top} office={config.mode === 'remote' ? null : office} hovered={hovered} onHover={setHovered} onSelect={select} />
+            <div className="scored-neighborhoods">{top.map(neighborhood => <NeighborhoodCard key={neighborhood.neighborhoodId} neighborhood={neighborhood} hovered={hovered} onHover={setHovered} onSelect={select} />)}</div>
+          </section>
+          <section>
+            <h2 className="section-title">All neighborhoods</h2>
+            <p className="section-lede">Open any area’s source evidence, including areas with insufficient data.</p>
+            <details className="score-details"><summary>View all {result.ranked.length} ranked neighborhoods</summary>
+              <ol className="ranked-neighborhood-list">{result.ranked.map(row => <li key={row.neighborhoodId}>
+                <button type="button" onClick={() => select(row.neighborhoodId)}>{row.name}<span>{row.totalScore?.toFixed(1)} / 100</span></button>
+              </li>)}</ol>
+            </details>
+            {result.unranked.length > 0 && <Card className="unranked-card"><span className="eyebrow">Insufficient data · {result.unranked.length} areas</span>
+              <ul>{result.unranked.map(row => <li key={row.neighborhoodId}><button type="button" className="text-button" onClick={() => select(row.neighborhoodId)}>{row.name}</button>
+                <span> — {row.missingCategories.map(id => WEIGHT_DEFS.find(def => def.id === id)?.label ?? id).join(', ')} unavailable; no total score.</span>
+              </li>)}</ul>
+            </Card>}
+          </section>
+          <section id="neighborhood-evidence" style={{ scrollMarginTop: 150 }}>
+            <div className="sec-head"><h2 className="section-title">Evidence for {active?.name ?? 'a neighborhood'}</h2></div>
+            <label className="field evidence-select">Choose neighborhood
+              <select value={activeId ?? ''} onChange={event => setSelectedId(Number(event.target.value))}>
+                {result.results.map(row => <option key={row.neighborhoodId} value={row.neighborhoodId}>{row.name}{row.rank === null ? ' — insufficient data' : ` — #${row.rank}`}</option>)}
+              </select>
+            </label>
+            {active && <details className="score-details"><summary>Full score breakdown{active.rank === null ? ' — total withheld' : ` — ${active.totalScore?.toFixed(1)} / 100`}</summary><ScoreBreakdown neighborhood={active} /></details>}
+            <p className="section-lede">Category measurements come from the source snapshots below. Model scores are calculated separately from those facts. Safety and driving times remain unavailable.</p>
+            {evidence.loading ? <Card><p role="status"><span className="spinner" /> Loading source evidence…</p></Card>
+              : evidence.error ? <Card><p role="alert">Source details could not be read: {evidence.error.message}</p><button className="btn" onClick={evidence.retry}>Retry evidence</button></Card>
+              : evidenceVersionMismatch ? <Card><p role="alert">The detailed evidence and ranking use different data versions. Details are withheld until both are refreshed.</p><button type="button" className="btn" onClick={refreshReportEvidence}>Refresh ranking and evidence</button></Card>
+              : views.length > 0 ? <EvidenceCards views={views} officeId={config.office} airportId={config.airport} weights={result.effectiveWeights} /> : null}
+          </section>
+          <section>
+            <h2 className="section-title">How to read this report</h2>
+            <Card><ul className="scoring-method">
+              <li>Each measurement becomes a lower-is-better percentile across the neighborhoods with that measurement available. Ties share a score. Multi-facility categories average the same fixed facility measurements for every neighborhood.</li>
+              <li>The total is the sum of category scores multiplied by your normalized weights. Only display values are rounded. Equal totals use the City neighborhood ID as a stable tie-break.</li>
+              <li>Affordability uses ACS 2020–2024 estimates. It does not account for your income, mortgage, taxes, insurance or current listings.</li>
+              <li>Commute, airports, recreation and facility access use straight-line distances from neighborhood reference points. They do not establish travel time, walkability, openings or quality.</li>
+              <li>Grocery access covers SNAP-authorized stores in the imported inventory. Restaurant preferences are not scored. Flood scores compare mapped land-area exposure, not the chance a particular home floods.</li>
+              <li>There is no safety tier, automated financial comparison, lead submission or saved shareable report in this version.</li>
+            </ul></Card>
+          </section>
+          <footer className="report-footer">
+            <span className="eyebrow">Sources and transparency</span>
+            <p>City of Houston neighborhood profiles and facilities · ACS 2020–2024 · FEMA mapped flood hazard areas · USDA SNAP retailer inventory · verified destination reference points. Source links and periods appear with the detailed evidence.</p>
+            <p>Model: {result.modelVersion}. Evidence checked by the API: {new Date(payload.evaluated_at).toLocaleString()}. This timestamp is a validity check, not the observation date of every source.</p>
+          </footer>
+        </>}
+    </main>
+  </>;
 }

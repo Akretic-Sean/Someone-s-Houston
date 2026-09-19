@@ -1540,3 +1540,37 @@ tbody tr:hover {
 .ev-sources a {
   color: var(--teal-bright);
 }
+
+/* Live scoring: keep the existing palette and card layout. */
+.scoring-form { border: 0; padding: 0; margin: 0; min-width: 0; }
+.scoring-form:disabled { opacity: .75; }
+button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
+.scoring-status { margin: 22px 0; }
+.scoring-status p + p { margin-top: 8px; }
+.scored-neighborhoods { display: grid; gap: 22px; }
+.score-reasons { margin: 16px 0; padding-left: 22px; line-height: 1.7; }
+.score-details { margin: 18px 0; }
+.score-details > summary { cursor: pointer; color: var(--accent, #f65b00); font-weight: 650; padding: 8px 0; }
+.scoring-table-wrap { overflow-x: auto; }
+.scoring-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+.scoring-table caption { text-align: left; padding: 10px 0; font-weight: 650; }
+.scoring-table th, .scoring-table td { padding: 14px 10px; text-align: left; border-bottom: 1px solid rgba(255,255,255,.13); vertical-align: top; }
+.scoring-table tbody th { min-width: 250px; font-weight: 500; }
+.scoring-table td { white-space: nowrap; }
+.scoring-table .source { max-width: 660px; margin-top: 5px; font-weight: normal; }
+.score-measurements { display: flex; flex-wrap: wrap; gap: 5px 15px; margin-top: 8px; color: var(--muted); font-size: .78rem; }
+.ranked-neighborhood-list { padding-left: 26px; }
+.ranked-neighborhood-list li { padding: 8px 0; }
+.ranked-neighborhood-list button { width: 100%; text-align: left; display: flex; justify-content: space-between; gap: 10px; background: transparent; color: inherit; border: 0; cursor: pointer; font: inherit; }
+.ranked-neighborhood-list button:hover, .text-button:hover { text-decoration: underline; }
+.unranked-card { margin-top: 20px; }
+.unranked-card ul, .scoring-method { line-height: 1.8; padding-left: 22px; }
+.unranked-card li, .scoring-method li { margin-top: 9px; }
+.text-button { border: 0; padding: 0; color: inherit; background: transparent; cursor: pointer; font: inherit; font-weight: 650; }
+.evidence-select { margin: 14px 0 22px; max-width: 650px; }
+.evidence-select select { width: 100%; margin-top: 8px; padding: 13px; background: #102d3b; border: 1px solid #355463; border-radius: 10px; color: #f7f7f7; font: inherit; }
+.map-context-button { padding: 0; cursor: pointer; border: 0; }
+.map-context-button:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+.prototype-notice { padding: 14px 24px; background: #263c47; margin: 0; line-height: 1.5; }
+@media (max-width: 650px) { .report-bar { flex-wrap: wrap; } .report-bar .source { display: none; } .scoring-table { font-size: .8rem; } .scoring-table th, .scoring-table td { padding: 10px 7px; } }
+@media print { .score-details { display: block; } .report-actions, .report-bar button, .proto { display: none; } .scoring-table-wrap { overflow: visible; } }
