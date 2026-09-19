@@ -2,7 +2,7 @@
 
 Researched and probed on 2026-09-19. Product goal: help tech recruits compare Houston neighborhoods according to their own priorities and household needs.
 
-**Scope update:** [Oleggo's build plan](build-plan.md) now defines the proposed MVP: a recruiter uses Claude to generate a shareable relocation report. Its TypeScript/Workers/KV architecture and tool names supersede the exploratory recommendations below. See [Phase 0 data notes](data-notes.md) for checks against the actual scoring requirements. Supabase remains an alternative; parks, schools, weather, and live routing are possible later features. V1 commute is straight-line miles.
+**Scope update:** [Oleggo's build plan](build-plan.md) defines the proposed MVP: a recruiter uses Claude to generate a shareable relocation report. The [backend data policy](backend-data-policy.md) now selects Supabase for prepared metrics and reports alongside the proposed TypeScript/Workers services. See [Phase 0 data notes](data-notes.md) for checks against scoring requirements. The broader recommendations below remain exploratory; parks, schools, weather, and live routing are possible later features. V1 commute is straight-line miles.
 
 ## What is connected
 
@@ -35,7 +35,9 @@ The current-working GIS prefix is `https://mycity2.houstontx.gov/gisweb01/rest/s
 
 [TranStar](https://traffic.houstontranstar.org/api/api_doc.aspx) documents JSON incident and lane-closure feeds updated once per minute. Live access requires contacting TranStar. This is a later integration unless credentials are already available; a sample feed is not live access.
 
-## Alternative: how Supabase could fit
+## Earlier Supabase design exploration
+
+Supabase has since been selected. Use the [backend data policy](backend-data-policy.md) for the current implementation scope; the broader entities and services below are background options.
 
 Proposed flow:
 

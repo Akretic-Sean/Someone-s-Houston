@@ -4,6 +4,8 @@
 
 Hackathon track: **Houston Open Data**. Status: planning.
 
+Backend decision, 2026-09-19: use **Supabase** for prepared neighborhood data and saved reports. The [backend data policy](backend-data-policy.md) defines bounded import windows, freshness checks, and the fast report path. It supersedes the original KV storage proposal and live-first scoring approach. Hosting remains proposed; no Hou Match database or product service has been deployed.
+
 ---
 
 ## Why Houston
@@ -90,10 +92,12 @@ flowchart LR
   R[Recruiter in Claude] -->|asks for a pitch| P[Pitch MCP server]
   R -->|follow-up questions| H[Houston Open Data MCP]
   P --> E[Scoring engine]
-  E -->|CKAN API| D[data.houstontx.gov]
-  H -->|CKAN API| D
-  E -->|baseline| C[Census ACS + tax tables]
-  P -->|saves report| S[(Report store)]
+  H -->|CKAN API| D[data.houstontx.gov]
+  D --> I[Bounded scheduled imports]
+  C[Census ACS + tax tables] --> I
+  I --> N[(Supabase prepared metrics)]
+  N --> E
+  P -->|saves report| S[(Supabase reports)]
   S --> W[Shareable report page]
   W --> K[Tech candidate]
   W -.->|opt-in only| L[Lead webhook: HubSpot / sponsor CRM]
@@ -106,7 +110,7 @@ flowchart LR
 | **Pitch MCP** | Takes city, salaries and office, runs the scoring, returns a report link | The product |
 | **Report page** | The page the candidate opens | Static render of stored JSON, no login, sponsor slot, opt-in lead button |
 
-**Why two MCP servers.** The Pitch MCP produces the report deterministically, so the same input gives the same numbers every time. The Open Data MCP stays connected in the same chat so the recruiter can ask follow-ups the report did not cover ("what do 311 complaints look like around the Heights?"). Both share one CKAN client library; the Pitch MCP calls the library directly, not the other server, to keep it fast.
+**Why two MCP servers.** The Pitch MCP produces reports deterministically for the same candidate inputs and data/scoring/reference versions. The Open Data MCP stays connected in the same chat so the recruiter can ask follow-ups the report did not cover ("what do 311 complaints look like around the Heights?"). Imports and the Open Data MCP share one CKAN client library. The Pitch MCP scores prepared Supabase data through shared packages; it does not call the other MCP server or fetch upstream datasets during report generation.
 
 ---
 
@@ -153,7 +157,7 @@ All outside figures live in `backend/data/reference/` with a source and date on 
 
 ### Reliability
 
-Live API first, snapshot fallback. A script pulls each dataset into `backend/data/snapshots/`. If the portal is slow or down during the demo, the engine reads the snapshot and the report says which date the data is from.
+Scheduled imports validate only the relevant source windows and publish versioned neighborhood metrics in Supabase. Reports use the prepared version, with a dated snapshot available for fallback. A failed refresh keeps the last validated version, but fallback data must still pass metric-specific freshness checks. Source periods are displayed separately from download dates. See [backend data policy](backend-data-policy.md).
 
 ### Known limit
 
@@ -264,7 +268,7 @@ hou-match/
 
 **Contract.** The report JSON shape is the interface between `backend/` and `frontend/`. Agree it in `docs/api.md` before Phase 3.
 
-**Stack (proposed).** TypeScript, official MCP SDK with Streamable HTTP transport, Cloudflare Workers for both servers, Workers KV for stored reports, a static report page rendered from JSON. Everything is stateless apart from KV, so the free tier is enough.
+**Stack.** Supabase is selected for prepared data and stored reports, with PostGIS for geographic processing. TypeScript, the official MCP SDK with Streamable HTTP, Cloudflare Workers for both servers, and a report page rendered from JSON remain the proposed application stack. Hosting configuration and actual plan costs still need verification.
 
 ---
 
@@ -275,6 +279,7 @@ Phases are ordered so there is a working demo as early as possible. Hours are es
 ### Phase 0: Verify the data (2 h)
 
 - [ ] Open each dataset in the table above. Record in `docs/data-notes.md`: geography level, year, datastore or file, row count, key fields
+- [ ] Apply `docs/backend-data-policy.md`: selected fields/geography, bounded time windows, complete coverage, and freshness eligibility
 - [ ] Confirm the income and housing dataset's neighborhood unit and find a matching boundary file
 - [ ] Confirm the HPD crime summary uses the same Super Neighborhood unit as the income and housing dataset; pull population per Super Neighborhood for per-capita rates
 - [ ] Decide what replaces any dataset that fails the check
@@ -307,7 +312,7 @@ Phases are ordered so there is a working demo as early as possible. Hours are es
 ### Phase 3: Pitch MCP and report page (6 h)
 
 - [ ] Five tools wired to the scoring package
-- [ ] Report JSON saved to KV under a random ID
+- [ ] Report JSON saved to Supabase under a random unguessable ID, with expiration enforced
 - [ ] Report page: seven sections, source line under every number, mobile-first, fast
 - [ ] Sponsor slot driven by config: logo, call-to-action label, listing links
 - [ ] `brokerage` flag hides the safety tier and re-spreads its weight

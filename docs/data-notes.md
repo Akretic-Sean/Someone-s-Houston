@@ -2,6 +2,8 @@
 
 Checked on 2026-09-19 against [the build plan](build-plan.md). These are source-discovery results, not completed import pipelines. Public sample/count queries succeeded where stated; full record validation and joins remain outstanding. The committed `backend/data/houston-catalog.json` contains metadata, not the scoring snapshots required by Phase 0.
 
+The [backend data policy](backend-data-policy.md) now selects Supabase and sets bounded import/freshness defaults. A source's appearance below confirms only the stated checks, not eligibility under that policy. In particular, the HPD summary ending in 2024 and the tested 311 feed need replacement or newer verified coverage for current scoring.
+
 ## Source findings
 
 | Source | Geography, period, access, and checked fields | Fit for the proposed score |
@@ -36,7 +38,7 @@ The plan's requirement for at least three portal datasets joined into the final 
 
 ## Backend implications and proposed clarifications
 
-- **Current architecture:** follow the build plan's shared TypeScript data client and scoring package, Houston Open Data MCP, Pitch MCP, and report JSON page. Workers/KV is proposed. Supabase/PostGIS could be useful for persistent spatial joins or relational data, but it is an optional architectural choice, not a dependency already chosen by the plan. No Hou Match Supabase project exists yet.
+- **Current architecture:** Supabase is selected for prepared neighborhood metrics and reports, with PostGIS for geographic processing. Retain the shared TypeScript packages, two MCP services, and report page. The backend data policy replaces the former KV/live-first proposal. No Hou Match Supabase project exists yet.
 - **Reproducibility:** deterministic functions need pinned input data as well as stable code. Store data snapshot, scoring, and tax-reference versions with each report; use a consistent dataset version within one calculation. Live refreshes may change newly generated reports. Existing report JSON should keep its original numbers and provenance until expiration.
 - **Frontend handoff:** define a fixture and the report contract in `docs/api.md` before either side wires the report page. Include source periods, fallback status, omitted metrics, units, assumptions, sponsor behavior, and 30-day expiration. That contract is not yet agreed.
 - **Commute:** v1 returns straight-line miles. The plan's example "12 minutes" must not become a generated claim without routing data. Set a maximum for the 2-mile cap-widening loop and define the result when fewer than three neighborhoods qualify. Custom addresses also need a geocoding method; office presets can work first.
