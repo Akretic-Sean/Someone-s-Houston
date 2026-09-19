@@ -1,0 +1,375 @@
+{
+  "schema_version": 1,
+  "rows": [
+    {
+      "neighborhood_id": 7,
+      "category_id": "afford",
+      "metric": "rent_usd",
+      "lower_bound": 1500,
+      "upper_bound": 1999,
+      "ranking_value": 1999,
+      "method": "conservative_upper_bound",
+      "source_url": "https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/6-Gross-Rent-2024.pdf",
+      "source_period": "ACS 2020–2024; published January 2026",
+      "source_checked_at": "2026-09-19T22:28:11.833662+00:00",
+      "refresh_due_at": "2026-10-20T22:28:11.833662+00:00",
+      "source_sha256": "2ec4fde51ac9b5a69e22c9914269546f8865cc1d44bf1775bf54de3ebe92e395",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "published_row": "7 HIDDEN VALLEY 110 0 0 0 0 110 0 0",
+        "estimated_rent_paying_units": 110,
+        "median_band_usd": [
+          1500,
+          1999
+        ],
+        "note": "110 is an estimated housing-unit count, not survey sample size. Exact median suppressed by City for insufficient sample observations. Band is not a confidence interval or current asking rent.",
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    },
+    {
+      "neighborhood_id": 17,
+      "category_id": "flood",
+      "metric": "sfha_area_pct",
+      "lower_bound": 71.6074,
+      "upper_bound": 73.6277,
+      "ranking_value": 73.6277,
+      "method": "conservative_upper_bound",
+      "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "source_period": "Current effective FEMA NFHL; dated panel coverage checked",
+      "source_checked_at": "2026-09-19T22:27:53.653735+00:00",
+      "refresh_due_at": "2026-10-20T22:27:53.653735+00:00",
+      "source_sha256": "39a5b70cc3911bc0b1d526fd875878575a0a42e8b6ec0e0673130bb2ef1ec999",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "uncertain_area_pct": 2.0202412124324742,
+        "source_polygon_count": 287,
+        "geometry_repairs": [
+          {
+            "object_id": 25773380,
+            "area_change_m2": 1e-06
+          }
+        ],
+        "method": "EPSG:5070 full precision; union before clipping; unknown/uncovered/conflicting area included in upper bound, excluded from lower bound. Bounds cover map classification only, not statistical or future flood uncertainty.",
+        "source_layers": {
+          "0": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+            "expected_count": 2,
+            "retrieved_count": 2,
+            "complete_id_set_before_after": true,
+            "source_sha256": "4d7d11fafa8708248353615e6ac888a89fa537f058fefde39c2077e9a2fdac71",
+            "downloaded_bytes": 407175,
+            "source_checked_at": "2026-09-19T22:27:53.653735+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:27:53.653735+00:00",
+            "resumed_batch_count": 1,
+            "source_data_last_edit_at": null
+          },
+          "3": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+            "expected_count": 14,
+            "retrieved_count": 14,
+            "complete_id_set_before_after": true,
+            "source_sha256": "f4213790dfbb6d221af850d9ede03d1c68f3d36f92b3f14fa365925b6b65609a",
+            "downloaded_bytes": 6761,
+            "source_checked_at": "2026-09-19T22:27:54.562546+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:27:54.562546+00:00",
+            "resumed_batch_count": 1,
+            "source_data_last_edit_at": null
+          },
+          "28": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+            "expected_count": 287,
+            "retrieved_count": 287,
+            "complete_id_set_before_after": true,
+            "source_sha256": "0d2001efc7a4a486a3ea1f6d863e79f58741a7683ab2075967fb35127237a74c",
+            "downloaded_bytes": 9921805,
+            "source_checked_at": "2026-09-19T22:27:55.340211+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:27:55.344515+00:00",
+            "resumed_batch_count": 3,
+            "source_data_last_edit_at": null
+          }
+        },
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    },
+    {
+      "neighborhood_id": 25,
+      "category_id": "flood",
+      "metric": "sfha_area_pct",
+      "lower_bound": 44.9031,
+      "upper_bound": 44.9938,
+      "ranking_value": 44.9938,
+      "method": "conservative_upper_bound",
+      "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "source_period": "Current effective FEMA NFHL; dated panel coverage checked",
+      "source_checked_at": "2026-09-19T22:28:18.839103+00:00",
+      "refresh_due_at": "2026-10-20T22:28:18.839103+00:00",
+      "source_sha256": "e2cfe7b18415bb2ed02e66dc7f41f2e70b0235c7e9c5c3756428e51b0c9e3ede",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "uncertain_area_pct": 0.09054583263718409,
+        "source_polygon_count": 143,
+        "geometry_repairs": [],
+        "method": "EPSG:5070 full precision; union before clipping; unknown/uncovered/conflicting area included in upper bound, excluded from lower bound. Bounds cover map classification only, not statistical or future flood uncertainty.",
+        "source_layers": {
+          "0": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+            "expected_count": 2,
+            "retrieved_count": 2,
+            "complete_id_set_before_after": true,
+            "source_sha256": "4d7d11fafa8708248353615e6ac888a89fa537f058fefde39c2077e9a2fdac71",
+            "downloaded_bytes": 407175,
+            "source_checked_at": "2026-09-19T22:28:18.839103+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:18.839103+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "3": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+            "expected_count": 11,
+            "retrieved_count": 11,
+            "complete_id_set_before_after": true,
+            "source_sha256": "1b646a4927f9d14eaaececfc8dbf066e9b23f83d3e9c675362a551cae4ec1c65",
+            "downloaded_bytes": 5329,
+            "source_checked_at": "2026-09-19T22:28:19.745856+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:19.745856+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "28": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+            "expected_count": 143,
+            "retrieved_count": 143,
+            "complete_id_set_before_after": true,
+            "source_sha256": "0f67a9b63445e646a572f5e13192ffb037f1aee29ecdf93e464dfcfbac84ce8a",
+            "downloaded_bytes": 2870119,
+            "source_checked_at": "2026-09-19T22:28:20.463268+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:20.469780+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          }
+        },
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    },
+    {
+      "neighborhood_id": 41,
+      "category_id": "flood",
+      "metric": "sfha_area_pct",
+      "lower_bound": 1.4375,
+      "upper_bound": 2.9618,
+      "ranking_value": 2.9618,
+      "method": "conservative_upper_bound",
+      "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "source_period": "Current effective FEMA NFHL; dated panel coverage checked",
+      "source_checked_at": "2026-09-19T22:28:23.437349+00:00",
+      "refresh_due_at": "2026-10-20T22:28:23.437349+00:00",
+      "source_sha256": "0a038962d8d616f04fad2008858de28c84b85ed1a6d14af373985efe131854ad",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "uncertain_area_pct": 1.5242024018182059,
+        "source_polygon_count": 92,
+        "geometry_repairs": [],
+        "method": "EPSG:5070 full precision; union before clipping; unknown/uncovered/conflicting area included in upper bound, excluded from lower bound. Bounds cover map classification only, not statistical or future flood uncertainty.",
+        "source_layers": {
+          "0": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+            "expected_count": 2,
+            "retrieved_count": 2,
+            "complete_id_set_before_after": true,
+            "source_sha256": "4d7d11fafa8708248353615e6ac888a89fa537f058fefde39c2077e9a2fdac71",
+            "downloaded_bytes": 407175,
+            "source_checked_at": "2026-09-19T22:28:23.437349+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:23.437349+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "3": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+            "expected_count": 4,
+            "retrieved_count": 4,
+            "complete_id_set_before_after": true,
+            "source_sha256": "42436c83771ada52c3975f19c697435cc3affd507bcaebb8474ccd060ce945ae",
+            "downloaded_bytes": 1908,
+            "source_checked_at": "2026-09-19T22:28:25.073130+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:25.073130+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "28": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+            "expected_count": 92,
+            "retrieved_count": 92,
+            "complete_id_set_before_after": true,
+            "source_sha256": "fa0619bbf45fd988378b476beb7545295281dacf1ca582de59fc4d3a3af2673b",
+            "downloaded_bytes": 4007419,
+            "source_checked_at": "2026-09-19T22:28:26.218073+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:26.218073+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          }
+        },
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    },
+    {
+      "neighborhood_id": 43,
+      "category_id": "flood",
+      "metric": "sfha_area_pct",
+      "lower_bound": 42.6363,
+      "upper_bound": 42.7513,
+      "ranking_value": 42.7513,
+      "method": "conservative_upper_bound",
+      "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "source_period": "Current effective FEMA NFHL; dated panel coverage checked",
+      "source_checked_at": "2026-09-19T22:28:29.059366+00:00",
+      "refresh_due_at": "2026-10-20T22:28:29.059366+00:00",
+      "source_sha256": "eca8412244ae9676ba7ee76bc40efe002a57593f0e82ac914a604a5426e58c63",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "uncertain_area_pct": 0.11485901859024596,
+        "source_polygon_count": 324,
+        "geometry_repairs": [
+          {
+            "object_id": 23815104,
+            "area_change_m2": 0.0
+          },
+          {
+            "object_id": 23815150,
+            "area_change_m2": 0.0
+          },
+          {
+            "object_id": 23815169,
+            "area_change_m2": 0.0
+          }
+        ],
+        "method": "EPSG:5070 full precision; union before clipping; unknown/uncovered/conflicting area included in upper bound, excluded from lower bound. Bounds cover map classification only, not statistical or future flood uncertainty.",
+        "source_layers": {
+          "0": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+            "expected_count": 2,
+            "retrieved_count": 2,
+            "complete_id_set_before_after": true,
+            "source_sha256": "2eef0502cfb33cffaf8c131aff91c3cabb2c351d73bb4259003483d00b144a64",
+            "downloaded_bytes": 516973,
+            "source_checked_at": "2026-09-19T22:28:29.059366+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:29.059366+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "3": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+            "expected_count": 11,
+            "retrieved_count": 11,
+            "complete_id_set_before_after": true,
+            "source_sha256": "7ae494286e03d8807beb0eda2f016d6fdaeee7767af1f28d049e32267ff9024a",
+            "downloaded_bytes": 5306,
+            "source_checked_at": "2026-09-19T22:28:29.977424+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:29.977424+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "28": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+            "expected_count": 324,
+            "retrieved_count": 324,
+            "complete_id_set_before_after": true,
+            "source_sha256": "c02ceeaf85b58206f72a4ed4afe64add891cd112108219ea9b544b3ad7e43c1f",
+            "downloaded_bytes": 17520179,
+            "source_checked_at": "2026-09-19T22:28:30.821114+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:31.404352+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          }
+        },
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    },
+    {
+      "neighborhood_id": 80,
+      "category_id": "flood",
+      "metric": "sfha_area_pct",
+      "lower_bound": 17.905,
+      "upper_bound": 18.217,
+      "ranking_value": 18.217,
+      "method": "conservative_upper_bound",
+      "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+      "source_period": "Current effective FEMA NFHL; dated panel coverage checked",
+      "source_checked_at": "2026-09-19T22:28:42.101769+00:00",
+      "refresh_due_at": "2026-10-20T22:28:42.101769+00:00",
+      "source_sha256": "ae9ffe97fb012e376ec28b9baa6a263f46b7548e2ef9bea0434f0da0539f63be",
+      "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+      "audit": {
+        "uncertain_area_pct": 0.3119105900419657,
+        "source_polygon_count": 453,
+        "geometry_repairs": [
+          {
+            "object_id": 25769701,
+            "area_change_m2": 0.0
+          },
+          {
+            "object_id": 25773474,
+            "area_change_m2": 0.0
+          },
+          {
+            "object_id": 25773639,
+            "area_change_m2": 0.0
+          },
+          {
+            "object_id": 25773691,
+            "area_change_m2": 2e-06
+          },
+          {
+            "object_id": 2113,
+            "area_change_m2": 0.0
+          }
+        ],
+        "method": "EPSG:5070 full precision; union before clipping; unknown/uncovered/conflicting area included in upper bound, excluded from lower bound. Bounds cover map classification only, not statistical or future flood uncertainty.",
+        "source_layers": {
+          "0": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/0",
+            "expected_count": 3,
+            "retrieved_count": 3,
+            "complete_id_set_before_after": true,
+            "source_sha256": "99307950da0055a8e506f9cb96be2126c19b923cfa7f458e054d64bd0a655796",
+            "downloaded_bytes": 631028,
+            "source_checked_at": "2026-09-19T22:28:42.101769+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:42.101769+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "3": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/3",
+            "expected_count": 9,
+            "retrieved_count": 9,
+            "complete_id_set_before_after": true,
+            "source_sha256": "ee495d6c0e305fb4cf926972c65498eb0ee4adb84bbbee4bf3e1559956b532b8",
+            "downloaded_bytes": 11092,
+            "source_checked_at": "2026-09-19T22:28:43.056560+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:43.056560+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          },
+          "28": {
+            "source_url": "https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28",
+            "expected_count": 453,
+            "retrieved_count": 453,
+            "complete_id_set_before_after": true,
+            "source_sha256": "0975e957058aa7fb74499c4fcba7f0db9d523af8fbbae3f4875427039ad839fb",
+            "downloaded_bytes": 19376334,
+            "source_checked_at": "2026-09-19T22:28:43.942229+00:00",
+            "latest_batch_retrieved_at": "2026-09-19T22:28:44.572829+00:00",
+            "resumed_batch_count": 0,
+            "source_data_last_edit_at": null
+          }
+        },
+        "boundary_sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449"
+      },
+      "limitation": "Derived ranking input, not a published point estimate. Original missing observation remains null. Upper bound is used because lower cost/exposure is favored; this is a conservative scenario, not a best estimate."
+    }
+  ]
+}

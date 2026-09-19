@@ -34,10 +34,6 @@ The eight input weights must each be finite numbers from 0 to 10. Defaults total
 
 Percentiles are relative to this reference cohort, not absolute quality ratings. The selected office, airport or housing mode changes which measurements are compared; changing weights changes their contributions. `nearest` airport requires both airport measurements so missing data cannot look favorable. The model intentionally favors lower housing estimates; it does not yet evaluate a personal budget, bedrooms or complete ownership costs.
 
-## Optional all-88 comparison
-
-The additive `shared/scoring-coverage.mjs` wrapper provides an explicit common-coverage view. It removes any selected category missing for one or more neighborhoods **for everyone**, then invokes this same model with one common weight set. It returns omitted categories and affected IDs, retained priority weight, and the unchanged strict result. This is a reduced-criteria comparison, never a complete eight-priority score. No per-neighborhood reweighting or imputation occurs. See [Claude wiring and acceptance checks](all-88-frontend-guide.md).
-
 ## Missing values and ranking
 
 A neighborhood missing any positive-weight category gets `totalScore: null`, `rank: null` and an explanation in `missingCategories`. It appears in `unranked`, never at the bottom with a fabricated zero. A zero-weight missing category does not prevent ranking. Do not redistribute weights differently for each neighborhood. Equal totals use canonical neighborhood ID as a stable display order; the tie is not evidence that one area is better.
@@ -65,7 +61,7 @@ const result = scoreNeighborhoods(scoringPayload, {
 
 Import paths depend on the caller's location; keep this one shared implementation. `scoreNeighborhoods` validates the cohort, schema/model versions, categories, unique IDs, units, timestamps and input options. Mixed evidence versions, malformed cohorts and evaluation timestamps more than five minutes in the future are rejected. Fully expired evidence throws `NO_CURRENT_DATA`. Invalid input throws `ScoringValidationError`; do not suppress it with mock results. It returns category measurements, availability reasons, contributions and deterministic explanations. Use the output directly rather than having Claude invent or recalculate scores.
 
-The existing `get_neighborhood_evidence` REST/MCP response deliberately retains `score: null` and `score_status: "not_implemented"`: that endpoint supplies raw evidence and does not receive user preferences. The shared model produces the new, separately labeled comparison scores. The optional scenario-comparison MCP tool uses the strict shared model; it does not automatically enable the all-88 view. No `/reports` persistence service is implied.
+The existing `get_neighborhood_evidence` REST/MCP response deliberately retains `score: null` and `score_status: "not_implemented"`: that endpoint supplies raw evidence and does not receive user preferences. The shared model produces the new, separately labeled comparison scores. No scoring MCP tool or `/reports` service is implied.
 
 ## Scope and verification
 
@@ -74,3 +70,8 @@ This version generates an in-session ranked report. It does not persist or share
 The optional Listing Watch dialog is independent of scoring. Its service is unconfigured, so no watch or email is created. Its browser-session correlation ID does not imply report persistence, and future listing/property results must not silently alter this model's neighborhood measurements.
 
 Run backend and shared scoring tests, the frontend build and the public connection preflight as described in [the handoff](frontend-backend-handoff.md). In the browser, verify that weights, rent/buy, office and airport choices recompute the shortlist; remote mode omits commute; all-zero effective weights are rejected; missing/expired inputs withhold rankings; and no mocked claims are displayed. A build/preflight alone is not a rendered-browser or deployed-host test.
+
+
+## Source-backed inputs for all 88
+
+The six missing rent/flood measurements have a separate, explicitly labeled conservative-input path. Keep every selected category; do not use the rejected global-exclusion approach. Read [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new RPC, shared wrapper, source bounds, badges, expiry and acceptance tests. Original observations and the strict model remain unchanged.

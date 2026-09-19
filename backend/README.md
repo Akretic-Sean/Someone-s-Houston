@@ -119,6 +119,4 @@ Deno checks, secret configuration and the protected synthetic runtime check.
 This does not yet connect AI generation to the report frontend or persist reports.
 
 
-## All-neighborhood comparison
-
-The optional [all-88 shared calculation](../docs/all-88-frontend-guide.md) ranks the full cohort on common current measurements without changing the strict model or filling source gaps. `npm run test:all-neighborhoods` verifies rent/buy and offer/remote against one live public snapshot. Uses the same ignored public-key configuration as `test:live`.
+For all 88 with every selected priority retained, see [source-bounded scoring](../docs/all-88-frontend-guide.md). `npm run test:all-neighborhoods` verifies the new RPC and shared wrapper against live public data. Never label its conservative source-derived inputs as exact observations.

@@ -1,67 +1,65 @@
-# Claude walkthrough: compare all 88 without filling unknowns
+# Claude walkthrough: all 88 with all priorities retained
 
-## What is ready
+This replaces the rejected category-exclusion approach. The `scoring-coverage` wrapper has been removed from PR #14. **Do not exclude affordability or flood from everyone.**
 
-The existing public scoring RPC already returns all 88 neighborhoods. The strict eight-priority calculation currently ranks 82 in rent mode and 83 in buy mode. The new **explicit opt-in** `scoreAllNeighborhoods` wrapper ranks all 88 using only selected categories with complete current coverage across the entire cohort. It reuses the existing scorer and never invents measurements. No database migration, new key, paid API, server deployment or extra request is required.
+## What fills the six ranking gaps
 
-This fixes inclusion in a comparable calculation; it **does not repair the missing source observations**. The strict scorer, database facts and existing UI behavior remain unchanged until the frontend opts in.
+Original missing observations remain null. Six additional source-backed **conservative ranking inputs** live separately in `neighborhood_gap_inputs`. They are not fabricated measurements or exact-data repairs.
 
-| Source gap | Neighborhoods | Consequence with current default weights |
+| Neighborhood | Official source information | Ranking input |
 | --- | --- | --- |
-| Published median rent is null | Hidden Valley (7) | Rent-mode all-88 comparison excludes affordability for everyone |
-| Validated flood percentages withheld for incomplete/conflicting mapped coverage | Eldridge / West Oaks (17), Alief (25), Fort Bend Houston (41), Kingwood Area (43), South Belt / Ellington (80) | All-88 comparison excludes flood for everyone |
+| Hidden Valley (7) | City ACS 2020–2024 gross-rent table: all 110 estimated rent-paying units fall in the $1,500–$1,999 band; exact median suppressed | $1,999/month, upper endpoint of that published band |
+| Eldridge / West Oaks (17) | FEMA mapped-SFHA classification interval 71.6074–73.6277% | 73.6277% |
+| Alief (25) | FEMA interval 44.9031–44.9938% | 44.9938% |
+| Fort Bend Houston (41) | FEMA interval 1.4375–2.9618% | 2.9618% |
+| Kingwood Area (43) | FEMA interval 42.6363–42.7513% | 42.7513% |
+| South Belt / Ellington (80) | FEMA interval 17.9050–18.2170% | 18.2170% |
 
-Do not substitute home value for rent, regional rent for neighborhood rent, zero flood exposure, or an average score. Those would answer different questions or fabricate evidence.
+The rent source is [City Gross Rent 2024, page 1](https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/6-Gross-Rent-2024.pdf). 110 is an estimated housing-unit count, **not** survey sample size. The [City median table](https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/8-Median-Gross-Rent-2024.pdf) explains suppression. The band is not a statistical confidence interval or current asking rent.
 
-## Copy this task to Claude
+Flood bounds are computed from fresh complete [effective FEMA NFHL](https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/28) polygon queries, effective panels and availability geometry using the canonical full-precision neighborhood boundaries. Unknown/uncovered/conflicting geography is excluded from the lower bound and included in the upper bound. Overlap with both moderate and minimal-hazard classes is checked; this reveals more uncertainty than the old moderate-only conflict check. The widest current interval is 2.0203 percentage points. The importer rejects intervals wider than five percentage points instead of silently publishing arbitrary values. Bounds address map-classification ambiguity only; they do not cover all model uncertainty or predict whether a property floods. Denominator includes water and nonresidential land.
 
-> Read docs/all-88-frontend-guide.md, docs/frontend-backend-handoff.md and docs/data-instructions.md on PR #14. Add an explicit “Compare all 88” view using shared/scoring-coverage.mjs and its TypeScript declarations. Keep the existing full-priority view, candidate settings and scoreNeighborhoods behavior. Reuse the current scoring-data fetch/cache. Show the returned notice, included/omitted criteria, original versus effective weights, and retainedWeightFraction next to results. Render comparison.ranked for the all-88 view, but do not claim these scores include omitted priorities. Preserve null rent/flood facts and source limitations in details. Handle NO_COMMON_CATEGORIES and expired data without mocks. Update every report-generation/recompute path consistently, run frontend tests/build and backend coverage tests, and verify the acceptance cases below. Do not change login, create a new database, use service credentials, merge unrelated PRs or edit the scoring formula.
+Upper endpoints are a deliberately conservative scoring assumption because the existing model favors lower rent/exposure. They can disadvantage a neighborhood relative to its unknown exact value. They are not best estimates. Retain that disclosure and the source interval whenever showing affected scores.
 
-## Wiring steps
+## Copy this to Claude
 
-1. Bring the PR branch changes into the frontend working branch using the team's normal reviewed workflow. Preserve teammate edits. Files required are `shared/scoring-coverage.mjs` and `shared/scoring-coverage.d.mts`; they import the existing shared scorer.
-2. Continue fetching `get_neighborhood_scoring_data` once through the current data layer with the publishable key. The complete 88-row payload is required; never filter it to the shortlist before scoring.
-3. Add the view choice separately from the eight user weights. Preserve requested slider values. Invoke the wrapper only when the user chooses all 88.
+> Read docs/all-88-frontend-guide.md and docs/frontend-backend-handoff.md from PR #14. Replace the rejected shared-coverage/category-exclusion proposal with the source-bounded scoring integration. Fetch get_neighborhood_scoring_data_with_estimates using the existing public key, cache its envelope, and score with scoreNeighborhoodsWithEstimates from shared/scoring-estimates.mjs. Keep all user weights, including affordability and flood; retain the existing remote-mode rule. Show the returned estimate badges, source ranges and conservative-upper-bound explanation for the six affected neighborhoods. Never call the $1,999 input a published median or a flood bound an exact exposure/risk probability. Preserve original null facts in the evidence cards, with a separate ranking-input line. Update both preview and report-generation call sites, validate/cache/expire the envelope correctly, run the tests below, and verify 88 ranked IDs in rent/buy and offer/remote. Do not alter login or use admin keys. Do not fall back to fabricated or expired data.
+
+## Fetch once and calculate locally
 
 ```ts
-import { scoreAllNeighborhoods } from '../../../shared/scoring-coverage.mjs';
+import { scoreNeighborhoodsWithEstimates } from '../../../shared/scoring-estimates.mjs';
 
-const coverage = scoreAllNeighborhoods(data.payload, config);
-const rows = coverage.comparison.ranked; // 88 rows or a clear error
-const reportNotice = coverage.notice;
-const included = coverage.includedCategories;
-const excluded = coverage.omittedCategories;
-const retainedPercent = 100 * coverage.retainedWeightFraction;
-// coverage.requested retains the original full-priority result, including exclusions.
-// coverage.comparison.normalizedWeights are the actual displayed ranking weights.
+const response = await fetch(
+  `${SUPABASE_URL}/rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`,
+  {
+    method: 'POST',
+    headers: { apikey: SUPABASE_PUBLISHABLE_KEY, 'Content-Type': 'application/json' },
+    body: '{}',
+    signal: AbortSignal.timeout(15000),
+  }
+);
+if (!response.ok) throw new Error('Scoring data unavailable');
+const envelope = await response.json();
+const result = scoreNeighborhoodsWithEstimates(envelope, config);
+// result.ranked: 88 with current complete receipts and default priorities.
+// result.effectiveWeights: original priorities; remote commute still becomes 0.
+// result.estimateInputsUsed: source URL, period, bounds and receipt for used inputs.
+// row.dataQuality: includes_conservative_bound | reference_measurements.
+// row.estimateInputsUsed: bounds used for this specific neighborhood.
 ```
 
-4. In the current checkout, `frontend/report-web/src/App.tsx` calls the strict scorer in both recomputation and report generation. Find **all** call sites (`rg scoreNeighborhoods frontend/report-web/src`) and pass the selected view through each path; otherwise the preview and generated report can disagree. Do not mutate `config.weights`.
-5. Keep the notice visible in the shortlist, generated report and any exported/shareable representation. Suggested label: **“All 88 — shared-data comparison”**. For the current default offer/rent settings show **“6 of 8 priorities; 74.1% of requested priority weight retained. Affordability and flood excluded from this comparison.”** Derive this text from the result, never hardcode counts or categories. Retained weight is not statistical confidence or data accuracy.
-6. Keep existing rent, flood, sources and optional context cards. Unknown remains unknown. Omitted categories can still show available facts, but have zero contribution for **every** neighborhood in this view. Do not use explanations from the full-priority view to describe the all-88 total. Do not compare numeric scores between views as though the formula were identical.
-7. Recompute when sliders, tenure, work mode, office, airport, snapshot or expiry change. Refetch and invalidate on resume/expiry using the current rules. If the common category set changes, show the updated notice and weights. If no selected category has full coverage, show `NO_COMMON_CATEGORIES` and offer the full-priority view or another user-selected priority; never silently add a priority.
+The response is `{schema_version:1, policy_version:'source-bounded-v1', base:<existing scoring payload>, estimates:[...]}`. It is deliberately a separate RPC so old clients cannot mistake substituted numbers for measured medians. **Do not pass the envelope to the old scorer or discard its estimates metadata.** No new credential, paid API or per-slider network call is required. The original scoring RPC and strict model remain available for auditing; they still preserve the six missing observations.
 
-## Expected live behavior with this edition
+1. Reuse the frontend data/auth layers. Adapt their payload type and validation to store the complete envelope rather than just `base`. The shared `.d.mts` declaration exposes the result type. The existing strict payload validator applies to `envelope.base`; the new scoring wrapper validates estimate policy, source URLs, approved IDs, ranges, dates and evidence versions.
+2. Find **all** `scoreNeighborhoods` calls in `frontend/report-web/src` (currently preview/recompute and report generation in `App.tsx`). Route both through the new wrapper using the same envelope and unchanged config. Use its returned explanations and weights.
+3. On each affected card/report show **“Includes a conservative source-derived estimate”**, the category-specific range, ranking endpoint and source link/period. On Hidden Valley's evidence card keep **“Exact median unavailable”** and add **“Ranking uses $1,999 upper end of the published $1,500–$1,999 band.”** Do not overwrite the median field with that endpoint. Buy mode uses the published home value and does not consume the rent input.
+4. Keep the category sliders unchanged. No categories are removed globally. The original normalizations, office/airport handling and remote-mode behavior remain in the shared scorer.
+5. Cache at most one hour and no later than the earliest usable base **or estimate** deadline. Recompute on slider/config changes and after tab resume. Refetch at expiry. Do not assume 88 forever: expired/mismatched estimates leave their metrics null and the corresponding rows unranked. Never reuse an earlier result after a failed refresh.
+6. Source changes matter: the database binds these inputs to the reviewed boundary and evidence versions. Publishing a new evidence edition invalidates them; rerun the importer/review/publication. Do not merely update dates. More recent valid observed values take precedence automatically.
+7. The current `compare_neighborhood_scenarios` MCP tool still uses strict observed inputs. It is not the new browser scoring path. Claude should use this walkthrough for the frontend rather than copy an old MCP shortlist or invent a formula.
 
-| Settings | Full-priority ranked | All-88 ranked | Omitted for all | Requested effective weight retained |
-| --- | ---: | ---: | --- | ---: |
-| Rent / offer defaults | 82 | 88 | Affordability, flood | 40/54 = 74.1% |
-| Rent / remote defaults | 82 | 88 | Affordability, flood; commute already disabled by remote mode | 33/47 = 70.2% |
-| Buy / offer defaults | 83 | 88 | Flood | 48/54 = 88.9% |
-| Buy / remote defaults | 83 | 88 | Flood; commute already disabled by remote mode | 41/47 = 87.2% |
-
-These counts are assertions for this dated edition, not permanent application constants. User preferences change retained weight. Future validated source repairs automatically restore categories with full coverage, without inventing fallback values.
-
-## Acceptance checks
-
-- Both views use the same live snapshot; all-88 shows exactly 88 unique IDs, including 7/17/25/41/43/80.
-- Rent excludes affordability globally; buy restores it when current home values are complete. Flood remains excluded until all 88 have valid measurements or the user assigned it zero weight.
-- Full-priority results remain unchanged. Missing measurements stay null in either view.
-- A flood-only selection produces `NO_COMMON_CATEGORIES`; all-zero weights and remote/commute-only settings remain invalid. Never show an invented 88-row ranking on failure.
-- Expired data cannot preserve a cached rank. A newly missing category changes the shared category set for everyone and must update the visible notice.
-- Report and preview agree on view, ranks, normalized weights, omitted categories and source dates.
-
-From the repository root:
+## Verify
 
 ```sh
 npm --prefix backend test
@@ -70,4 +68,12 @@ npm --prefix frontend/report-web test
 npm --prefix frontend/report-web run build
 ```
 
-The live check requires the existing public environment variables or ignored `backend/.env`; it reads one scoring snapshot and verifies all four tenure/work-mode combinations. It makes no writes. Shared tests cover exclusions, equal criteria, preserved unknowns, expiry and no-common-category failures. Frontend rendering is the partner's remaining integration task.
+The live command uses the existing public-key configuration in `backend/.env` or process variables. It checks 88 ranked neighborhoods in all four rent/buy × offer/remote scenarios, affordability/flood weights retained, six inputs used for rent and five for buy, and the original Hidden Valley median still null.
+
+UI acceptance: report and preview agree; all 88 canonical IDs appear; affordability and flood remain weighted; changing rent to buy removes Hidden Valley's rent estimate badge; source bounds stay visible on affected reports; unavailable/expired estimates and source outages never become zero or safe. No deployed-browser validation is implied by CLI checks.
+
+## Backend refresh and audit
+
+`backend/tools/prepare-gap-inputs.py` downloads the City PDF and targeted FEMA geometry using the existing bounded downloader. It checks the boundary hash, complete source ID sets before/after, geometry and dates. Reproduce with the existing Python virtual environment, then review `backend/data/neighborhood-gap-inputs.json`. This committed file is a reproducibility artifact, not a runtime fallback.
+
+Publish its six `rows` through service-only `publish_neighborhood_gap_inputs(p_rows)`. Publication is atomic and enforces approved neighborhoods, sources, ranges and freshness. Public clients have read access only. `get_neighborhood_scoring_data_with_estimates` withholds expired/boundary/evidence-mismatched rows; the shared wrapper also checks validity locally. Receipts expire 31 days after actual retrieval. The reference refresh runbook must include these inputs when refreshing the main evidence edition.

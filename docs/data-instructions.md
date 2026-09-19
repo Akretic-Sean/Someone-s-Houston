@@ -38,10 +38,6 @@ IDs are integers 1–88. Frontend mock slugs are not canonical IDs: resolve them
 - Housing structure, bedroom and construction-year tables are separate marginals; do not invent combined listing inventory. USDA groceries cover SNAP-authorized grocery/supermarket/superstore records only; zero records does not establish no food access. Dining remains missing.
 - Evidence distances are straight-line from a neighborhood reference point to an inventory/address proxy, never route minutes. Medical inventories do not establish insurance acceptance, specialty access or clinical quality. Flood percentages describe mapped land area, not the chance a home floods; heed coverage/conflict flags and null values.
 
-## Optional all-88 comparison
-
-The explicit `scoreAllNeighborhoods` wrapper in `shared/scoring-coverage.mjs` implements a common-coverage view; follow [the frontend guide](all-88-frontend-guide.md). Remove incomplete selected categories globally, display the omissions and actual weights, retain original settings and full-priority results, and never claim that missing source data was repaired. This is the only approved alternative coverage policy; no per-neighborhood redistribution or synthetic values.
-
 ## Frontend and backend access
 
 - Frontend uses the publishable key and the documented public REST/RPC paths; it does not call the ingestion Edge Function or use MCP as its HTTP data API.
@@ -58,3 +54,8 @@ The explicit `scoreAllNeighborhoods` wrapper in `shared/scoring-coverage.mjs` im
 - Frontend: from `frontend/report-web/`, run `npm run build` (includes TypeScript checking).
 - New datasets need bounded scope, source/effective dates, missing-value rules, a documented read contract and meaningful validation before they are called available. Update `docs/api.md` and MCP tool descriptions with the implementation.
 - Follow `docs/claude-data-guide.md` for connection setup and interpretation smoke checks. Recommendations must use explicit preferences and the versioned shared model. Do not claim private report storage, routing or other outputs outside its scope.
+
+
+## Source-backed inputs for all 88
+
+The six missing rent/flood measurements have a separate, explicitly labeled conservative-input path. Keep every selected category; do not use the rejected global-exclusion approach. Read [the all-88 frontend walkthrough](all-88-frontend-guide.md) for the new RPC, shared wrapper, source bounds, badges, expiry and acceptance tests. Original observations and the strict model remain unchanged.
