@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { CATEGORY_IDS, type ScoredNeighborhood, type ScoringPayload, type ScoringResult } from '../../../../shared/scoring.mjs';
 import type { ReportConfig } from '../App';
 import { Card } from '../components/Bits';
@@ -9,6 +9,7 @@ import { useEvidence } from '../evidence/useEvidence';
 import { clearEvidenceCache } from '../evidence/api';
 import { evidenceMatchesScoring } from '../evidence/validity.mjs';
 import { buildCategoryViews, formatMeters, formatPct, formatUsd } from '../evidence/select';
+import ListingWatchDialog from '../watch/ListingWatchDialog';
 
 const METRIC_LABELS: Record<string, string> = {
   rent_usd: 'Estimated monthly rent', home_value_usd: 'Estimated home value', sfha_area_pct: 'Area in mapped flood hazard zone',
@@ -73,6 +74,10 @@ export default function CandidateReport({ config, result, payload, loading, erro
 }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [watchOpen, setWatchOpen] = useState(false);
+  const [watchMessage, setWatchMessage] = useState('');
+  // Correlation identifier for this browser session, not a persisted report ID.
+  const [watchReportId] = useState(() => `session-${crypto.randomUUID()}`);
   const activeId = selectedId ?? result?.ranked[0]?.neighborhoodId ?? null;
   const evidence = useEvidence(activeId);
   const active = result?.results.find(row => row.neighborhoodId === activeId);
@@ -83,6 +88,7 @@ export default function CandidateReport({ config, result, payload, loading, erro
   const evidenceVersionMismatch = detailNeighborhood?.neighborhood_id === activeId && !matchingEvidence;
   const views = matchingEvidence && evidence.payload ? buildCategoryViews(evidence.payload).map(view => ({ ...view, label: WEIGHT_DEFS.find(def => def.id === view.id)?.label ?? view.label })) : [];
   const top = result?.ranked.slice(0, 5) ?? [];
+  const watchPicks = useMemo(() => (result?.ranked.slice(0, 5) ?? []).map(row => ({ neighborhoodId: row.neighborhoodId, name: row.name })), [result]);
 
   function select(id: number) {
     setSelectedId(id);
@@ -101,7 +107,9 @@ export default function CandidateReport({ config, result, payload, loading, erro
       <span className="source">Provisional neighborhood comparison</span>
       <button type="button" className="btn" onClick={onConfigure}>Adjust priorities</button>
       <button type="button" className="btn" onClick={() => window.print()}>Print / PDF</button>
+      <button type="button" className="btn btn-primary" disabled={loading || Boolean(error) || watchPicks.length === 0} onClick={() => setWatchOpen(true)}>Listing Watch</button>
     </div>
+    {watchMessage && <p className="prototype-notice" role="status">{watchMessage}</p>}
     <main className="report-body">
       {loading ? <Card><p role="status"><span className="spinner" /> Checking current scoring evidence…</p></Card>
         : error || !result || !payload ? <Card><p role="alert">{error ?? 'Scoring evidence is unavailable.'}</p><button className="btn" onClick={onRetry}>Retry data connection</button></Card>
@@ -171,5 +179,7 @@ export default function CandidateReport({ config, result, payload, loading, erro
           </footer>
         </>}
     </main>
+    <ListingWatchDialog open={watchOpen} onClose={() => setWatchOpen(false)} reportId={watchReportId}
+      officeId={config.office} picks={watchPicks} onDone={setWatchMessage} />
   </>;
 }
