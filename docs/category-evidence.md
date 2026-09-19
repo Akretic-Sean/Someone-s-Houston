@@ -32,6 +32,8 @@ Houston's public food-inspection downloads date to 2015, despite newer portal up
 
 ## Storage, refresh and cost control
 
+Refresh owner: **@Akretic-Sean**. See [data operations](data-operations.md) for the October 20 first expiry, October 6 refresh target, source-review sequence and automated 14-day expiry warnings. Missing offline PDF retrieval receipts now stop preparation; boundary geometry must match its manifest before evidence spatial joins.
+
 Two added public tables: eight rows in `report_category_config`, and 704 rows in `neighborhood_category_evidence` (88×8). The evidence table and indexes measured 2.6 MiB after publication. Keep one current release; publish all 704 atomically. Candidate details never belong in these public-read tables. RLS/grants deny public writes, and publication uses the existing private bounded staging area with a service-only finalizer.
 
 Evidence is precomputed once per source update. It includes dependency versions, observation/effective dates and explicit unknowns. The RPC hides facts if the boundary, profile/center or referenced facility version changes. It also hides expired facts. `refresh_due_at` is a 31-day review deadline after the oldest successful input check, not a claim that an observation was measured recently. Housing offline regeneration retains the real PDF retrieval date; the economic source is rechecked even if its content is unchanged.

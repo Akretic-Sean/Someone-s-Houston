@@ -6,4 +6,4 @@
 *.sh text eol=lf
 # Published snapshot manifests hash exact UTF-8 bytes. Keep GeoJSON checkout
 # line endings stable on Windows; never rewrite a source hash for CRLF.
-backend/data/*.geojson text eol=lf
+/backend/data/*.geojson text eol=lf

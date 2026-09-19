@@ -1,0 +1,7 @@
+# Reference refresh and backend reliability owner; see docs/data-operations.md.
+/backend/ @Akretic-Sean
+/.github/workflows/backend-ci.yml @Akretic-Sean
+/.github/workflows/data-monitor.yml @Akretic-Sean
+/docs/data-operations.md @Akretic-Sean
+/docs/category-evidence.md @Akretic-Sean
+/docs/live-feeds.md @Akretic-Sean

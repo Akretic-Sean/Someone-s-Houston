@@ -6,6 +6,7 @@ import { createNeighborhoodClient, readBoundedJson, supabaseBaseUrl, type Neighb
 import { REPORT_CATEGORIES } from './evidence.js';
 import { validateEvidenceRows } from './publish-evidence.js';
 import { fetchSource, prepareProfiles } from './import-neighborhoods.js';
+import { verifyBoundarySnapshot } from './prepare-boundaries.js';
 
 type Json = Record<string, unknown>;
 type Point = [number, number];
@@ -101,12 +102,13 @@ export async function prepareEvidence(options: { url: string; publishableKey: st
     throw new Error('Inventory exceeds bounded read.');
   }
   const read = async (name: string) => JSON.parse(await readFile(new URL(`../data/${name}`, import.meta.url), 'utf8'));
-  const [profiles, sourceRaw, placeRaw, housing, groceries, anchors, flood, boundaries, boundaryManifest, economicSource, economicReference] = await Promise.all([
+  const [profiles, sourceRaw, placeRaw, housing, groceries, anchors, flood, boundaryContent, boundaryManifest, economicSource, economicReference] = await Promise.all([
     client.list(), table('neighborhood_sources', 'source_id'), table('neighborhood_places', 'place_id'),
     read('neighborhood-housing.json'), read('neighborhood-groceries.json'), read('reference/destination-anchors.json'),
-    read('neighborhood-flood-exposure.json'), read('super-neighborhood-boundaries.geojson'), read('super-neighborhood-boundaries.manifest.json'),
+    read('neighborhood-flood-exposure.json'), readFile(new URL('../data/super-neighborhood-boundaries.geojson', import.meta.url), 'utf8'), read('super-neighborhood-boundaries.manifest.json'),
     fetchSource(fetcher), read('reference/super-neighborhoods-2024.json'),
   ]);
+  const boundaries = verifyBoundarySnapshot(boundaryContent, boundaryManifest, profiles);
   const sources = z.array(sourceSchema).length(8).parse(sourceRaw), places = z.array(placeSchema).max(5_000).parse(placeRaw);
   const version: string = z.string().regex(/^coh-sn-boundaries-[a-f0-9]{16}$/).parse(boundaryManifest.boundary_version);
   if (new Set(places.map(p => p.place_id)).size !== places.length || new Set(sources.map(s => s.source_id)).size !== 8 ||
