@@ -89,7 +89,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
   const matchingEvidence = detailNeighborhood?.neighborhood_id === activeId && evidenceMatchesScoring(detailNeighborhood, scoringNeighborhood);
   const evidenceVersionMismatch = detailNeighborhood?.neighborhood_id === activeId && !matchingEvidence;
   const views = matchingEvidence && evidence.payload ? buildCategoryViews(evidence.payload).map(view => ({ ...view, label: WEIGHT_DEFS.find(def => def.id === view.id)?.label ?? view.label })) : [];
-  const top = result?.ranked.slice(0, 5) ?? [];
+  const top = useMemo(() => result?.ranked.slice(0, 5) ?? [], [result]);
   const watchPicks = useMemo(() => (result?.ranked.slice(0, 5) ?? []).map(row => ({ neighborhoodId: row.neighborhoodId, name: row.name })), [result]);
 
   function select(id: number) {

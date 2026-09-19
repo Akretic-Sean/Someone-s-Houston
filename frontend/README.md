@@ -135,9 +135,8 @@ username signup, quotas and the exact Vercel handoff.
 
 - **Sample dashboard:** labeled demonstration records and connector controls.
 
-The map plots actual reference points using a cosine-corrected projection.
-
-These are neighborhood locations, not parcels or navigational directions.
+The Leaflet map uses OpenStreetMap street tiles and the Supabase `get_neighborhood_map` RPC for simplified boundaries, joined by canonical neighborhood ID. Tiles, boundaries and reference-point markers share Web Mercator positioning. Teal markers show the shortlist; orange shows the workplace. Pan/zoom, fit-all, shortlist zoom and keyboard marker selection preserve the evidence-card flow. Boundary responses are validated, coalesced and cached for up to 24 hours; boundary or tile failures show separate retry controls without blocking ranking.
+These are neighborhood locations, not parcels or navigational directions. Tiles load directly from OpenStreetMap with visible attribution and browser caching; no extra API key is required. Do not bulk-download or prefetch tiles. The external tile service can be unavailable or rate limited; follow https://operations.osmfoundation.org/policies/tiles/ and arrange a suitable tile provider before scaling traffic. Browser tests mock tiles and Supabase. For an optional real-tile visual check, run `LIVE_MAP_TILES=1 npx playwright test -g "geographic map"` (POSIX shell); API/auth fixtures remain synthetic.
 
 Reports are kept only in the current browser session. Saved/shareable reports,
 

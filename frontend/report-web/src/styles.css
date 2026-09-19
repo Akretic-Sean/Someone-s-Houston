@@ -1711,6 +1711,24 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
   min-height: 100vh;
   color: var(--text-3);
 }
+
+/* Geographic report map: keep the basemap below the app header and dialogs. */
+.geo-map { height: 460px; width: 100%; z-index: 0; border: 1px solid var(--line-2); border-radius: var(--r-md); background: #10252e; font-family: var(--sans); }
+.geo-map .leaflet-tile-pane { filter: grayscale(1) invert(1) brightness(.8) contrast(.9); }
+.geo-map-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.geo-map-actions .source { margin-right: auto; }
+.geo-map .leaflet-control-attribution { background: #10252e; color: #cbd5e1; }
+.geo-map .leaflet-control-attribution a { color: #5eead4; }
+.geo-map .leaflet-bar a { background: #10252e; color: #e2e8f0; }
+.geo-map .leaflet-tooltip { background: #10252e; border-color: #5eead4; color: #e2e8f0; }
+.geo-marker { display: grid; place-items: center; }
+.geo-dot { display: block; width: 9px; height: 9px; background: #94a3b8; border: 1px solid #10252e; border-radius: 50%; }
+.geo-dot-pick { display: grid; place-items: center; width: 27px; height: 27px; background: #5eead4; color: #03232d; font-weight: 800; font-size: 13px; border: 2px solid #0f766e; box-shadow: 0 0 0 3px #042f2ecc; }
+.geo-dot-office { width: 20px; height: 20px; background: var(--accent); border: 2px solid #7c2d12; }
+.geo-marker[data-active='true'] .geo-dot, .geo-marker:focus-visible .geo-dot { outline: 3px solid white; outline-offset: 3px; }
+.map-status { color: var(--text-2); font-size: 13px; margin: 8px 0; }
+@media (max-width: 600px) { .geo-map { height: 360px; } }
+@media print { .geo-map { break-inside: avoid; print-color-adjust: exact; -webkit-print-color-adjust: exact; } .geo-map-actions, .geo-map .leaflet-control-zoom { display: none; } }
 .login-help, .login-address { font-size: 13px; line-height: 1.6; color: var(--text-3); margin-top: 18px; }
 .login-address { margin: 0 0 20px; overflow-wrap: anywhere; }
 .login-address strong { color: var(--text-2); }
