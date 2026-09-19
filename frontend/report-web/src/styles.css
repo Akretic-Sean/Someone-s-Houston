@@ -1758,3 +1758,10 @@ button:disabled, input:disabled { cursor: not-allowed; opacity: .5; }
 .estimate-disclosure p { margin: 6px 0 0; }
 .estimate-disclosure a { text-decoration: underline; text-underline-offset: 3px; }
 .estimate-badge { display: block; font-size: 12px; line-height: 1.5; margin: 0 12px 10px; }
+
+.public-safety-panel { margin: 20px 0; }
+.public-safety-panel h3 { font-family: var(--serif); font-size: 26px; font-weight: 400; margin: 8px 0; }
+.crime-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin: 18px 0; }
+.crime-counts dt { font-size: 13px; color: var(--text-3); }
+.crime-counts dd { margin: 4px 0 0; font-size: 24px; color: var(--text); }
+.public-safety-panel a { text-decoration: underline; text-underline-offset: 3px; }

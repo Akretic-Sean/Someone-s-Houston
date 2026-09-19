@@ -22,7 +22,7 @@ export default function CreateReport({ config, onChange, result, loading, genera
   return (
     <main className="create"><div className="shell">
       <h1 className="section-title">Configure and generate</h1>
-      <p className="section-lede">Choose what matters to you. We compare Houston’s 88 Super Neighborhoods using published evidence and your weights. Scores are provisional relative comparisons. Safety is unavailable and is not scored.</p>
+      <p className="section-lede">Choose what matters to you. We compare Houston’s 88 Super Neighborhoods using published evidence and your weights. Scores are provisional relative comparisons. Public safety context appears separately in your report and is not scored.</p>
       <fieldset className="scoring-form" disabled={generating || extracting}>
         <PreferenceNotes profile={config.profile} onChange={profile => onChange({ ...config, profile })} onBusy={onExtracting} />
         <div className="config-grid">
