@@ -120,7 +120,7 @@ test('MCP discovery and tool calls return real profile data with missing-value c
   t.after(async () => { await client.close(); await server.close(); });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   const listing = await client.listTools();
-  assert.deepEqual(listing.tools.map(x => x.name).sort(), ['get_current_conditions', 'get_neighborhood', 'get_neighborhood_amenities', 'get_neighborhood_evidence', 'list_neighborhoods']);
+  assert.deepEqual(listing.tools.map(x => x.name).sort(), ['get_current_conditions', 'get_neighborhood', 'get_neighborhood_amenities', 'get_neighborhood_evidence', 'get_neighborhood_relocation_context', 'list_neighborhoods']);
   const result = await client.callTool({ name: 'get_neighborhood', arguments: { neighborhood_id: 7 } });
   assert.equal(result.isError, undefined);
   const output = JSON.parse(result.content[0].text);

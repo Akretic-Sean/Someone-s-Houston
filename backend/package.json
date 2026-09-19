@@ -14,6 +14,8 @@
     "groceries:prepare": "npm run build && node dist/prepare-groceries.js",
     "evidence:prepare": "npm run build && node --env-file-if-exists=.env dist/prepare-evidence.js",
     "evidence:publish": "npm run build && node --env-file-if-exists=.env dist/publish-evidence.js",
+    "relocation:prepare": "python tools/prepare-relocation-context.py",
+    "relocation:publish": "npm run build && node --env-file-if-exists=.env dist/publish-relocation-context.js",
     "mcp": "node --env-file-if-exists=.env dist/mcp.js",
     "test:live": "npm run build && node --env-file-if-exists=.env test/live.mjs",
     "test:frontend": "npm run build && node tools/check-frontend-connection.mjs"

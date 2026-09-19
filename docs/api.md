@@ -8,6 +8,8 @@ The P0 comparison flow uses a compact public scoring-data RPC and the shared det
 
 ## Neighborhood profiles
 
+**Optional expanded context:** `POST /rest/v1/rpc/get_neighborhood_relocation_context` with `{"p_neighborhood_id":62}` returns housing detail, school locations, METRO scheduled transit and historical 2024 reported offense counts. It does not alter scoring. See [the additive contract](expanded-context.md) for availability, periods, expiry, limitations and the sixth local MCP tool.
+
 - Base URL: `https://hknzivrgihnqzvsafkkr.supabase.co`.
 - Method/path: `GET /rest/v1/neighborhood_profiles` (Supabase PostgREST).
 - Header: `apikey: <SUPABASE_PUBLISHABLE_KEY>`. No account/login is required for this public City data. Never use an admin key in the frontend.

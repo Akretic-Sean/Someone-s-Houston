@@ -8,6 +8,8 @@ recorded in `.github/CODEOWNERS`.
 
 ## Deadlines and response
 
+The optional [expanded context](expanded-context.md) has separate deadlines: the initial METRO window expires September 26, 2026 at 00:00 UTC; refresh weekly before expiry. Historical-crime source review is due 30 days after its check. The monitor now also validates two manifests/176 summaries, issuing a transit warning two days ahead and a crime-source review warning seven days ahead. These reference imports are reviewed operator actions, separate from weather/gauge Cron. Expiry withholds optional facts without altering the scoring model.
+
 The September 19, 2026 release begins expiring **October 20, 2026**. Complete the
 next reviewed refresh by **October 6**, then use the newly published
 `refresh_due_at` values for subsequent deadlines. Review references at least

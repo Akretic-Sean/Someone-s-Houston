@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CATEGORIES, MARKER, referenceProblems, checkHealth, syncIssue } from '../tools/monitor-data.mjs';
+import { CATEGORIES, MARKER, referenceProblems, supplementProblems, checkHealth, syncIssue } from '../tools/monitor-data.mjs';
 
 const NOW = Date.parse('2026-09-19T18:00:00Z');
 const iso = offset => new Date(NOW + offset).toISOString();
@@ -8,6 +8,8 @@ function references() {
   const profiles = Array.from({ length: 88 }, (_, i) => ({ neighborhood_id: i + 1, data_version: 'profile-v1' }));
   return {
     profiles, boundaries: profiles.map(p => ({ neighborhood_id: p.neighborhood_id, boundary_version: 'boundary-v1' })),
+    supplementSources: ['metro_gtfs','hpd_crime_2024'].map(source_id=>({source_id,source_checked_at:iso(-1000),refresh_due_at:iso(30*86400000),boundary_version:'boundary-v1'})),
+    supplementRows: ['metro_gtfs','hpd_crime_2024'].flatMap(source_id=>profiles.map(p=>({source_id,neighborhood_id:p.neighborhood_id}))),
     sources: Array.from({ length: 8 }, (_, i) => ({ source_id: `source_${i}`, data_version: 'source-v1', boundary_version: 'boundary-v1' })),
     evidence: profiles.flatMap(p => CATEGORIES.map(category_id => ({ neighborhood_id: p.neighborhood_id, category_id,
       prepared_at: iso(-1000), refresh_due_at: iso(90 * 86400000), boundary_version: 'boundary-v1',
@@ -32,10 +34,22 @@ function api(snapshot = references(), live = current()) {
     assert.equal(init.method, 'GET'); assert.equal(init.redirect, 'error');
     const table = new URL(url).pathname.split('/').at(-1);
     return Response.json(({ neighborhood_category_evidence: snapshot.evidence, neighborhood_profiles: snapshot.profiles,
-      neighborhood_boundaries: snapshot.boundaries, neighborhood_sources: snapshot.sources, get_current_context: live })[table]);
+      neighborhood_boundaries: snapshot.boundaries, neighborhood_sources: snapshot.sources, get_current_context: live,
+      neighborhood_supplement_sources:snapshot.supplementSources,neighborhood_supplements:snapshot.supplementRows })[table]);
   };
 }
 const options = { url: 'https://test.supabase.co', publishableKey: 'sb_publishable_test', now: NOW };
+
+test('optional context monitoring catches short transit expiry, lost rows and boundary drift',()=>{
+  const snapshot=references();
+  const input={sources:snapshot.supplementSources,rows:snapshot.supplementRows,boundaries:snapshot.boundaries};
+  assert.deepEqual(supplementProblems(input,NOW),[]);
+  input.sources[0].refresh_due_at=iso(86400000);
+  assert.equal(supplementProblems(input,NOW)[0].severity,'warning');
+  input.sources[0].boundary_version='obsolete';
+  assert.equal(supplementProblems(input,NOW)[0].severity,'critical');
+  input.rows.pop();assert.throws(()=>supplementProblems(input,NOW));
+});
 
 test('monitor accepts fresh zero NWS alerts and validates both live and reference layers', async () => {
   assert.deepEqual(await checkHealth({ ...options, fetch: api() }), []);
@@ -72,7 +86,7 @@ test('HTTP failure and malformed live data report sanitized errors without hidin
   const problems = await checkHealth({ ...options, fetch: api(snapshot, {}) });
   assert.equal(problems.length, 2);
   const failed = await checkHealth({ ...options, fetch: async () => new Response('secret-provider-error', { status: 503 }) });
-  assert.equal(failed.length, 2);
+  assert.equal(failed.length, 3);
   assert.ok(!JSON.stringify(failed).includes('secret-provider-error'));
 });
 

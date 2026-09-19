@@ -55,8 +55,28 @@ export function referenceProblems(snapshot, now = Date.now()) {
   return problems;
 }
 
+export function supplementProblems({ sources, rows, boundaries }, now = Date.now()) {
+  const ids = ['metro_gtfs', 'hpd_crime_2024'];
+  const manifests = z.array(z.object({ source_id: z.enum(ids), source_checked_at: time, refresh_due_at: time, boundary_version: version })).length(2).parse(sources);
+  const records = z.array(z.object({ source_id: z.enum(ids), neighborhood_id: id })).length(176).parse(rows);
+  if (new Set(manifests.map(s => s.source_id)).size !== 2 || new Set(records.map(r => `${r.source_id}:${r.neighborhood_id}`)).size !== 176 ||
+      !Array.isArray(boundaries) || boundaries.length !== 88 || new Set(boundaries.map(b => b.boundary_version)).size !== 1) throw new Error('Incomplete context cohort');
+  const problems = [];
+  for (const source of manifests) {
+    const expiry = Date.parse(source.refresh_due_at), checked = Date.parse(source.source_checked_at);
+    if (checked > now + 300000 || expiry <= checked || source.boundary_version !== boundaries[0].boundary_version) {
+      problems.push({ code: `supplement:${source.source_id}:invalid`, severity: 'critical', message: `${source.source_id}: invalid validity or changed boundary edition. Re-prepare the optional context.` });
+    } else if (expiry <= now + (source.source_id === 'metro_gtfs' ? 2 : 7) * DAY) {
+      problems.push({ code: `supplement:${source.source_id}:expiry`, severity: expiry <= now ? 'critical' : 'warning',
+        message: `${source.source_id}: refresh due ${source.refresh_due_at}. Refresh the optional context; expired facts are withheld.` });
+    }
+  }
+  return problems;
+}
+
 export async function checkHealth({ url, publishableKey, fetch: fetcher = fetch, now = Date.now() }) {
   const problems = [];
+  let checkedBoundaries;
   // Independent probes: an outage in one layer must not hide the other.
   try {
     const client = createContextClient({ url, publishableKey, fetch: fetcher, currentCacheMs: 0, now: () => now });
@@ -83,9 +103,24 @@ export async function checkHealth({ url, publishableKey, fetch: fetcher = fetch,
       read('neighborhood_sources', 'source_id,data_version,boundary_version', 9),
     ]);
     problems.push(...referenceProblems({ evidence, profiles, boundaries, sources }, now));
+    checkedBoundaries = boundaries;
   } catch {
     // Never put provider error bodies, credentials, or arbitrary source text in issues.
     problems.push({ code: 'reference:probe', severity: 'critical', message: 'Reference metadata API failed or the expected 88 neighborhoods, eight inventories, or 704 evidence rows are incomplete/invalid. Check publication and Actions variables.' });
+  }
+  try {
+    const base = supabaseBaseUrl(url);
+    if (!publishableKey?.startsWith('sb_publishable_')) throw new Error('Public key required');
+    const read = async (path) => readBoundedJson(await fetcher(`${base}/rest/v1/${path}`, {
+      method: 'GET', headers: { apikey: publishableKey }, signal: AbortSignal.timeout(15000), redirect: 'error',
+    }), 100000);
+    const [sources, rows] = await Promise.all([
+      read('neighborhood_supplement_sources?select=source_id,source_checked_at,refresh_due_at,boundary_version&limit=3'),
+      read('neighborhood_supplements?select=source_id,neighborhood_id&limit=177'),
+    ]);
+    problems.push(...supplementProblems({ sources, rows, boundaries: checkedBoundaries }, now));
+  } catch {
+    problems.push({ code: 'supplement:probe', severity: 'critical', message: 'Optional context metadata is unavailable/incomplete. Verify both source manifests and 176 neighborhood summaries.' });
   }
   return problems.sort((a, b) => a.code.localeCompare(b.code));
 }

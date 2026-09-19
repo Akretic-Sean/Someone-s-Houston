@@ -25,6 +25,8 @@ IDs are integers 1–88. Frontend mock slugs are not canonical IDs: resolve them
 
 ## Interpretation rules
 
+- Optional `get_neighborhood_relocation_context({"neighborhood_id":62})` combines housing, dated school locations, scheduled METRO transit and historical 2024 selected offense counts. See [the expanded contract](expanded-context.md). It never changes scores or produces crime rates/safety tiers. Preserve availability and expiry, including in cached replies. Crime observations remain 2024 after a refresh; transit is a dated schedule, not live arrivals.
+
 - Cite source period and source URL. A retrieval/check time does not change the observation period.
 - Economic profiles are ACS 2020–2024 estimates: monthly gross rent, annual household income, and estimated median home value. They are not current listings, an individual's salary, or a job-market salary benchmark.
 - `null`, `unavailable`, `stale`, missing sources and `needs_rejoin` are unknown, never zero or a favorable score. Preserve quality flags; Hidden Valley (7) has unavailable rent in the current edition.

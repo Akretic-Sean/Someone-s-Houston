@@ -47,7 +47,7 @@ const transport = new StdioClientTransport({
 });
 try {
   await mcp.connect(transport);
-  assert.equal((await mcp.listTools()).tools.length, 5);
+  assert.equal((await mcp.listTools()).tools.length, 6);
   const result = await mcp.callTool({ name: 'get_neighborhood', arguments: { neighborhood_id: 62 } });
   assert.equal(result.isError, undefined);
   assert.equal(JSON.parse(result.content[0].text).neighborhood.name, 'MIDTOWN');
@@ -58,6 +58,10 @@ try {
   assert.equal(conditionsResult.isError, undefined);
   assert.equal(JSON.parse(conditionsResult.content[0].text).feeds.length, 2);
   const evidenceResult = await mcp.callTool({ name: 'get_neighborhood_evidence', arguments: { neighborhood_id: 62 } });
+  const relocationResult = await mcp.callTool({ name: 'get_neighborhood_relocation_context', arguments: { neighborhood_id: 62 } });
+  assert.equal(relocationResult.isError, undefined);
+  assert.equal(relocationResult.structuredContent.neighborhood_id, 62);
+  assert.equal(relocationResult.structuredContent.scoring_effect, 'none');
   assert.equal(evidenceResult.isError, undefined);
   assert.equal(JSON.parse(evidenceResult.content[0].text).profile_id, 'report-priorities-v1');
 } finally { await mcp.close(); }

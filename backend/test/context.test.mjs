@@ -150,7 +150,7 @@ test('expired cache failures reject and clear inflight instead of silently retur
   await assert.rejects(client.getCurrentConditions(), /503/);
   assert.equal(mock.calls.length, 3);
 });
-test('MCP exposes five read-only tools and returns compact counts, provenance and freshness', async t => {
+test('MCP exposes six read-only tools and returns compact counts, provenance and freshness', async t => {
   const mock = stub(); const context = createContextClient({ ...options, now: () => NOW, fetch: mock.fetch });
   const server = createServer({ list: async () => { throw new Error('Profile lookup not needed.'); } }, context);
   const client = new Client({ name: 'context-test', version: '1.0.0' });
@@ -158,7 +158,7 @@ test('MCP exposes five read-only tools and returns compact counts, provenance an
   t.after(async () => { await client.close(); await server.close(); });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
   const tools = (await client.listTools()).tools;
-  assert.equal(tools.length, 5); assert.ok(tools.every(tool => tool.annotations.readOnlyHint));
+  assert.equal(tools.length, 6); assert.ok(tools.every(tool => tool.annotations.readOnlyHint));
   const amenity = await client.callTool({ name: 'get_neighborhood_amenities', arguments: { neighborhood_id: 62, category: 'parks', limit: 1 } });
   assert.equal(amenity.isError, undefined);
   const a = JSON.parse(amenity.content[0].text); assert.equal(a.counts.parks, 2); assert.equal(a.amenities.length, 1);
