@@ -103,4 +103,3 @@ test('MCP comparison returns shared model results through a read-only tool', asy
   assert.equal(result.structuredContent.model_version, MODEL_VERSION);
   assert.equal(result.structuredContent.baseline.ranked_count, 88);
 });
-
