@@ -3,6 +3,7 @@ import type { ReportConfig } from '../App';
 import { Card, Segmented } from '../components/Bits';
 import { DEFAULT_WEIGHTS, OFFICES, WEIGHT_DEFS } from '../data/offices';
 import { CONNECTORS, type ConnectorId, type ConnectorStates } from '../data/connectors';
+import { ACCEPTED, readTranscriptFile, TranscriptFileError } from '../data/transcriptFile';
 import {
   LIFESTYLE_FIELDS,
   OFFER_FIELDS,
@@ -52,6 +53,9 @@ export default function CreateReport({
   const [importing, setImporting] = useState<ConnectorId | null>(null);
   const [transcript, setTranscript] = useState('');
   const [extracting, setExtracting] = useState(false);
+  const [uploadName, setUploadName] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const fileInput = useRef<HTMLInputElement>(null);
   const [generating, setGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
   const [genLabel, setGenLabel] = useState('');
@@ -80,6 +84,27 @@ export default function CreateReport({
         setTranscript(TRANSCRIPT);
       }, 1400),
     );
+  }
+
+  async function onFile(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    // Reset so picking the same file twice still fires a change event.
+    event.target.value = '';
+    if (!file) return;
+
+    setUploadError(null);
+    try {
+      const text = await readTranscriptFile(file);
+      setTranscript(text);
+      setUploadName(file.name);
+      setImporting(null);
+    } catch (err) {
+      setTranscript('');
+      setUploadName(null);
+      setUploadError(
+        err instanceof TranscriptFileError ? err.message : 'That file could not be read.',
+      );
+    }
   }
 
   function extract() {
@@ -121,6 +146,7 @@ export default function CreateReport({
   const totalWeight = Object.values(config.weights).reduce((a, b) => a + b, 0) || 1;
   const transcriptLines = transcript
     .split('\n')
+    .filter((line) => line.trim())
     .slice(0, 6)
     .map((line) => {
       const [who, ...rest] = line.split(': ');
@@ -208,8 +234,32 @@ export default function CreateReport({
             <div style={{ height: 20 }} />
 
             <Card>
-              <span className="eyebrow">Transcript</span>
-              <div style={{ height: 12 }} />
+              <div className="sec-head" style={{ marginBottom: 12 }}>
+                <span className="eyebrow">
+                  Transcript
+                  {uploadName ? <span className="upload-name"> · {uploadName}</span> : null}
+                </span>
+                <button
+                  type="button"
+                  className="pill"
+                  onClick={() => fileInput.current?.click()}
+                >
+                  Upload transcript
+                </button>
+              </div>
+
+              <input
+                ref={fileInput}
+                type="file"
+                accept={ACCEPTED}
+                onChange={onFile}
+                className="sr-only"
+                tabIndex={-1}
+                aria-hidden="true"
+              />
+
+              {uploadError ? <div className="form-error">{uploadError}</div> : null}
+
               {importing ? (
                 <p className="line-text">
                   <span className="spinner" />
@@ -243,15 +293,15 @@ export default function CreateReport({
                   <label className="field" style={{ display: 'block' }}>
                     <textarea
                       rows={6}
-                      placeholder="Paste the recruiter call transcript, or import it above."
+                      placeholder="Paste the recruiter call transcript, upload a file, or import it above."
                       value={transcript}
                       onChange={(e) => setTranscript(e.target.value)}
                     />
                   </label>
                   <div style={{ height: 12 }} />
                   <p className="source">
-                    Nothing is stored until you generate. Import from a connected source above
-                    to load the sample conversation.
+                    Accepts .txt, .md, .vtt and .srt up to 2 MB. Uploaded files are read in
+                    your browser and never sent anywhere. Nothing is stored until you generate.
                   </p>
                 </>
               )}

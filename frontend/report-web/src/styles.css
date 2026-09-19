@@ -480,6 +480,14 @@ tbody tr:hover {
   cursor: progress;
 }
 
+.upload-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-3);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
 .transcript {
   display: flex;
   flex-direction: column;
