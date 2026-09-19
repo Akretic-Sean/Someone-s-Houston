@@ -16,6 +16,17 @@ import type {
   ScoringResult,
 } from "../../../../shared/scoring.d.mts";
 
+// @deno-types="../../../../shared/scoring-estimates.d.mts"
+import {
+  scoreNeighborhoodsWithEstimates,
+  validateBoundedScoringPayload,
+} from "../../../../shared/scoring-estimates.mjs";
+import type {
+  BoundedScoringPayload,
+  BoundedScoringResult,
+  EstimateInput,
+} from "../../../../shared/scoring-estimates.d.mts";
+
 const weight = z.number().int().min(0).max(10);
 const Options = z.object({
   tenure: z.enum(["rent", "buy"]),
@@ -45,6 +56,7 @@ const RequestSchema = z.discriminatedUnion("action", [
   }).strict(),
   z.object({
     action: z.literal("generate"),
+    scoringPolicy: z.literal("source-bounded-v1").optional(),
     requestId: z.string().uuid(),
     options: Options,
     preferences: FormSchema,
@@ -60,7 +72,7 @@ export type Dependencies = {
     userId: string,
     requestId: string,
   ) => Promise<"allowed" | "duplicate" | "limited">;
-  loadScoring: (token: string) => Promise<unknown>;
+  loadScoring: (token: string, bounded: boolean) => Promise<unknown>;
   models: () => Models;
   now?: () => number;
 };
@@ -111,6 +123,7 @@ export function reportFacts(
   result: ScoringResult,
   options: ScoringOptions,
   now: number,
+  estimates: EstimateInput[] = [],
 ) {
   // Every ranked score depends on the comparison cohort, not just the winners.
   const expiries = payload.neighborhoods.flatMap((row) =>
@@ -123,11 +136,20 @@ export function reportFacts(
         : [];
     })
   );
-  const expiresAt = new Date(Math.min(now + 3_600_000, ...expiries))
+  const expiresAt = new Date(
+    Math.min(
+      now + 3_600_000,
+      ...expiries,
+      ...estimates.map((input) => Date.parse(input.refresh_due_at)),
+    ),
+  )
     .toISOString();
   const facts = result.ranked.slice(0, 3).flatMap((row) => {
-    const source =
-      `Published neighborhood evidence and your selected weights; provisional comparison calculated ${result.evaluatedAt}. Original sources and periods are shown in the neighborhood evidence.`;
+    const source = `Published neighborhood evidence${
+      estimates.length
+        ? " with disclosed conservative source-derived ranking bounds"
+        : ""
+    } and your selected weights; provisional comparison calculated ${result.evaluatedAt}. Original sources and periods are shown in the neighborhood evidence.`;
     const base = { source, refresh_due_at: expiresAt };
     return [
       {
@@ -193,12 +215,27 @@ export function createHandler(deps: Dependencies) {
       }
       // Load and validate authoritative evidence before charging a report attempt.
       let payload: ScoringPayload | undefined;
-      let result: ScoringResult | undefined;
+      let result: ScoringResult | BoundedScoringResult | undefined;
+      let envelope: BoundedScoringPayload | undefined;
       const now = deps.now ?? Date.now;
       if (input.action === "generate") {
         try {
-          payload = validateScoringPayload(await deps.loadScoring(token));
-          result = scoreNeighborhoods(payload, input.options, now());
+          const raw = await deps.loadScoring(
+            token,
+            input.scoringPolicy === "source-bounded-v1",
+          );
+          if (input.scoringPolicy === "source-bounded-v1") {
+            envelope = validateBoundedScoringPayload(raw, now());
+            payload = envelope.base;
+            result = scoreNeighborhoodsWithEstimates(
+              envelope,
+              input.options,
+              now(),
+            );
+          } else {
+            payload = validateScoringPayload(raw);
+            result = scoreNeighborhoods(payload, input.options, now());
+          }
         } catch {
           return reply(503, { error: "evidence_unavailable" });
         }
@@ -217,7 +254,13 @@ export function createHandler(deps: Dependencies) {
       if (input.action === "extract") {
         return reply(200, await models.extract(input.input));
       }
-      const bundle = reportFacts(payload!, result!, input.options, now());
+      const bundle = reportFacts(
+        payload!,
+        result!,
+        input.options,
+        now(),
+        "estimateInputsUsed" in result! ? result!.estimateInputsUsed : [],
+      );
       const narration = await models.narrate({
         section: bundle.section,
         facts: bundle.facts,
@@ -232,7 +275,7 @@ export function createHandler(deps: Dependencies) {
         (_match, id: string) => byId.get(id) ?? "",
       ) ?? null;
       return reply(200, {
-        payload,
+        payload: envelope ?? payload,
         generatedAt: new Date(now()).toISOString(),
         narrative: {
           status: narration.status,

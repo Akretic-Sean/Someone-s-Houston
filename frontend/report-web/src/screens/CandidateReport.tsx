@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
-import { CATEGORY_IDS, type ScoredNeighborhood, type ScoringPayload, type ScoringResult } from '../../../../shared/scoring.mjs';
+import { CATEGORY_IDS, type ScoringPayload } from '../../../../shared/scoring.mjs';
+import type { BoundedNeighborhood, BoundedScoringResult } from '../../../../shared/scoring-estimates.mjs';
+import EstimateDisclosure from '../components/EstimateDisclosure';
 import type { ReportConfig } from '../App';
 import { Card } from '../components/Bits';
 import NeighborhoodMap from '../components/NeighborhoodMap';
@@ -27,7 +29,7 @@ function measurementValue(category: string, key: string, value: number | null) {
   return `${formatMeters(value)} straight-line`;
 }
 
-function ScoreBreakdown({ neighborhood }: { neighborhood: ScoredNeighborhood }) {
+function ScoreBreakdown({ neighborhood }: { neighborhood: BoundedNeighborhood }) {
   return <div className="scoring-table-wrap"><table className="scoring-table">
     <caption>Category scores and contributions for {neighborhood.name}</caption>
     <thead><tr><th scope="col">Category / evidence used</th><th scope="col">Weight</th><th scope="col">Score</th><th scope="col">Points</th></tr></thead>
@@ -36,7 +38,7 @@ function ScoreBreakdown({ neighborhood }: { neighborhood: ScoredNeighborhood }) 
       return <tr key={id}><th scope="row"><div>{category.label}</div>
         <div className="source">{category.measurement}</div>
         <div className="score-measurements">{Object.entries(category.metrics).map(([key, value]) =>
-          <span key={key}>{METRIC_LABELS[key] ?? key}: {measurementValue(id, key, value)}</span>)}</div>
+          <span key={key}>{neighborhood.estimateInputsUsed.some(input => input.metric === key) ? 'Conservative ranking input' : METRIC_LABELS[key] ?? key}: {measurementValue(id, key, value)}</span>)}</div>
         {category.reason && <div className="source">{category.reason}</div>}
       </th>
         <td>{Math.round(category.normalizedWeight * 100)}%</td>
@@ -48,7 +50,7 @@ function ScoreBreakdown({ neighborhood }: { neighborhood: ScoredNeighborhood }) 
 }
 
 function NeighborhoodCard({ neighborhood, hovered, onHover, onSelect }: {
-  neighborhood: ScoredNeighborhood; hovered: number | null;
+  neighborhood: BoundedNeighborhood; hovered: number | null;
   onHover: (id: number | null) => void; onSelect: (id: number) => void;
 }) {
   const rent = neighborhood.categories.afford.metrics.rent_usd;
@@ -59,10 +61,11 @@ function NeighborhoodCard({ neighborhood, hovered, onHover, onSelect }: {
       <div className="hood-score">{neighborhood.totalScore?.toFixed(1)}<span> / 100</span></div>
     </div>
     <div className="tags">
-      {typeof rent === 'number' && <span className="tag">{formatUsd(rent)} / mo estimated median rent</span>}
+      {typeof rent === 'number' && !neighborhood.estimateInputsUsed.some(input => input.metric === 'rent_usd') && <span className="tag">{formatUsd(rent)} / mo estimated median rent</span>}
       {typeof home === 'number' && <span className="tag">{formatUsd(home)} estimated median home value</span>}
       <span className="tag">Provisional comparison</span>
     </div>
+    <EstimateDisclosure inputs={neighborhood.estimateInputsUsed} />
     <ul className="score-reasons">{neighborhood.explanations.map(reason => <li key={reason}>{reason}</li>)}</ul>
     <details className="score-details"><summary>Why this ranked here</summary><ScoreBreakdown neighborhood={neighborhood} /></details>
     <button type="button" className="btn" style={{ marginTop: 14 }} onClick={() => onSelect(neighborhood.neighborhoodId)}>View sources and local facilities</button>
@@ -70,7 +73,7 @@ function NeighborhoodCard({ neighborhood, hovered, onHover, onSelect }: {
 }
 
 export default function CandidateReport({ config, result, payload, narrative, now, loading, error, onRetry, onConfigure }: {
-  config: ReportConfig; result: ScoringResult | null; payload: ScoringPayload | null; loading: boolean;
+  config: ReportConfig; result: BoundedScoringResult | null; payload: ScoringPayload | null; loading: boolean;
   error: string | null; onRetry: () => void; onConfigure: () => void;
   narrative: Narrative | null; now: number;
 }) {
@@ -126,6 +129,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
               <Card><div className="fact-label">Airport preference</div><div className="fact-value">{config.airport === 'nearest' ? 'Nearest of IAH / HOU' : config.airport.toUpperCase()}</div></Card>
               <Card><div className="fact-label">Comparable neighborhoods</div><div className="fact-value">{result.ranked.length} / {result.results.length}</div></Card>
             </div>
+            {result.estimateInputsUsed.length > 0 && <p className="source">{result.notice}</p>}
             <div className="tags">{WEIGHT_DEFS.map(def => <span className="tag" key={def.id}>{def.label}: {Math.round(result.normalizedWeights[def.id] * 100)}%</span>)}</div>
             {config.mode === 'remote' && <p className="source">Commute is excluded in fully remote mode. Remaining priorities are renormalized.</p>}
           </section>
@@ -142,7 +146,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
           </section>
           <section>
             <h2 className="section-title">Top neighborhood matches</h2>
-            <p className="section-lede">Showing the highest {top.length} scores among neighborhoods with every positively weighted measurement available. Missing measurements are never treated as zero or rewarded.</p>
+            <p className="section-lede">Showing the highest {top.length} scores among neighborhoods with a measurement or disclosed source-derived bound for each selected priority. Missing observations are never treated as zero.</p>
             <NeighborhoodMap rows={payload.neighborhoods} picks={top} office={config.mode === 'remote' ? null : office} hovered={hovered} onHover={setHovered} onSelect={select} />
             <div className="scored-neighborhoods">{top.map(neighborhood => <NeighborhoodCard key={neighborhood.neighborhoodId} neighborhood={neighborhood} hovered={hovered} onHover={setHovered} onSelect={select} />)}</div>
           </section>
@@ -152,6 +156,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
             <details className="score-details"><summary>View all {result.ranked.length} ranked neighborhoods</summary>
               <ol className="ranked-neighborhood-list">{result.ranked.map(row => <li key={row.neighborhoodId}>
                 <button type="button" onClick={() => select(row.neighborhoodId)}>{row.name}<span>{row.totalScore?.toFixed(1)} / 100</span></button>
+                {row.estimateInputsUsed.length > 0 && <span className="estimate-badge">Includes conservative source-derived estimate · select for bounds and sources</span>}
               </li>)}</ol>
             </details>
             {result.unranked.length > 0 && <Card className="unranked-card"><span className="eyebrow">Insufficient data · {result.unranked.length} areas</span>
@@ -167,6 +172,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
                 {result.results.map(row => <option key={row.neighborhoodId} value={row.neighborhoodId}>{row.name}{row.rank === null ? ' — insufficient data' : ` — #${row.rank}`}</option>)}
               </select>
             </label>
+            {active && <EstimateDisclosure inputs={active.estimateInputsUsed} />}
             {active && <details className="score-details"><summary>Full score breakdown{active.rank === null ? ' — total withheld' : ` — ${active.totalScore?.toFixed(1)} / 100`}</summary><ScoreBreakdown neighborhood={active} /></details>}
             <p className="section-lede">Category measurements come from the source snapshots below. Model scores are calculated separately from those facts. Safety and driving times remain unavailable.</p>
             {evidence.loading ? <Card><p role="status"><span className="spinner" /> Loading source evidence…</p></Card>
@@ -179,6 +185,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
             <Card><ul className="scoring-method">
               <li>Each measurement becomes a lower-is-better percentile across the neighborhoods with that measurement available. Ties share a score. Multi-facility categories average the same fixed facility measurements for every neighborhood.</li>
               <li>The total is the sum of category scores multiplied by your normalized weights. Only display values are rounded. Equal totals use the City neighborhood ID as a stable tie-break.</li>
+              <li>When an exact observation is unavailable, a labeled upper bound from an approved official source may supply a conservative ranking input. Bounds and original missing facts remain separate.</li>
               <li>Affordability uses ACS 2020–2024 estimates. It does not account for your income, mortgage, taxes, insurance or current listings.</li>
               <li>Commute, airports, recreation and facility access use straight-line distances from neighborhood reference points. They do not establish travel time, walkability, openings or quality.</li>
               <li>Grocery access covers SNAP-authorized stores in the imported inventory. Restaurant preferences are not scored. Flood scores compare mapped land-area exposure, not the chance a particular home floods.</li>

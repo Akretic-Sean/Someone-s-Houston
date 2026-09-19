@@ -117,7 +117,9 @@ then reviewed and edited. The controls below the notes determine the ranking.
 
 requesting an AI explanation. **Continue with factual report** uses the same
 
-scoring model without a paid model call. Both paths preserve missing-data rules.
+source-bounded scoring model without a paid model call. Preview and both report
+paths retain the complete estimates envelope; affected areas show source ranges
+and conservative-input badges. Original missing facts stay null. Both paths preserve missing-data rules.
 
 See [the release checklist](../docs/hackathon-release.md) for backend deployment,
 

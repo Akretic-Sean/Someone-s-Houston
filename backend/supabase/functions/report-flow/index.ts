@@ -43,8 +43,15 @@ Deno.serve(createHandler({
       serviceKey,
       serviceKey,
     ),
-  loadScoring: (token) =>
-    rpc("get_neighborhood_scoring_data", {}, token, publicKey),
+  loadScoring: (token, bounded) =>
+    rpc(
+      bounded
+        ? "get_neighborhood_scoring_data_with_estimates"
+        : "get_neighborhood_scoring_data",
+      {},
+      token,
+      publicKey,
+    ),
   models: () =>
     createReportModelClient(modelConfigFromEnv((name) => Deno.env.get(name))),
 }));

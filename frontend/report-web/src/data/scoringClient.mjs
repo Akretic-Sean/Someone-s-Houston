@@ -1,4 +1,4 @@
-import { validateScoringPayload } from '../../../../shared/scoring.mjs';
+import { validateBoundedScoringPayload } from '../../../../shared/scoring-estimates.mjs';
 
 const CACHE_MS = 60 * 60 * 1000;
 const MAX_BYTES = 1_000_000;
@@ -31,8 +31,9 @@ export async function readBoundedJson(response, maxBytes = MAX_BYTES) {
 }
 
 export function nextScoringDeadline(payload, now = Date.now()) {
-  const dates = payload.neighborhoods.flatMap(row => Object.values(row.categories)
+  const dates = payload.base.neighborhoods.flatMap(row => Object.values(row.categories)
     .map(category => Date.parse(category.refresh_due_at ?? '')))
+    .concat(payload.estimates.map(estimate => Date.parse(estimate.refresh_due_at)))
     .filter(value => Number.isFinite(value) && value > now);
   return dates.length ? Math.min(...dates) : null;
 }
@@ -54,7 +55,7 @@ export function createScoringClient({ url, key, fetchImpl = fetch, now = Date.no
     if (cache && now() < cache.expiresAt) return structuredClone(cache.payload);
     if (inFlight) return structuredClone(await inFlight);
     inFlight = (async () => {
-      const response = await fetchImpl(`${url.replace(/\/$/, '')}/rest/v1/rpc/get_neighborhood_scoring_data`, {
+      const response = await fetchImpl(`${url.replace(/\/$/, '')}/rest/v1/rpc/get_neighborhood_scoring_data_with_estimates`, {
         method: 'POST',
         headers: { apikey: key, 'Content-Type': 'application/json' },
         body: '{}',
@@ -67,8 +68,8 @@ export function createScoringClient({ url, key, fetchImpl = fetch, now = Date.no
           : `Scoring data is unavailable (HTTP ${response.status}). Please retry.`);
       }
       const payload = await readBoundedJson(response);
-      validateScoringPayload(payload);
       const at = now();
+      validateBoundedScoringPayload(payload, at);
       cache = { payload, expiresAt: Math.min(at + CACHE_MS, nextScoringDeadline(payload, at) ?? Infinity) };
       return payload;
     })().catch(error => {

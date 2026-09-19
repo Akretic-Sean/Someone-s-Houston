@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ScoringPayload } from '../../../../shared/scoring.mjs';
+import type { BoundedScoringPayload } from '../../../../shared/scoring-estimates.mjs';
 import { SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../config';
 import { createScoringClient, nextScoringDeadline } from '../data/scoringClient.mjs';
 
 const client = createScoringClient({ url: SUPABASE_URL, key: SUPABASE_PUBLISHABLE_KEY });
 
 export function useScoringData() {
-  const [payload, setPayload] = useState<ScoringPayload | null>(null);
+  const [payload, setPayload] = useState<BoundedScoringPayload | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedAt, setLoadedAt] = useState(0);

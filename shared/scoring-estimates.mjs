@@ -1,4 +1,4 @@
-import { scoreNeighborhoods, validateScoringPayload, ScoringValidationError } from './scoring.mjs';
+import { scoreNeighborhoods, validateScoringPayload, ScoringValidationError, DEFAULT_WEIGHTS } from './scoring.mjs';
 
 export const ESTIMATE_POLICY = 'source-bounded-v1';
 const RENT_SOURCE = 'https://www.houstontx.gov/planning/Demographics/sn-demographics-2024/6-Gross-Rent-2024.pdf';
@@ -51,4 +51,12 @@ export function scoreNeighborhoodsWithEstimates(envelope, options, now = Date.no
   }
   return { ...result, policyVersion: ESTIMATE_POLICY, estimateInputsUsed: used,
     notice: 'All selected priorities retained. Some neighborhoods use labeled conservative bounds derived from official data. Original missing observations remain unknown; this is not an exact-data repair.' };
+}
+
+/** Validate the complete envelope without replacing any original observations. */
+export function validateBoundedScoringPayload(envelope, now = Date.now()) {
+  scoreNeighborhoodsWithEstimates(envelope, {
+    weights: DEFAULT_WEIGHTS, tenure: 'rent', mode: 'offer', office: 'ion', airport: 'nearest',
+  }, now);
+  return envelope;
 }
