@@ -4,6 +4,10 @@
 # working directory name when running `supabase init`.
 project_id = "hou-match"
 
+# Private scheduler authenticates with a Vault token, verified by the handler.
+[functions.refresh-neighborhood-context]
+verify_jwt = false
+
 [api]
 enabled = true
 # Port to use for the API URL.

@@ -1,0 +1,17 @@
+{
+  "source_url": "https://services.arcgis.com/NummVBqZSIJKUeVR/arcgis/rest/services/Super_Neighborhoods_Demographics/FeatureServer/2",
+  "source_checked_at": "2026-09-19T17:20:13.112Z",
+  "source_data_last_edit_at": "2026-04-10T20:46:28.862Z",
+  "source_schema_last_edit_at": "2026-05-14T22:30:45.540Z",
+  "source_boundary_effective_date": null,
+  "source_date_note": "ArcGIS edit timestamps describe the service, not when neighborhood boundaries took effect. No boundary effective date is published in the layer metadata.",
+  "coordinate_reference_system": "EPSG:4326",
+  "coordinate_order": "longitude,latitude",
+  "boundary_version": "coh-sn-boundaries-5a9f3eb79545b99e",
+  "sha256": "32f9d78f81028a6eb025fdfdcc24bbd201e81d8da78efe4a5201d3109346b449",
+  "feature_count": 88,
+  "position_count": 33386,
+  "json_bytes": 1245018,
+  "simplification": "None; source coordinate precision retained. Ring direction normalized to RFC 7946.",
+  "validation": "IDs and names match all 88 existing profiles; finite coordinates in Houston bounds, closed nonzero-area rings. Database publication must also pass PostGIS ST_IsValid for every geometry."
+}
