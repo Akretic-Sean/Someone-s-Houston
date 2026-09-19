@@ -67,7 +67,6 @@ export default function App() {
             {label}
           </button>
         ))}
-        <span className="proto-note">Frontend only · mocked data</span>
       </div>
 
       {view === 'dashboard' && <Dashboard onOpenReport={() => go('report')} onCreate={() => go('create')} />}
