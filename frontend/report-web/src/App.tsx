@@ -174,7 +174,19 @@ function ReportWorkspace({ session, onSignOut, signingOut, authError }: {
     setGenerateError(null);
     try {
       const { profile, ...options } = config;
-      const report = await generateAiReport(options, profile);
+      let report: GeneratedReport;
+      try {
+        report = await generateAiReport(options, profile);
+        scoreNeighborhoodsWithEstimates(report.payload, config);
+      } catch {
+        // AI is optional. Reuse the validated public-data client and the same
+        // deterministic scorer; never substitute invented or expired evidence.
+        const payload = await data.refresh();
+        const generatedAt = new Date().toISOString();
+        report = { payload, generatedAt, narrative: {
+          status: 'degraded', text: null, facts: [], expiresAt: generatedAt,
+        } };
+      }
       const result = scoreNeighborhoodsWithEstimates(report.payload, config);
       if (!result.ranked.length) throw new Error('No neighborhoods have all of the evidence needed for these priorities. Review the missing-data details or retry after the data is refreshed.');
       setGenerated(report);

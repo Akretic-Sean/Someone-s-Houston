@@ -220,15 +220,48 @@ test('notes are reviewed before an authenticated AI report; changing priorities 
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('a single generate action shows an honest quota error', async ({ page }) => {
-  const state = await mockApi(page, { aiStatus: 429 });
+for (const status of [429, 503]) {
+  test(`AI HTTP ${status} falls back to database scoring and preserves priorities`, async ({ page }) => {
+    const state = await mockApi(page, { aiStatus: status });
+    await page.goto('/'); await signIn(page);
+    await page.getByRole('button', { name: 'Fully remote', exact: true }).click();
+    await page.getByRole('button', { name: 'Buy', exact: true }).click();
+    await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+    await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toBeVisible();
+    await expect(page.getByText('Showing the factual report without an AI explanation.', { exact: false })).toBeVisible();
+    await expect(page.getByText('88 / 88', { exact: true })).toBeVisible();
+    await expect(page.getByText('Commute is excluded in fully remote mode.', { exact: false })).toBeVisible();
+    expect(state.aiRequests.length).toBe(1);
+    expect(state.scoringReads).toBe(1);
+  });
+}
+
+test('AI network failure falls back and saves a factual report', async ({ page }) => {
+  await mockApi(page);
+  await page.route('**/functions/v1/report-flow', route => route.abort());
+  const rows: any[] = [];
+  await page.route('**/rest/v1/saved_reports*', async route => {
+    if (route.request().method() === 'POST') {
+      rows.push(route.request().postDataJSON());
+      return route.fulfill({ status: 201, json: null });
+    }
+    return route.fulfill({ json: rows, headers: { 'content-range': '*/0' } });
+  });
   await page.goto('/'); await signIn(page);
   await page.getByRole('button', { name: 'Generate report', exact: true }).click();
-  await expect(page.getByRole('alert')).toContainText('AI usage limit');
-  await expect(page.getByRole('button', { name: 'Continue with factual report', exact: true })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Top neighborhood matches' })).toHaveCount(0);
-  await expect(page.getByRole('alert')).not.toContainText('continue with the factual report');
-  expect(state.aiRequests.length).toBe(1);
+  await expect(page.getByText('Saved to your dashboard.', { exact: true })).toBeVisible();
+  expect(rows).toHaveLength(1);
+  expect(rows[0].snapshot.narrative.status).toBe('degraded');
+  expect(rows[0].snapshot.payload.base.neighborhoods).toHaveLength(88);
+});
+
+test('AI fallback preserves missing-data rules for expired estimates', async ({ page }) => {
+  await mockApi(page, { aiStatus: 429, expiredBounds: true });
+  await page.goto('/'); await signIn(page);
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
+  await expect(page.getByText('82 / 88', { exact: true })).toBeVisible();
+  await page.getByLabel('Choose neighborhood').selectOption('7');
+  await expect(page.locator('#neighborhood-evidence').getByRole('complementary', { name: 'Conservative ranking inputs' })).toHaveCount(0);
 });
 
 test('a degraded AI response still renders a real ranked report', async ({ page }) => {
@@ -398,7 +431,7 @@ test('public safety shows historical counts without changing scores; expired dat
   });
   await page.goto('/'); await signIn(page);
   await expect(page.getByRole('slider')).toHaveCount(8);
-  await page.getByRole('button', { name: 'Continue with factual report', exact: true }).click();
+  await page.getByRole('button', { name: 'Generate report', exact: true }).click();
   const score = await page.locator('.hood-score').first().textContent();
   const panel = page.getByRole('region', { name: 'Public safety context' });
   await page.getByLabel('Choose neighborhood').selectOption('7');

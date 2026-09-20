@@ -171,22 +171,25 @@ Deno.test("strict body validation rejects forged facts, identities, oversized no
 });
 Deno.test("duplicate requests and exhausted quotas cannot call models", async () => {
   for (
-    const [result, status] of [["duplicate", 409], ["limited", 429]] as const
+    const [result, status] of [["duplicate", 409], ["limited", 200]] as const
   ) {
     const { send, calls } = setup({ reserve: async () => result });
     assert((await send()).status === status);
     assert(calls.model === 0);
   }
 });
-Deno.test("quota infrastructure fails closed with bounded errors", async () => {
+Deno.test("quota infrastructure failure returns factual data without paid work", async () => {
   const { send, calls } = setup({
     reserve: async () => {
       throw new Error("private credential data");
     },
   });
   const response = await send();
-  assert(response.status === 503);
-  assert(!(await response.text()).includes("credential"));
+  assert(response.status === 200);
+  const body = await response.json();
+  assert(body.narrative.status === "degraded" && body.narrative.text === null);
+  assert(body.payload.neighborhoods.length === 88);
+  assert(!JSON.stringify(body).includes("credential"));
   assert(calls.model === 0);
 });
 Deno.test("server evidence determines ranking and fact substitution; plain text response", async () => {
@@ -364,4 +367,43 @@ Deno.test("nearby policy keeps browser/server parity and rejects a legacy respon
   const old = setup({ loadScoring: async () => boundedFixture() });
   assert((await old.send({ ...generate, scoringPolicy: "source-bounded-v1", facilityPolicy: "nearby-3mi-v1" })).status === 503);
   assert(old.calls.model === 0 && old.calls.reserved === 0);
+});
+
+Deno.test("quota fallback preserves bounded data and extraction limits", async () => {
+  const { send, calls } = setup({ reserve: async () => "limited", loadScoring: async () => boundedFixture() });
+  const response = await send({ ...generate, scoringPolicy: "source-bounded-v1" });
+  const body = await response.json();
+  assert(response.status === 200 && body.narrative.status === "degraded");
+  assert(body.narrative.text === null && body.narrative.facts.length === 0);
+  assert(scoreNeighborhoodsWithEstimates(body.payload, generate.options as ScoringOptions, time).ranked.length === 88);
+  assert(body.payload.base.neighborhoods[6].categories.afford.metrics.rent_usd === null);
+  assert((await send({ action: "extract", requestId, input: { transcript: "Midtown", answers: {} } })).status === 429);
+  assert(calls.model === 0);
+});
+
+Deno.test("model initialization or narration failure still returns factual evidence", async () => {
+  for (const initialize of [true, false]) {
+    const { send } = setup({ models: () => {
+      if (initialize) throw new Error("private provider config");
+      return {
+        extract: async () => { throw new Error("unused"); },
+        narrate: async () => { throw new Error("private provider outage"); },
+      };
+    } });
+    const response = await send();
+    const body = await response.json();
+    assert(response.status === 200 && body.narrative.status === "degraded");
+    assert(body.payload.neighborhoods.length === 88);
+    assert(!JSON.stringify(body).includes("private provider"));
+  }
+});
+
+Deno.test("quota fallback does not revive expired evidence", async () => {
+  let currentTime = time;
+  const { send, calls } = setup({ now: () => currentTime, reserve: async () => {
+    currentTime = time + 3_600_001;
+    return "limited";
+  } });
+  assert((await send()).status !== 200);
+  assert(calls.model === 0);
 });
