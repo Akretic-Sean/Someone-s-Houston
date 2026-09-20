@@ -1,21 +1,25 @@
-# Hou Match backend
+# Someone’s Houston backend
 
 Frontend teammates: use [the frontend/backend handoff](../docs/frontend-backend-handoff.md) for a ready-to-use agent prompt, environment setup, field mappings and connection checks. From the repository root, `npm --prefix backend run test:frontend` verifies the existing frontend configuration against the public data endpoints; it does not modify the database.
 
-Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (tested on 24.14.1; use 22.12+ for the frontend). Supabase provides the hosted database and REST API; the neighborhood MCP runs locally over stdio. A shared deterministic model generates in-session neighborhood rankings. Cloudflare hosting and stored/shared reports remain proposed.
+Owner: @Akretic-Sean. TypeScript on Node.js 22.9+ (use 22.12+ for the frontend; CI uses Node 24). Supabase provides Postgres/PostGIS, Auth, public read APIs and authenticated Edge Functions. A shared deterministic model generates neighborhood rankings; AI optionally explains the computed results. The neighborhood MCP runs locally over stdio. Private saved reports are implemented; public share links are not.
+
+**[Report app](https://app.astronix.io)** · [Public landing page](https://astronix.io) · [Architecture and usage](../README.md)
 
 ## Ready now
 
 - Optional family/transit/historical-crime context: [integration and refresh guide](../docs/expanded-context.md). `get_neighborhood_relocation_context` is additive and does not change ranking. Its METRO service window needs a weekly reviewed refresh; the monitor warns before expiry.
 
-- Supabase project: [`Someone-s-Houston`](https://supabase.com/dashboard/project/hknzivrgihnqzvsafkkr), reference `hknzivrgihnqzvsafkkr`, region `us-east-1`, Free plan verified 2026-09-19.
+- Supabase project: [`Someone-s-Houston`](https://supabase.com/dashboard/project/hknzivrgihnqzvsafkkr), reference `hknzivrgihnqzvsafkkr`, region `us-east-1`.
 - API base: `https://hknzivrgihnqzvsafkkr.supabase.co`.
 - `public.neighborhood_profiles`: 88 validated City records, public read-only, with source periods and missing-value flags.
 - 88 PostGIS boundaries plus eight facility sources, joined once during import. Three read-only RPCs serve the map, neighborhood facilities and current conditions.
 - NWS alerts and USGS water gauges refresh centrally every 15 minutes; expired data is withheld from current-condition reads.
 - Eight report-priority categories and 704 precomputed evidence records, exposed through `get_neighborhood_evidence`.
-- Compact `get_neighborhood_scoring_data()` read RPC for all 88 neighborhoods (approximately 162 kB), plus dependency-free `../shared/scoring.mjs` for browser/Node ranking. No per-slider API request or external provider call is needed. See [the scoring model](../docs/scoring-matrix.md).
-- Shared cached clients: `src/neighborhoods.ts`, `src/context.ts` and `src/evidence.ts`. Six read-only Claude tools in `src/mcp.ts`.
+- The report UI uses `get_neighborhood_access_scoring_data()` with model `houston-access-v2` and `scoreNeighborhoodsWithEstimates` in `../shared/scoring-estimates.mjs`. It retains all selected priorities and supplies disclosed conservative source-derived inputs for six neighborhoods, while preserving their missing observations. Nearby amenities and healthcare use a 3-mile radius with distance weighting. No per-slider API request or external provider call is needed. The original `get_neighborhood_scoring_data()` and strict `../shared/scoring.mjs` path remain available for audits and MCP scenario comparisons. See [the scoring model](../docs/scoring-matrix.md).
+- Shared cached clients: `src/neighborhoods.ts`, `src/context.ts` and `src/evidence.ts`. Seven read-only MCP tools in `src/mcp.ts`: six fact/context reads and one deterministic scenario-comparison tool.
+- Authenticated `report-flow` extracts optional notes and generates source-grounded explanations after deterministic scoring. AI quota/provider failures preserve a factual report; the browser has an independent fallback using validated public evidence. Invalid or expired evidence can still prevent generation.
+- `saved_reports` stores report configuration and the original snapshot behind owner-scoped RLS. The frontend reports save failures explicitly; reopening recomputes saved preferences using current evidence. See [frontend behavior](../frontend/README.md).
 - [Frontend/API contract](../docs/api.md), [facility provenance](../docs/neighborhood-context.md), [map integration/demo](../docs/map-integration.md), [live-feed operations](../docs/live-feeds.md).
 
 ## Install and test
@@ -86,19 +90,19 @@ Example prompts:
 - "Use get_current_conditions for regional weather alerts and gauges; explain any unavailable or expired data."
 - "Use get_neighborhood_evidence for Midtown (62). Explain the eight priorities, source dates and missing inputs; preserve null route minutes and safety tier."
 
-Six MCP tools return facts and source context. The seventh, `compare_neighborhood_scenarios`, runs the same shared model for two explicit preference sets; see [scenario comparisons](../docs/backend-demo-proof.md). Neither supplies driving times, safety tiers, tax calculations or saved reports. MCP has no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all seven tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
+Six MCP tools return facts and source context. The seventh, `compare_neighborhood_scenarios`, runs the strict shared model for two explicit preference sets; see [scenario comparisons](../docs/backend-demo-proof.md). These tools do not supply driving times, safety tiers, tax calculations or private saved reports. MCP has no arbitrary SQL or write tool. Caches last up to 24 hours for profiles, one hour for facilities/evidence, and 60 seconds for current conditions; expiry is rechecked on every read. Restart/reconnect after building to discover all seven tools. Claude web/hosted connectors require a future HTTP deployment; this connector supports local MCP clients.
 
 The optional `supabase` entry is the separate **developer** MCP: project-scoped, read-only and OAuth-authenticated with each developer's own Supabase account. It is not needed to consume neighborhood data.
 
 ## Database changes
 
-The migration files match the migrations already applied to the hosted project. Do not replay them manually there. For future changes, use the pinned CLI version and review a new migration before applying it:
+Migration files version the database schema, policies and RPCs. Check the target project's applied migration history before deploying; do not replay migrations manually on the hosted project. For future changes, use the pinned CLI version and review a new migration before applying it:
 
 ```sh
 npx --yes supabase@2.117.0 migration new descriptive_change_name
 ```
 
-RLS and explicit read grants protect each public data table. Only trusted ingestion receives insert/update privileges; staging and the Vault-backed refresh request stay private. PostGIS, pg_cron and pg_net support spatial joins and central refresh. No Realtime subscription, vector index, tile storage bucket, extra database instance or paid plan was created.
+RLS and explicit read grants protect each public reference table. Only trusted ingestion receives reference-data insert/update privileges; staging and the Vault-backed refresh request stay private. The separate `saved_reports` table permits authenticated users to read and write only their own records. PostGIS, pg_cron and pg_net support spatial joins and central refresh. The architecture does not require a Realtime subscription, vector index or tile storage bucket.
 
 ## Earlier catalog discovery utility
 
@@ -116,7 +120,6 @@ See [source priorities](../docs/source-shortlist.md) and [bounded data policy](.
 The server-only AI SDK/OpenRouter extraction and narration boundary is documented
 in [the model-layer guide](../docs/model-layer.md), including pinned versions,
 Deno checks, secret configuration and the protected synthetic runtime check.
-This does not yet connect AI generation to the report frontend or persist reports.
+The report frontend calls this authenticated flow. Models organize optional notes and explain validated facts; they do not invent ranking scores. Server and browser fallback paths retain factual reports when AI is unavailable, subject to valid current evidence. Private report persistence uses `saved_reports` independently of model generation, so saving failures do not erase the report already generated. Public sharing and durable autonomous-agent memory are not implemented.
 
-
-For all 88 with every selected priority retained, see [source-bounded scoring](../docs/all-88-frontend-guide.md). `npm run test:all-neighborhoods` verifies the new RPC and shared wrapper against live public data. Never label its conservative source-derived inputs as exact observations.
+For all 88 with every selected priority retained, see [source-bounded scoring](../docs/all-88-frontend-guide.md). `npm run test:all-neighborhoods` checks `get_neighborhood_scoring_data_with_estimates` and the shared wrapper against live public data; it does not by itself certify the newer nearby-access RPC or deployed report UI. Never label conservative source-derived inputs as exact observations.

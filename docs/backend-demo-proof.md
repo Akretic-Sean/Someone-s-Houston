@@ -1,19 +1,12 @@
-# Backend judging evidence and scenario comparison
+# Backend scenario comparison and performance
 
-The backend supports an Open Data demonstration today. Additional datasets alone do not close the remaining product gaps. This change makes the existing engineering and preference-dependent insight demonstrable without changing frontend contracts or spending on model calls.
+The read-only MCP scenario tool compares two explicit preference sets against the same public evidence snapshot and explains how category contributions change the result. It uses the strict `houston-proximity-v1` model through `get_neighborhood_scoring_data`; the current report app uses the separately documented [nearby-access model and conservative bounds](scoring-matrix.md). Do not treat the two policies as interchangeable.
 
-| Judging area | Demonstrable backend evidence | Remaining product work |
-| --- | --- | --- |
-| Completeness / technical depth | 88 canonical neighborhoods, spatial joins, bounded imports, 704 category-evidence rows, 176 transit/crime summaries, source versions, permission and expiry tests; shared deterministic model | Verify the deployed site's complete user journey; optional context cards need frontend wiring |
-| Open Data track | Actual Houston estimates, mapped flood coverage and named facilities, source periods/links, explicit gaps; live scenario tool explains preference tradeoffs | Show the source drawer and a concrete relocation decision during the demo |
-| Agents track | Seven read-only tools, including deterministic scenario comparison | Tool availability alone is not autonomous reasoning or durable memory. Those are not demonstrated by this PR |
-| Insight / usability | Signed category contributions explain the winner's margin; changes in priorities return changed ranks and missing-data exclusions | Present measurements and tradeoffs in plain language; route minutes, current listings and personal costs remain unsupported |
-| Creativity / performance | Precompute spatial data once, reuse one compact scoring snapshot across priority changes, fetch evidence only for selected neighborhoods | The timing below is a sequential local-client sample, not load capacity or deployed-browser performance |
-| Commercialization | Recruiter relocation decision support is the stated customer use case | Pricing, a buying moment, stored/shared reports and lead delivery are not completed by this backend change |
+This guide documents reproducible validation and dated timings. It does not establish production browser performance, AI latency, load capacity or a completed autonomous agent workflow.
 
 ## Claude task
 
-> Rebuild and reconnect the product MCP. Use compare_neighborhood_scenarios with my explicit baseline and alternative preferences. Explain the changed shortlist and the signed category contributions, then call get_neighborhood_evidence for the winners and match evidence_versions before citing dates and source URLs. Preserve missing-data exclusions. Do not describe proximity as route time or raw crime counts as safety. Do not claim saved reports, memory, autonomous actions or a buying flow from this tool. For browser integration, retain the existing scoring RPC and shared model; MCP is optional.
+> Rebuild and reconnect the product MCP. Use compare_neighborhood_scenarios with my explicit baseline and alternative preferences. Explain the changed shortlist and the signed category contributions, then call get_neighborhood_evidence for the winners and match evidence_versions before citing dates and source URLs. Preserve missing-data exclusions. Do not describe proximity as route time or raw crime counts as safety. Do not claim saved reports, memory, autonomous actions or a buying flow from this tool. For browser integration, use the current access-scoring RPC and bounded wrapper described in the frontend/backend handoff; MCP is optional.
 
 Example tool arguments:
 
@@ -56,9 +49,8 @@ Verified September 19, 2026 at 22:12 UTC:
 
 These are dated measurements and rounded examples, not a performance SLA or permanent recommendations. Rerun before presenting. Current live feeds and reference-source expiry can change independently. The default matrix still leaves neighborhoods with required missing measurements unranked; this is intentional, not a complete-data claim.
 
-## Next priorities
+## Interpreting the result
 
-1. Finish the deployed end-to-end demo and optional evidence-card integration. This is more valuable now than another bulk import.
-2. Show the before/after example, the close first/second margin, source periods, and a missing-data case.
-3. If pursuing the Agents track, separately implement consented private report memory and an actual tool-driven reasoning workflow; do not label this deterministic utility an autonomous agent.
-4. After the hackathon, address route times, current comparable housing costs, dining coverage and newer crime observations with appropriate provenance and methodology. Keep the current working scoring contract stable.
+Show the before/after preference choices, the first/second score margin and the source periods together. A different ranking can reveal a tradeoff, but it is not a causal prediction or a guarantee about a neighborhood. Unknown measurements remain unranked under this strict comparison policy.
+
+Private dashboard persistence is documented separately in [saved reports](private-saved-reports.md). The scenario tool itself does not save reports, deliver leads or maintain autonomous agent memory. Future data work can add route times, current comparable housing costs and broader dining coverage without silently changing this comparison contract.

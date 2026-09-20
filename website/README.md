@@ -1,29 +1,21 @@
-# Welcome to your Lovable project
+# Someone’s Houston landing site
 
-This project was built with [Lovable](https://lovable.dev).
+This directory contains the public landing-site source, built with Lovable, TanStack Start, React, TypeScript and Tailwind CSS.
 
-## Build with Lovable
+Public entry point: [astronix.io](https://astronix.io). The report application is a separate project at [app.astronix.io](https://app.astronix.io), with source in [`frontend/report-web/`](../frontend/report-web/). Follow the [report app setup](../frontend/README.md) for authentication, database evidence and report generation.
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+Landing-page examples are illustrative; use the report app and its source-linked evidence for actual neighborhood comparisons. Confirm report buttons point to the public app when publishing this site. Updating this README does not change deployed links or marketing copy.
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+This package has a committed `bun.lock`. Use Bun to preserve that dependency workflow:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
+git clone https://github.com/Akretic/Someone-s-Houston.git
+cd Someone-s-Houston/website
+bun install --frozen-lockfile
+bun run dev
+bun run build
 ```
 
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
+The project is connected to Lovable. Follow [the local working agreement](AGENTS.md): keep pushed branches usable and do not rewrite published history. See the [documentation index](../docs/README.md) for the backend architecture, data rules and current implementation contracts.
