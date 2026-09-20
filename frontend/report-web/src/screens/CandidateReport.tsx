@@ -3,6 +3,7 @@ import { CATEGORY_IDS, type ScoringPayload } from '../../../../shared/scoring.mj
 import type { BoundedNeighborhood, BoundedScoringResult } from '../../../../shared/scoring-estimates.mjs';
 import PublicSafetyPanel from '../components/PublicSafetyPanel';
 import EstimateDisclosure from '../components/EstimateDisclosure';
+import DemoListings from '../components/DemoListings';
 import type { ReportConfig } from '../App';
 import { Card } from '../components/Bits';
 import NeighborhoodMap from '../components/NeighborhoodMap';
@@ -41,7 +42,7 @@ function ScoreBreakdown({ neighborhood }: { neighborhood: BoundedNeighborhood })
         <div className="score-measurements">{Object.entries(category.metrics).map(([key, value]) =>
           <span key={key}>{neighborhood.estimateInputsUsed.some(input => input.metric === key) ? 'Conservative ranking input' : METRIC_LABELS[key] ?? key}: {measurementValue(id, key, value)}</span>)}</div>
         {category.nearbyAccess && <div className="score-measurements">{Object.entries(category.nearbyAccess.facilities).map(([key, access]) =>
-          <span key={key}>{METRIC_LABELS[key] ?? key}: {access ? `${access.count} within 3 miles · ${access.weighted_count.toFixed(2)} distance-weighted count` : 'Nearby inventory unavailable'}</span>)}</div>}
+          <span key={key}>{METRIC_LABELS[key] ?? key}: {access ? `${access.count} within 3 miles Â· ${access.weighted_count.toFixed(2)} distance-weighted count` : 'Nearby inventory unavailable'}</span>)}</div>}
         {category.reason && <div className="source">{category.reason}</div>}
       </th>
         <td>{Math.round(category.normalizedWeight * 100)}%</td>
@@ -183,6 +184,7 @@ export default function CandidateReport({ config, result, payload, narrative, no
               : evidence.error ? <Card><p role="alert">Source details could not be read: {evidence.error.message}</p><button className="btn" onClick={evidence.retry}>Retry evidence</button></Card>
               : evidenceVersionMismatch ? <Card><p role="alert">The detailed evidence and ranking use different data versions. Details are withheld until both are refreshed.</p><button type="button" className="btn" onClick={refreshReportEvidence}>Refresh ranking and evidence</button></Card>
               : views.length > 0 ? <EvidenceCards views={views} officeId={config.office} airportId={config.airport} weights={result.effectiveWeights} scoredCategories={active?.categories} /> : null}
+            <DemoListings neighborhoodId={activeId} />
           </section>
           <section>
             <h2 className="section-title">How to read this report</h2>
