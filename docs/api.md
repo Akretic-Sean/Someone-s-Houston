@@ -4,7 +4,7 @@ For implementation setup, frontend file/field mapping and acceptance checks, sta
 
 Neighborhood profiles, maps, facility context and current-condition reads are **implemented and live**, 2026-09-19. The Supabase and local MCP sections below describe those available reads.
 
-The P0 comparison flow uses a compact public scoring-data RPC and the shared deterministic `houston-proximity-v1` model to generate an in-session ranked report. See [the scoring method](scoring-matrix.md). Its proposed stored-report endpoints and old mock payloads are preserved below under [Proposed report API](#proposed-report-api); they are not implemented endpoints or the current scoring response.
+The current report uses the compact `get_neighborhood_access_scoring_data` RPC, deterministic `houston-access-v2` model and source-bounded scoring wrapper. Private saved reports are implemented separately through Supabase's `saved_reports` table; deployed saving must still be verified independently. The original strict `houston-proximity-v1` RPC remains supported for older clients and MCP scenario comparison. See [the scoring method](scoring-matrix.md). The `/reports` endpoints and old mock payloads below remain under [Proposed report API](#proposed-report-api); they are not implemented endpoints or the current scoring response.
 
 ## Authenticated AI report flow
 
@@ -13,14 +13,17 @@ confirmed Supabase user session (`Authorization: Bearer <user JWT>`) and the
 project's publishable key in `apikey`. Gateway JWT checking and a live Auth user
 lookup both apply. Anonymous accounts and operator API keys are not user sessions.
 
-- New frontend generation requests include `scoringPolicy: "source-bounded-v1"`.
-  The server reads `get_neighborhood_scoring_data_with_estimates` and uses
+- Current frontend generation requests include `scoringPolicy: "source-bounded-v1"`
+  and `facilityPolicy: "nearby-3mi-v1"`.
+  The server reads `get_neighborhood_access_scoring_data` and uses
   `scoreNeighborhoodsWithEstimates`, matching the frontend preview. In this mode,
   response `payload` is the complete `{schema_version, policy_version, base,
-  estimates}` envelope. Original missing observations remain null. Narration
+  estimates}` envelope with `base.model_version: "houston-access-v2"`. Original missing observations remain null. Narration
   validity is bounded by every used estimate deadline, not just base evidence.
-  Generation requests omitting the policy retain the existing strict payload
-  and scorer for compatibility; extraction is unchanged.
+  Requests with only `scoringPolicy` retain the intermediate
+  `get_neighborhood_scoring_data_with_estimates` envelope; requests omitting both
+  policies retain the original strict payload/scorer. Supplying `facilityPolicy`
+  without `scoringPolicy` is invalid. Extraction is unchanged.
 - Extraction body: `{ action: "extract", requestId: "<UUID>", input: {
   transcript: "<up to 24,000 characters>", answers: { office: "Midtown" } } }`.
   `answers` allows the existing twelve CandidateProfile keys, each at most 500
@@ -28,31 +31,66 @@ lookup both apply. Anonymous accounts and operator API keys are not user session
   fields: { office: { value, confidence, evidence }, ... }, unanswered: [...] } }`.
   Existing answers override extraction. Quotes must match the notes. The user
   reviews/edits these answers; no extracted text silently changes ranking weights.
-- Generation body: `{ action: "generate", requestId: "<UUID>", options: {
+- Generation body: `{ action: "generate", requestId: "<UUID>",
+  scoringPolicy: "source-bounded-v1", facilityPolicy: "nearby-3mi-v1", options: {
   tenure: "rent", mode: "offer", office: "ion", airport: "nearest", weights: {
   afford: 8, commute: 7, flood: 6, amen: 5, fit: 7, food: 8, air: 6, health: 7
   } }, preferences: { office: "Midtown" } }`.
-  The server fetches scoring evidence itself and runs `shared/scoring.mjs`.
+  The server fetches scoring evidence itself and runs the shared bounded-input wrapper.
   Browser-supplied scores/facts/user IDs are rejected. Response: `{ payload:
-  <ScoringPayload>, generatedAt, narrative: { status, text, expiresAt, facts } }`.
+  <BoundedScoringPayload>, generatedAt, narrative: { status, text, expiresAt, facts } }`.
   `text` is plain text with verified fact placeholders substituted server-side.
   Facts contain `id`, `label`, `value`, `source`, and `refresh_due_at`.
   `degraded` narration returns `text:null`; the real ranking remains usable.
+- On generation quota exhaustion, quota-service failure or model/narration failure,
+  valid evidence returns HTTP 200 with `narrative: { status: "degraded", text: null,
+  facts: [], expiresAt }` and the factual scoring payload. Quota exhaustion or a
+  failed quota check does not call a paid model. Auth, input and evidence validation
+  still apply; expired evidence is never revived. The browser independently catches
+  AI request failures and loads the validated public scoring envelope for the same
+  deterministic factual report. It labels the missing AI explanation explicitly.
 
 Successful results are 200 and `Cache-Control: no-store`. Error bodies contain
 only `{ error: "<bounded_code>" }`: 400 `invalid_input`, 401 `sign_in_required`,
 409 `request_already_started`/`evidence_expired`, 415 `json_required`, 422
-`no_comparable_neighborhoods`, 429 `usage_limit` (Retry-After 3600), 503
+`no_comparable_neighborhoods`, 429 `usage_limit` for extraction (Retry-After 3600), 503
 `evidence_unavailable`/`temporarily_unavailable`. Gateway 401 errors may use
 Supabase's own response envelope. OPTIONS returns 204; other methods return 405.
 Requests are limited to 100,000 bytes. The quota is six combined operations per
 user and one hundred project-wide per rolling hour. Repeat IDs return 409 rather
-than rerunning paid work. Notes/profiles/reports are not stored. Usage metadata
-is private and accessible only by the server. See [release setup](hackathon-release.md).
+than rerunning paid work. This function does not persist notes or reports; the
+frontend's separate private-save path stores report configuration (including profile
+fields) and the generation snapshot. Usage metadata is private and accessible only
+by the server. See [release setup](hackathon-release.md).
+
+## Private saved reports (implemented)
+
+The current dashboard uses Supabase PostgREST at `/rest/v1/saved_reports`, not the
+proposed `/reports` service. Use the project publishable key and the authenticated
+user's session. `frontend/report-web/src/data/savedReports.ts` is the client contract:
+
+- List: select `id,title,created_at,config`, filter `user_id` to the current user,
+  order by `created_at` descending, request an exact count and at most 100 rows.
+- Save: upsert `{ id, user_id, title, config, snapshot }` on conflict `id`, using a
+  generated UUID. `config` contains the profile and ranking controls; `snapshot`
+  is the complete `GeneratedReport`. Titles are 1–200 characters. Database checks
+  require JSON objects and cap serialized config at 50,000 bytes and snapshot at
+  5,000,000 bytes.
+- Access: authenticated select/insert/update only, with `auth.uid() = user_id` in
+  owner policies. Anonymous access and client deletion are not granted. An app-side
+  filter alone is not authorization; preserve these database policies.
+- Reopen: restore saved preferences and recompute using current validated evidence.
+  The original snapshot remains private; it is not silently presented as current.
+  A failed save leaves the generated report usable and offers retry.
+
+The migration and client are implemented and covered by tests. This contract does
+not certify production saving: verify an authenticated save, reload and owner
+isolation against the deployed database. No public sharing URL, report-delivery API
+or automatic report-expiration policy is implemented.
 
 ## Neighborhood profiles
 
-**Optional expanded context:** `POST /rest/v1/rpc/get_neighborhood_relocation_context` with `{"p_neighborhood_id":62}` returns housing detail, school locations, METRO scheduled transit and historical 2024 reported offense counts. It does not alter scoring. See [the additive contract](expanded-context.md) for availability, periods, expiry, limitations and the sixth local MCP tool.
+**Optional expanded context:** `POST /rest/v1/rpc/get_neighborhood_relocation_context` with `{"p_neighborhood_id":62}` returns housing detail, school locations, METRO scheduled transit and historical 2024 reported offense counts. It does not alter scoring. See [the additive contract](expanded-context.md) for availability, periods, expiry, limitations and its local MCP tool.
 
 - Base URL: `https://hknzivrgihnqzvsafkkr.supabase.co`.
 - Method/path: `GET /rest/v1/neighborhood_profiles` (Supabase PostgREST).
@@ -155,6 +193,10 @@ Cache at most one hour, recheck each `refresh_due_at` before rendering, and clea
 
 ## Scoring data and local ranking
 
+This section documents the preserved strict/legacy contract. The current frontend
+uses [nearby facility scoring](#nearby-facility-scoring-current-report) with the
+bounded-input wrapper described below.
+
 `POST /rest/v1/rpc/get_neighborhood_scoring_data` with `{}` returns the complete 88-neighborhood cohort for model `houston-proximity-v1`. Authentication is the same public `apikey` header; anonymous and authenticated reads are allowed. The function is read-only and uses the evidence RPC's freshness and dependency checks. It neither stores candidate inputs nor calls external providers.
 
 ```ts
@@ -204,12 +246,14 @@ Local stdio server, `backend/dist/mcp.js`, same publishable key and cached API c
 | `get_neighborhood_amenities` | Required `neighborhood_id` 1–88; optional `category`, `limit` 1–100 | Facility counts, bounded records and source provenance |
 | `get_current_conditions` | Optional `neighborhood_id` 1–88, `limit` 1–20 | Bounded current observations/alerts, availability, timestamps and interpretation notes |
 | `get_neighborhood_evidence` | Required `neighborhood_id` 1–88 | Facts, provenance and missing inputs for all eight priorities; null scores and unavailable safety tier |
+| `get_neighborhood_relocation_context` | Required `neighborhood_id` 1–88 | Housing, schools, scheduled transit and historical offense context; does not change scores |
+| `compare_neighborhood_scenarios` | Two explicit preference sets and optional `limit` 1–5 | Deterministic strict-model shortlists, signed score margins and rank changes; see the comparison contract below |
 
-Results provide context, not recommendation scores. Failed reads return MCP `isError: true`; none of the tools has write/SQL capabilities. Text and structured responses include source context. Live testing launches the actual stdio process and queries Supabase. Reconnect the MCP after building to discover newly added tools.
+The first six tools provide reference/context facts; scenario comparison additionally returns deterministic relative scores. Failed reads return MCP `isError: true`; none of the seven tools has write/SQL capabilities. Text and structured responses include source context. Live testing launches the actual stdio process and queries Supabase. Reconnect the MCP after building to discover newly added tools.
 
 ## Report integration status
 
-In-session ranking is implemented by the shared model and compact data RPC above. Stored-report endpoints, private candidate authorization, salary/tax calculations, saved-report schema/expiration, crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Effective FEMA map evidence is available through the category endpoint, subject to coverage flags; gauges/alerts remain separate operational context. Neither establishes parcel-level risk. Existing browser login, where present, does not create saved-report ownership policies.
+Ranking, optional AI narration/factual fallback and private owner-authorized report history are implemented. Public `/reports` endpoints, public sharing, a separate candidate-record service, salary/tax calculations, report-expiration automation, crime/services scores, routing and hosted HTTP MCP deployment remain proposed. Production private saving must be checked separately from report rendering. Effective FEMA map evidence is available through the category endpoint, subject to coverage flags; gauges/alerts remain separate operational context. Neither establishes parcel-level risk.
 
 The user's latest screenshot confirms the frontend weight IDs below. [The current evidence matrix](matrix-readiness.md) uses `backend/data/reference/report-priorities.v1.json`; the earlier 100-point draft is superseded. Raw defaults total 54 and produce the screenshot percentages after normalization/display rounding. The shared comparison model applies these weights using the documented limited measurements.
 
@@ -219,16 +263,16 @@ The user's latest screenshot confirms the frontend weight IDs below. [The curren
 
 If a separate service is later supplied, `frontend/report-web/src/watch/api.ts` sends a JSON POST to that URL with `Content-Type: application/json` and a 15-second timeout. `src/watch/types.ts` is the frontend request shape: `{ reportId, neighborhoodIds, neighborhoodNames, listingType, softCriteria, officeId, delivery: { channel: "email", email }, consent: true, cadence: "weekly", expiresAfterWeeks: 12 }`. `listingType` is `sale|rent|both`; neighborhood IDs are the City's canonical integers. The current `reportId` is a `session-…` browser correlation identifier, **not** a persisted report key or authorization credential.
 
-The UI requires a selected neighborhood, email and explicit consent before calling the adapter. A future service must independently validate the request and consent, protect contact details, and implement scheduling, expiry, listing retrieval and delivery. None of those operations is provided by the Supabase scoring RPC or current five MCP tools. The adapter treats an HTTP success as request acceptance only; it does not establish that a watch was stored or any email delivered. No live listing inventory or property scores enter the neighborhood matrix.
+The UI requires a selected neighborhood, email and explicit consent before calling the adapter. A future service must independently validate the request and consent, protect contact details, and implement scheduling, expiry, listing retrieval and delivery. None of those operations is provided by the Supabase scoring RPC or current seven MCP tools. The adapter treats an HTTP success as request acceptance only; it does not establish that a watch was stored or any email delivered. No live listing inventory or property scores enter the neighborhood matrix.
 
 ## Proposed report API
 
 Status: **proposed by the frontend, not yet agreed or implemented.** The following
 report endpoints are design proposals; the live neighborhood reads above remain available.
 
-The payloads below preserve the earlier frontend mock design for future stored-report work.
+The payloads below preserve the earlier frontend mock design for a future custom report service.
 They do not replace the implemented Supabase response schemas or shared scoring types above,
-and their sample financial/safety claims must not be rendered as live outputs.
+or the implemented private `saved_reports` contract. Their sample financial/safety claims must not be rendered as live outputs.
 
 Open questions for @Akretic-Sean, listed here rather than assumed:
 
@@ -370,17 +414,19 @@ neighborhood score/factor or hero fact; that gap must be resolved during integra
   `{ id, name, origin, role, status, date }` where status is `Viewed` / `Shared` /
   `Draft` / `Expert opt-in`.
 
-### Transcript import and extraction
+### Transcript connector import (proposed)
 
-- Status: **proposed, and the largest open question.**
+- Status: connector OAuth/import remains **proposed**. Pasted-note extraction through
+  the authenticated `report-flow` endpoint is implemented as documented above.
 
-The create-report flow imports a recruiter call from a meeting-notes tool (Granola,
-Fireflies, Fathom, Zoom Notes) and extracts a candidate profile, field by field, each with
-a `High` / `Medium` / `Low` confidence the recruiter can check before generating.
+The proposed connector flow would import a recruiter call from a meeting-notes tool
+(Granola, Fireflies, Fathom, Zoom Notes). Current users can paste notes for optional
+extraction and review each suggested field before generating; notes do not silently
+change ranking controls.
 
-The frontend currently fakes both steps. Before it can be built for real we need to agree:
-who holds the connector OAuth tokens, whether extraction is a backend endpoint or happens
-in the MCP layer, and what the confidence value actually measures.
+Before connecting external meeting tools, agree on OAuth token ownership, source
+permissions and the import contract. The implemented extraction response's confidence
+labels are review aids, not calibrated probabilities.
 
 ---
 
@@ -408,14 +454,14 @@ Handler errors are 403 unauthorized, 405 method,
 not include transcripts, provider credentials, or raw model errors.
 See [the model-layer guide](model-layer.md) for the shared TypeScript interfaces.
 The authenticated `report-flow` endpoint supplies extraction/narration (see above);
-stored reports remain unimplemented.
+private report persistence uses the separate `saved_reports` table described above.
 
 
 ## Agent scenario comparison (implemented, local MCP)
 
 `compare_neighborhood_scenarios` accepts `baseline` and `alternative` preference objects plus optional `limit` (1-5, default 3). Each preference requires all eight 0-10 `weights`, `tenure` rent/buy, `mode` offer/remote, `office` ion/downtown/energy/tmc/nasa, and `airport` iah/hou/nearest. All-zero effective weights are rejected before reading.
 
-Uses the existing public `get_neighborhood_scoring_data` RPC and shared model; **no new HTTP endpoint or database migration**. Returns version 1 with `model_version`, `evaluated_at`, `snapshot_sha256`, `evidence_versions`, echoed `preferences`, `baseline`/`alternative` summaries, and 88 `rank_changes`. Summaries include full scored `shortlist` rows, common normalized weights, excluded IDs/reasons and signed `winner_margin.categories` contributions. Contributions sum to the winner-minus-runner-up margin; negative values favor the runner-up. Missing ranks and margins remain null. Rank changes can reflect a change in eligibility as well as weights. `snapshot_sha256` fingerprints validated measurements excluding the changing evaluation time; it is not a signed source attestation.
+Uses the existing public `get_neighborhood_scoring_data` RPC and strict `scoreNeighborhoods` model; **no new HTTP endpoint or database migration**. This preserves the legacy proximity path: it does not use the current frontend's `houston-access-v2` envelope or conservative-input wrapper, so its rankings may differ. Returns version 1 with `model_version`, `evaluated_at`, `snapshot_sha256`, `evidence_versions`, echoed `preferences`, `baseline`/`alternative` summaries, and 88 `rank_changes`. Summaries include full scored `shortlist` rows, common normalized weights, excluded IDs/reasons and signed `winner_margin.categories` contributions. Contributions sum to the winner-minus-runner-up margin; negative values favor the runner-up. Missing ranks and margins remain null. Rank changes can reflect a change in eligibility as well as weights. `snapshot_sha256` fingerprints validated measurements excluding the changing evaluation time; it is not a signed source attestation.
 
 The client coalesces reads, caches at most one hour or the earliest usable source deadline, rejects oversized responses/admin keys, and never substitutes mock or expired fallback data. Tool failure uses MCP `isError: true`. Source URLs remain in `get_neighborhood_evidence`; match evidence versions before combining claims. See [examples and live proof](backend-demo-proof.md). Frontend continues using its existing direct RPC and shared model.
 
