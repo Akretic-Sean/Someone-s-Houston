@@ -1,5 +1,25 @@
 # Backend data operations
 
+## Project retired: September 26, 2026
+
+Support and routine maintenance are discontinued at the owner's request. The repository remains public and stored data is preserved. This section supersedes the historical operating schedule below.
+
+- GitHub Actions are disabled at repository level after publishing the retirement notice. The `Backend data health` workflow is also individually disabled and its automatic schedule has been removed from source.
+- Supabase project `hknzivrgihnqzvsafkkr` retains `hou-match-current-context` (job 1) with `active = false`. Its former 15-minute weather/gauge refresh is stopped. Job history and configuration are retained; no records, credentials or schema have been deleted.
+- Dependabot automated security fixes were already disabled; there is no Dependabot/Renovate configuration or Vercel cron in the checked repository. No matching local Windows task or Codex automation was found in the inspected environment.
+- Existing data must keep its original source dates and expiry. Do not extend deadlines or replace expired facts merely to keep a retired demo appearing current.
+- Historical setup, migration and refresh commands below are reference material. Do not run or re-enable them without a new explicit owner request. The original migrations can recreate schedules in a new deployment; copying this repository is not a safe substitute for reviewing those effects.
+
+This retirement stops background refresh and monitoring. It does not delete hosting, pause the entire database, revoke credentials or disconnect third-party deployment integrations. A visitor can still invoke an available app or API; hosted endpoints are not certified as maintained services.
+
+### Verification and any future restart
+
+Check GitHub Actions permissions (`enabled: false`), the monitor workflow (`disabled_manually`), and `cron.job` (`active: false`). There should be no running or queued project workflows or refresh requests after shutdown. The public repository description and README identify discontinued support. The final maintenance pull request records its checks; automated verification stops afterward.
+
+Restarting requires explicit owner authorization, a review of retained credentials and hosting, fresh source validation and tests, and deliberate re-enabling of only the needed workflows and Cron job. Do not treat this document's old schedules as permission to resume service.
+
+## Historical operating procedures
+
 **Owner: @Akretic-Sean.** This includes housing, boundaries, facilities, groceries,
 FEMA summaries, destination anchors, category evidence, and refresh alerts.
 Oleggo1 consumes the public API and handles frontend availability displays; a
