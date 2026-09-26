@@ -1,13 +1,15 @@
 # Someone’s Houston
 
+> [!IMPORTANT]
+> **Support discontinued — September 26, 2026.** The hackathon has ended. This public repository is retained as a historical reference; it is no longer maintained or monitored. Automated data refreshes and update checks have been stopped. The hosted backend has been paused with its data retained, so live report generation is offline. Stored datasets retain their original observation dates and expiry rules. Do not rely on this project for current relocation information. See [project retirement status](docs/data-operations.md#project-retired-september-26-2026).
+
 **Find a Houston neighborhood that fits the life you want to build.**
 
 Someone’s Houston helps recruiters and relocating technology candidates compare Houston’s **88 Super Neighborhoods** using their housing, workplace and lifestyle priorities. It turns public datasets into a weighted neighborhood report with an interactive map, category breakdowns and traceable evidence. AI helps organize notes and explain results; a shared deterministic model calculates the scores.
 
 **[Open the report app](https://app.astronix.io)** · [Visit the landing page](https://astronix.io) · [Documentation](docs/README.md) · [Contribute](CONTRIBUTING.md)
 
-[![Backend verification](https://github.com/Akretic/Someone-s-Houston/actions/workflows/backend-ci.yml/badge.svg?branch=main)](https://github.com/Akretic/Someone-s-Houston/actions/workflows/backend-ci.yml)
-[![Frontend verification](https://github.com/Akretic/Someone-s-Houston/actions/workflows/frontend-ci.yml/badge.svg?branch=main)](https://github.com/Akretic/Someone-s-Houston/actions/workflows/frontend-ci.yml)
+The implementation and setup notes below describe the completed hackathon project. They are preserved for reference, not as a commitment to ongoing hosting, support or data freshness.
 
 ## Try a comparison
 

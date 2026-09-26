@@ -1,7 +1,7 @@
 name: Backend data health
 on:
-  schedule:
-    - cron: '8,23,38,53 * * * *'
+  # Retired after the hackathon. No scheduled API polling.
+  # Explicit owner authorization is required before manually reactivating.
   workflow_dispatch:
 
 permissions:

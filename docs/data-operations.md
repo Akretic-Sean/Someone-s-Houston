@@ -1,5 +1,27 @@
 # Backend data operations
 
+## Project retired: September 26, 2026
+
+Support and routine maintenance are discontinued at the owner's request. The repository remains public and stored data is preserved. This section supersedes the historical operating schedule below.
+
+- GitHub Actions are disabled at repository level after publishing the retirement notice. The `Backend data health` workflow is also individually disabled and its automatic schedule has been removed from source.
+- Supabase project `hknzivrgihnqzvsafkkr` retains `hou-match-current-context` (job 1) with `active = false`. Its former 15-minute weather/gauge refresh is stopped. Job history and configuration are retained; no records, credentials or schema have been deleted.
+- Dependabot automated security fixes were already disabled; there is no Dependabot/Renovate configuration or Vercel cron in the checked repository. No matching local Windows task or Codex automation was found in the inspected environment.
+- Existing data must keep its original source dates and expiry. Do not extend deadlines or replace expired facts merely to keep a retired demo appearing current.
+- Historical setup, migration and refresh commands below are reference material. Do not run or re-enable them without a new explicit owner request. The original migrations can recreate schedules in a new deployment; copying this repository is not a safe substitute for reviewing those effects.
+
+The owner also requested that the hosted backend be taken offline while preserving data. The Supabase project is paused rather than deleted. Database/Auth-backed reports and provider-backed narration are unavailable while paused. Existing web hosting and third-party deployment integrations are not deleted; a static page can still load, but it is not a supported live application.
+
+Supabase documents a 90-day one-click restore window for paused projects. After that, the project dashboard provides the database backup and Storage objects for download and restoration to a new project or locally. Pausing is not a promise of indefinite one-click restoration. See [Supabase pause/restore limits](https://supabase.com/docs/guides/platform/upgrading#time-limits).
+
+### Verification and any future restart
+
+Check GitHub Actions permissions (`enabled: false`), the monitor workflow (`disabled_manually`), the preserved Cron job (`active: false` before pausing), and the Supabase project status (`INACTIVE`). There should be no running or queued project workflows or refresh requests after shutdown. The public repository description and README identify discontinued support. The final maintenance pull request records its checks; automated verification stops afterward.
+
+Restarting requires explicit owner authorization, restoring the Supabase backup/project, a review of retained credentials and hosting, fresh source validation and tests, and deliberate re-enabling of only the needed workflows and Cron job. Do not treat this document's old schedules as permission to resume service.
+
+## Historical operating procedures
+
 **Owner: @Akretic-Sean.** This includes housing, boundaries, facilities, groceries,
 FEMA summaries, destination anchors, category evidence, and refresh alerts.
 Oleggo1 consumes the public API and handles frontend availability displays; a

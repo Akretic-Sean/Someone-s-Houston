@@ -1,5 +1,7 @@
 # Working agreements
 
+- Support was discontinued on September 26, 2026. Keep this repository public as a historical reference. Do not restart scheduled workflows, source imports, refresh Cron or update monitoring without a new explicit owner request. See `docs/data-operations.md` for retirement status; its older operating instructions are historical.
+
 - Frontend work belongs in `frontend/`, owned by Oleggo1.
 - For frontend/backend integration, start with `docs/frontend-backend-handoff.md`; reuse the current frontend data/auth layers and verify with the documented preflight before declaring it connected.
 - Backend work belongs in `backend/`, owned by Akretic-Sean.

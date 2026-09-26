@@ -1,5 +1,7 @@
 # Current Houston context feeds
 
+> **Retired September 26, 2026:** automatic NWS/USGS refresh and GitHub data-health monitoring are stopped. The schedule and deployment details below describe the hackathon implementation, not an active service. See [retirement status](data-operations.md#project-retired-september-26-2026). Retained observations expire normally and must not be presented as current.
+
 These small snapshots complement the Super Neighborhood reference layer. They describe present conditions, not a neighborhood's long-term desirability, safety, or flood risk. Annual Census estimates do not become real-time data when downloaded again.
 
 ## Enabled source adapters
