@@ -1,7 +1,7 @@
 # Someone’s Houston
 
 > [!IMPORTANT]
-> **Support discontinued — September 26, 2026.** The hackathon has ended. This public repository is retained as a historical reference; it is no longer maintained or monitored. Automated data refreshes and update checks have been stopped. Hosted demos may become unavailable, and stored datasets retain their original observation dates and expiry rules. Do not rely on this project for current relocation information. See [project retirement status](docs/data-operations.md#project-retired-september-26-2026).
+> **Support discontinued — September 26, 2026.** The hackathon has ended. This public repository is retained as a historical reference; it is no longer maintained or monitored. Automated data refreshes and update checks have been stopped. The hosted backend has been paused with its data retained, so live report generation is offline. Stored datasets retain their original observation dates and expiry rules. Do not rely on this project for current relocation information. See [project retirement status](docs/data-operations.md#project-retired-september-26-2026).
 
 **Find a Houston neighborhood that fits the life you want to build.**
 

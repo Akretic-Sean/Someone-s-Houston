@@ -10,13 +10,15 @@ Support and routine maintenance are discontinued at the owner's request. The rep
 - Existing data must keep its original source dates and expiry. Do not extend deadlines or replace expired facts merely to keep a retired demo appearing current.
 - Historical setup, migration and refresh commands below are reference material. Do not run or re-enable them without a new explicit owner request. The original migrations can recreate schedules in a new deployment; copying this repository is not a safe substitute for reviewing those effects.
 
-This retirement stops background refresh and monitoring. It does not delete hosting, pause the entire database, revoke credentials or disconnect third-party deployment integrations. A visitor can still invoke an available app or API; hosted endpoints are not certified as maintained services.
+The owner also requested that the hosted backend be taken offline while preserving data. The Supabase project is paused rather than deleted. Database/Auth-backed reports and provider-backed narration are unavailable while paused. Existing web hosting and third-party deployment integrations are not deleted; a static page can still load, but it is not a supported live application.
+
+Supabase documents a 90-day one-click restore window for paused projects. After that, the project dashboard provides the database backup and Storage objects for download and restoration to a new project or locally. Pausing is not a promise of indefinite one-click restoration. See [Supabase pause/restore limits](https://supabase.com/docs/guides/platform/upgrading#time-limits).
 
 ### Verification and any future restart
 
-Check GitHub Actions permissions (`enabled: false`), the monitor workflow (`disabled_manually`), and `cron.job` (`active: false`). There should be no running or queued project workflows or refresh requests after shutdown. The public repository description and README identify discontinued support. The final maintenance pull request records its checks; automated verification stops afterward.
+Check GitHub Actions permissions (`enabled: false`), the monitor workflow (`disabled_manually`), the preserved Cron job (`active: false` before pausing), and the Supabase project status (`INACTIVE`). There should be no running or queued project workflows or refresh requests after shutdown. The public repository description and README identify discontinued support. The final maintenance pull request records its checks; automated verification stops afterward.
 
-Restarting requires explicit owner authorization, a review of retained credentials and hosting, fresh source validation and tests, and deliberate re-enabling of only the needed workflows and Cron job. Do not treat this document's old schedules as permission to resume service.
+Restarting requires explicit owner authorization, restoring the Supabase backup/project, a review of retained credentials and hosting, fresh source validation and tests, and deliberate re-enabling of only the needed workflows and Cron job. Do not treat this document's old schedules as permission to resume service.
 
 ## Historical operating procedures
 
